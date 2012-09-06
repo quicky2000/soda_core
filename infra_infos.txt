@@ -1,0 +1,4 @@
+depend:url_reader EXT_xmlParser EXT_gzstream EXT_expat
+CFLAGS:-Wall -g
+LDFLAGS:
+
