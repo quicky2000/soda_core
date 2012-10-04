@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "gzstream.h"
-#include "xmlParser.h"
+#include "dom_parser.h"
 
 using namespace quicky_url_reader;
 
@@ -61,6 +61,7 @@ void osm_diff_watcher::run(const uint64_t & p_start_seq_number)
 //------------------------------------------------------------------------------
 void osm_diff_watcher::parse_diff(void)
 {
+  // Sax analyse
   igzstream l_input_file("tmp_diff.gz");
   m_analyser.init();
   sax_parser l_sax_parser;
@@ -72,15 +73,12 @@ void osm_diff_watcher::parse_diff(void)
   //      std::cout << l_line << std::endl ;
   //    }
   l_input_file.close();
-  XMLResults l_err= {eXMLErrorNone,0,0};
-  std::string l_xml_string;
-  std::string l_line;
+
+  // DOM analyse
   igzstream l_input_file_bis("tmp_diff.gz");
-  while(!getline(l_input_file_bis,l_line).eof())
-    {
-      l_xml_string += l_line;
-    }
-  XMLNode l_node = XMLNode::parseString(l_xml_string.c_str(),"valgrindoutput",&l_err);
+  dom_parser l_dom_parser;
+  l_dom_parser.parse(l_input_file_bis);
+  
 }
 
 //------------------------------------------------------------------------------
@@ -109,7 +107,8 @@ std::string osm_diff_watcher::get_url_diff(const uint64_t & p_seq_number)
   // For more information refer to OSM wiki page
   // http://wiki.openstreetmap.org/wiki/Planet.osm/diffs
   //  std::string l_url_diff("http://planet.openstreetmap.org/minute-replicate/");
-  std::string l_url_diff("http://planet.openstreetmap.org/redaction-period/minute-replicate/");
+  //std::string l_url_diff("http://planet.openstreetmap.org/redaction-period/minute-replicate/");
+  std::string l_url_diff("http://planet.openstreetmap.org/replication/minute/");
   l_url_diff += l_complete_seq_number.substr(0,3) + "/" + l_complete_seq_number.substr(3,3) + "/" + l_complete_seq_number.substr(6,3) + ".osc.gz";
   return l_url_diff;
 }
@@ -120,7 +119,8 @@ uint64_t osm_diff_watcher::get_sequence_number(void)const
   std::string l_sequence_number;
   url_reader & l_url_reader = url_reader::get_instance();
   download_buffer l_buffer;
-  l_url_reader.read_url("http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt",l_buffer);
+  l_url_reader.read_url("http://planet.openstreetmap.org/replication/minute/state.txt",l_buffer);
+  //  l_url_reader.read_url("http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt",l_buffer);
   std::stringstream l_stream;
   l_stream << l_buffer.get_data();
   std::string l_line;
