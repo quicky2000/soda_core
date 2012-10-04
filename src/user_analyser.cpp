@@ -1,10 +1,11 @@
 #include "user_analyser.h"
 #include "url_reader.h"
 #include "download_buffer.h"
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
-#include "assert.h"
+#include <cstring>
+#include <cassert>
 
 using namespace quicky_url_reader;
 
@@ -63,11 +64,12 @@ void user_analyser::end_element(const std::string & p_name)
 	  std::string l_date = get_user_inscription_date(m_user_name);
 	  m_users.insert(std::map<uint32_t,std::string>::value_type(m_uid,l_date));
 	  std::cout << "==> User \"" << m_user_name << "\"\t\"" << l_date << "\"" << std::endl ;
+          // Expecting date looking like "August 13, 2009"
 	  size_t l_first_space = l_date.find(" ");
-	  size_t l_second_sapce = l_date.find_last_of(" ");
-	  std::string l_day_str = l_date.substr(0,l_first_space);
-	  std::string l_month_str = l_date.substr(l_first_space+1,l_second_sapce-l_first_space-1);
-	  std::string l_year_str = l_date.substr(l_second_sapce+1);
+	  size_t l_comma = l_date.find_last_of(",");
+	  std::string l_month_str = l_date.substr(0,l_first_space);
+	  std::string l_day_str = l_date.substr(l_first_space+1,l_comma-l_first_space-1);
+	  std::string l_year_str = l_date.substr(l_comma+1);
 #ifdef DEBUG_USER_ANALYSER
 	  std::cout << "Day = \"" << l_day_str << "\"" << std::endl ;
 	  std::cout << "Month = \"" << l_month_str << "\"" << std::endl ;
@@ -82,6 +84,7 @@ void user_analyser::end_element(const std::string & p_name)
 	  time_t l_today = time(NULL);
 	  struct tm l_inscription;
     
+          memset(&l_inscription,0,sizeof(l_inscription));
 	  l_inscription.tm_mday = l_inscription_day;   /* 1er                */
 	  l_inscription.tm_mon  = l_inscription_month - 1;   /* janvier            */
 	  l_inscription.tm_year = l_inscritpion_year - 1900; /* 2000 (2000 - 1900) */
@@ -129,13 +132,12 @@ std::string user_analyser::get_user_inscription_date(const std::string & p_user)
   while(!l_found && !getline(l_stream,l_line).eof())
     {
       size_t l_pos ;
-      if((l_pos = l_line.find("Mapper since")) != std::string::npos)
+      // expecting line like "Mapper since: August 13, 2009"
+      if((l_pos = l_line.find("Mapper since:")) != std::string::npos)
 	{
-	  size_t l_begin = l_line.find(">",l_pos);
+	  size_t l_begin = l_line.find(":",l_pos);
 	  l_begin = l_line.find_first_not_of(" ",l_begin+1);
-	  size_t l_end = l_line.find_last_of("<");
-	  l_line = l_line.substr(l_begin,l_end - l_begin);
-	  l_user_date = l_line.substr(0,l_line.find(" at"));
+          l_user_date = l_line.substr(l_begin);
 	  l_found = true;
 	}
     }
