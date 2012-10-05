@@ -2,12 +2,13 @@
 #define _SAX_PARSER_H_
 
 #include <expat.h>
+#include "osm_diff_parser_base.h"
 #include <iostream>
 #include <set>
 
 class sax_analyser_if;
 
-class sax_parser
+class sax_parser: public osm_diff_parser_base<sax_analyser_if>
 {
 public:
   // Callbacks for expat
@@ -17,15 +18,15 @@ public:
 
   sax_parser(void);
   ~sax_parser(void);
-  void parse(std::istream & p_stream);
-  void add_analyser(sax_analyser_if & p_analyser);
+  void parse_stream(std::istream & p_stream);
+  //TO DELETE   void add_analyser(sax_analyser_if & p_analyser);
   
 private:
   void analyse_start_element(const char *el, const char **attr);
   void analyse_end_element(const char *el);
 
   XML_Parser m_parser;
-  std::set<sax_analyser_if*> m_analysers;
+  //TO DELETE   std::set<sax_analyser_if*> m_analysers;
 };
 
 #endif /* _SAX_PARSER_H_ */

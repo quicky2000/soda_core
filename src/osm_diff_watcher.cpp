@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "gzstream.h"
 #include "dom_parser.h"
+#include "basic_dom_analyser.h"
 
 using namespace quicky_url_reader;
 
@@ -61,23 +62,34 @@ void osm_diff_watcher::run(const uint64_t & p_start_seq_number)
 //------------------------------------------------------------------------------
 void osm_diff_watcher::parse_diff(void)
 {
+  //TO DELETE  // Sax analyse
+  //TO DELETE  igzstream l_input_file("tmp_diff.gz");
+  //TO DELETE  m_analyser.init();
+  //TO DELETE  sax_parser l_sax_parser;
+  //TO DELETE  l_sax_parser.add_analyser(m_analyser);
+  //TO DELETE  l_sax_parser.parse(l_input_file);
+  //TO DELETE  l_input_file.close();
+
+  //TO DELETE  // DOM analyse
+  //TO DELETE  igzstream l_input_file_bis("tmp_diff.gz");
+  //TO DELETE  dom_parser l_dom_parser;
+  //TO DELETE  l_dom_parser.parse(l_input_file_bis);
+  //TO DELETE  l_input_file_bis.close();
+
   // Sax analyse
-  igzstream l_input_file("tmp_diff.gz");
   m_analyser.init();
   sax_parser l_sax_parser;
   l_sax_parser.add_analyser(m_analyser);
-  l_sax_parser.parse(l_input_file);
-  //  std::string l_line;
-  //  while(!getline(l_input_file,l_line).eof())
-  //    {
-  //      std::cout << l_line << std::endl ;
-  //    }
-  l_input_file.close();
+  l_sax_parser.parse("tmp_diff.gz");
 
   // DOM analyse
-  igzstream l_input_file_bis("tmp_diff.gz");
   dom_parser l_dom_parser;
-  l_dom_parser.parse(l_input_file_bis);
+  basic_dom_analyser l_dom_analyser;
+  l_dom_parser.add_analyser(l_dom_analyser);
+  l_dom_parser.parse("tmp_diff.gz");
+
+
+
   
 }
 

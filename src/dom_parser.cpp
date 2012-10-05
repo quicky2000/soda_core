@@ -1,16 +1,19 @@
 #include "dom_parser.h"
+#include "dom_analyser_operations.h"
 #include <sstream>
 
 using namespace std;
 
+
+
 //------------------------------------------------------------------------------
-void dom_parser::add_analyser(dom_analyser_if & p_analyser)
-{
-  m_analysers.insert(&p_analyser);
-}
+//TO DELETEvoid dom_parser::add_analyser(dom_analyser_if & p_analyser)
+//TO DELETE{
+//TO DELETE  m_analysers.insert(&p_analyser);
+//TO DELETE}
  
 //------------------------------------------------------------------------------
-void dom_parser::parse(std::istream & p_stream)
+void dom_parser::parse_stream(std::istream & p_stream)
 {
   std::string l_xml_string;
   std::string l_line;
@@ -27,14 +30,17 @@ void dom_parser::parse(std::istream & p_stream)
       std::cout << l_error_msg << std::endl ;
       exit(-1);
     }
-  std::set<dom_analyser_if*>::iterator l_iter = m_analysers.begin();
-  std::set<dom_analyser_if*>::iterator l_iter_end = m_analysers.end();
-  while(l_iter != l_iter_end)
-    {
-      (*l_iter)->analyse(l_node);
-      ++l_iter;
-    }
+  std::cout << "DOM PARSE SUCCESSFULL" << std::endl ;
 
+  //TO DELETE  std::set<dom_analyser_if*>::iterator l_iter = m_analysers.begin();
+  //TO DELETE  std::set<dom_analyser_if*>::iterator l_iter_end = m_analysers.end();
+  //TO DELETE  while(l_iter != l_iter_end)
+  //TO DELETE    {
+  //TO DELETE      (*l_iter)->analyse(l_node);
+  //TO DELETE      ++l_iter;
+  //TO DELETE    }
+  this->perform_analyse(dom_analyse_operation(l_node));
+  std::cout << "End of DOM based analysers" << std::endl ;
 }
 
 //------------------------------------------------------------------------------
