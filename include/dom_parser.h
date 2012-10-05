@@ -7,17 +7,19 @@
 #include <set>
 #include <iostream>
 
-class dom_parser: public osm_diff_parser_base<dom_analyser_if>
+namespace osm_diff_watcher
 {
- public:
+  class dom_parser: public osm_diff_parser_base<dom_analyser_if>
+  {
+  public:
 
-  //TO DELETE  void add_analyser(dom_analyser_if & p_analyser);
-  void parse_stream(std::istream & p_stream);
- private:
-  static void error_message(const XMLResults & p_err,std::string & p_msg);
+    //TO DELETE  void add_analyser(dom_analyser_if & p_analyser);
+    void parse_stream(std::istream & p_stream);
+  private:
+    static void error_message(const XMLResults & p_err,std::string & p_msg);
 
-  //TO DELETE  std::set<dom_analyser_if*> m_analysers;
-};
-
+    //TO DELETE  std::set<dom_analyser_if*> m_analysers;
+  };
+}
 #endif // _DOM_PARSER_H_
 //EOF

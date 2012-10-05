@@ -3,19 +3,22 @@
 
 #include <string>
 
-class sax_analyser_if
+namespace osm_diff_watcher
 {
- public:
-  virtual void init(void)=0;
+  class sax_analyser_if
+  {
+  public:
+    virtual void init(void)=0;
 
-  virtual void start_element(const std::string & p_name)=0;
+    virtual void start_element(const std::string & p_name)=0;
 
-  virtual void get_attribute(const std::string & p_name,
-			     const std::string & p_value)=0;
+    virtual void get_attribute(const std::string & p_name,
+			       const std::string & p_value)=0;
 
-  virtual void end_element(const std::string & p_name)=0;
+    virtual void end_element(const std::string & p_name)=0;
 
-  inline virtual ~sax_analyser_if(void){};
-};
-
+    inline virtual ~sax_analyser_if(void){};
+  };
+}
 #endif
+//EOF

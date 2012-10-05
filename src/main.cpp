@@ -10,7 +10,7 @@ int main(int p_argc,char ** p_argv)
     {
       l_start_seq_number = atoll(p_argv[1]);
     }
-  osm_diff_watcher l_watcher;
+  osm_diff_watcher::osm_diff_watcher l_watcher;
   l_watcher.run(l_start_seq_number);
 }
 //EOF

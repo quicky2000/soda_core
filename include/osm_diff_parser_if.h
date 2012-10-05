@@ -3,12 +3,14 @@
 
 #include <string>
 
-class osm_diff_parser_if
+namespace osm_diff_watcher
 {
- public:
-  virtual void parse(const std::string & p_name)=0;
-  inline ~osm_diff_parser_if(void){}
-};
-
+  class osm_diff_parser_if
+  {
+  public:
+    virtual void parse(const std::string & p_name)=0;
+    inline ~osm_diff_parser_if(void){}
+  };
+}
 #endif // _OSM_DIFF_PARSER_IF_H_
 //EOF
