@@ -10,6 +10,7 @@
 #include "gzstream.h"
 #include "dom_parser.h"
 #include "basic_dom_analyser.h"
+#include "dom2cpp_analyser.h"
 
 using namespace quicky_url_reader;
 
@@ -87,12 +88,10 @@ namespace osm_diff_watcher
     // DOM analyse
     dom_parser l_dom_parser;
     basic_dom_analyser l_dom_analyser;
-    l_dom_parser.add_analyser(l_dom_analyser);
-    l_dom_parser.parse("tmp_diff.gz");
-
-
-
-  
+    dom2cpp_analyser l_dom2cpp_analyser;
+    //l_dom_parser.add_analyser(l_dom_analyser);
+    l_dom_parser.add_analyser(l_dom2cpp_analyser);
+    l_dom_parser.parse("tmp_diff.gz");  
   }
 
   //------------------------------------------------------------------------------
