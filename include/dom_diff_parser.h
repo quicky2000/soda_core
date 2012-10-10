@@ -1,7 +1,7 @@
 #ifndef _DOM_DIFF_PARSER_H_
 #define _DOM_DIFF_PARSER_H_
 
-#include "osm_diff_parser_base.h"
+#include "parser_base.h"
 #include "dom_analyser_if.h"
 #include <string>
 #include <set>
@@ -9,7 +9,7 @@
 
 namespace osm_diff_watcher
 {
-  class dom_diff_parser: public osm_diff_parser_base<dom_analyser_if>
+  class dom_diff_parser: public parser_base<dom_analyser_if>
   {
   public:
     dom_diff_parser(const std::string & p_root="osmChange");

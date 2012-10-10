@@ -1,17 +1,17 @@
-#ifndef _OSM_DIFF_PARSER_BASE_H_
-#define _OSM_DIFF_PARSER_BASE_H_
+#ifndef _PARSER_BASE_H_
+#define _PARSER_BASE_H_
 
 #include <set>
 #include <algorithm>
 #include <iostream>
 #include "gzstream.h"
 #include "analyse_operation.h"
-#include "osm_diff_parser_if.h"
+#include "parser_if.h"
 
 namespace osm_diff_watcher
 {
   template <class T>
-    class osm_diff_parser_base:public osm_diff_parser_if
+    class parser_base:public parser_if
   {
   public:
     void add_analyser(T & p_analyser);
@@ -25,7 +25,7 @@ namespace osm_diff_watcher
   }
   ;
 
-#include "osm_diff_parser_base.tpp"
+#include "parser_base.tpp"
 }
-#endif // _OSM_DIFF_PARSER_BASE_H_
+#endif // _PARSER_BASE_H_
 //EOF

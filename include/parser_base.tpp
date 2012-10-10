@@ -1,16 +1,16 @@
-#ifndef _OSM_DIFF_PARSER_BASE_TPP_
-#define _OSM_DIFF_PARSER_BASE_TPP_
+#ifndef _PARSER_BASE_TPP_
+#define _PARSER_BASE_TPP_
 
 //------------------------------------------------------------------------------
 template <class T>
-void osm_diff_parser_base<T>::add_analyser(T & p_analyser)
+void parser_base<T>::add_analyser(T & p_analyser)
 {
   m_analysers.insert(&p_analyser);
 }
 
 //------------------------------------------------------------------------------
 template <class T>
-void osm_diff_parser_base<T>::parse(const std::string & p_name)
+void parser_base<T>::parse(const std::string & p_name)
 {
   igzstream l_input_file(p_name.c_str());
     if(l_input_file==NULL)
@@ -24,7 +24,7 @@ void osm_diff_parser_base<T>::parse(const std::string & p_name)
 
 //------------------------------------------------------------------------------
 template <class T>
-void osm_diff_parser_base<T>::perform_analyse(const analyse_operation<T> & func)
+void parser_base<T>::perform_analyse(const analyse_operation<T> & func)
 {
   for(typename std::set<T*>::iterator l_iter = m_analysers.begin();l_iter != m_analysers.end() ; ++l_iter)
     {
@@ -32,5 +32,5 @@ void osm_diff_parser_base<T>::perform_analyse(const analyse_operation<T> & func)
     }
 }
 
-#endif //_OSM_DIFF_PARSER_BASE_TPP_
+#endif //_PARSER_BASE_TPP_
 //EOF
