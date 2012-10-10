@@ -1,5 +1,5 @@
-#ifndef _DOM_PARSER_H_
-#define _DOM_PARSER_H_
+#ifndef _DOM_DIFF_PARSER_H_
+#define _DOM_DIFF_PARSER_H_
 
 #include "osm_diff_parser_base.h"
 #include "dom_analyser_if.h"
@@ -9,7 +9,7 @@
 
 namespace osm_diff_watcher
 {
-  class dom_parser: public osm_diff_parser_base<dom_analyser_if>
+  class dom_diff_parser: public osm_diff_parser_base<dom_analyser_if>
   {
   public:
 
@@ -21,5 +21,5 @@ namespace osm_diff_watcher
     //TO DELETE  std::set<dom_analyser_if*> m_analysers;
   };
 }
-#endif // _DOM_PARSER_H_
+#endif // _DOM_DIFF_PARSER_H_
 //EOF

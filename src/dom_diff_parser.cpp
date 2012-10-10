@@ -1,4 +1,4 @@
-#include "dom_parser.h"
+#include "dom_diff_parser.h"
 #include "dom_analyser_operations.h"
 #include <sstream>
 
@@ -7,13 +7,13 @@ using namespace std;
 namespace osm_diff_watcher
 {
   //------------------------------------------------------------------------------
-  //TO DELETEvoid dom_parser::add_analyser(dom_analyser_if & p_analyser)
+  //TO DELETEvoid dom_diff_parser::add_analyser(dom_analyser_if & p_analyser)
   //TO DELETE{
   //TO DELETE  m_analysers.insert(&p_analyser);
   //TO DELETE}
  
   //------------------------------------------------------------------------------
-  void dom_parser::parse_stream(std::istream & p_stream)
+  void dom_diff_parser::parse_stream(std::istream & p_stream)
   {
     std::string l_xml_string;
     std::string l_line;
@@ -24,7 +24,7 @@ namespace osm_diff_watcher
     XMLResults l_err= {eXMLErrorNone,0,0};
     XMLNode l_node = XMLNode::parseString(l_xml_string.c_str(),"osmChange",&l_err);
     std::string l_error_msg;
-    dom_parser::error_message(l_err,l_error_msg);
+    dom_diff_parser::error_message(l_err,l_error_msg);
     if(l_error_msg != "")
       {
 	std::cout << l_error_msg << std::endl ;
@@ -44,7 +44,7 @@ namespace osm_diff_watcher
   }
 
   //------------------------------------------------------------------------------
-  void dom_parser::error_message(const XMLResults & p_err,std::string & p_msg)
+  void dom_diff_parser::error_message(const XMLResults & p_err,std::string & p_msg)
   {
     p_msg = XMLNode::getError(p_err.error);
     stringstream l_line_number ;
@@ -55,7 +55,7 @@ namespace osm_diff_watcher
 
     if(p_msg != "No error")
       {
-	p_msg = "Dom_parser : \"" + p_msg+ "\" on line " + l_line_number.str() + " when parsing XML column " + l_column_number.str();
+	p_msg = "dom_diff_parser : \"" + p_msg+ "\" on line " + l_line_number.str() + " when parsing XML column " + l_column_number.str();
       }
     else
       {

@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "gzstream.h"
-#include "dom_parser.h"
+#include "dom_diff_parser.h"
 #include "basic_dom_analyser.h"
 #include "dom2cpp_analyser.h"
 
@@ -75,8 +75,8 @@ namespace osm_diff_watcher
 
     //TO DELETE  // DOM analyse
     //TO DELETE  igzstream l_input_file_bis("tmp_diff.gz");
-    //TO DELETE  dom_parser l_dom_parser;
-    //TO DELETE  l_dom_parser.parse(l_input_file_bis);
+    //TO DELETE  dom_diff_parser l_dom_diff_parser;
+    //TO DELETE  l_dom_diff_parser.parse(l_input_file_bis);
     //TO DELETE  l_input_file_bis.close();
 
     // Sax analyse
@@ -86,12 +86,12 @@ namespace osm_diff_watcher
     l_sax_parser.parse("tmp_diff.gz");
 
     // DOM analyse
-    dom_parser l_dom_parser;
+    dom_diff_parser l_dom_diff_parser;
     basic_dom_analyser l_dom_analyser;
     dom2cpp_analyser l_dom2cpp_analyser;
-    //l_dom_parser.add_analyser(l_dom_analyser);
-    l_dom_parser.add_analyser(l_dom2cpp_analyser);
-    l_dom_parser.parse("tmp_diff.gz");  
+    //l_dom_diff_parser.add_analyser(l_dom_analyser);
+    l_dom_diff_parser.add_analyser(l_dom2cpp_analyser);
+    l_dom_diff_parser.parse("tmp_diff.gz");  
   }
 
   //------------------------------------------------------------------------------
