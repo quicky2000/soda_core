@@ -4,6 +4,7 @@
 #include "osm_node.h"
 #include "osm_way.h"
 #include "osm_relation.h"
+#include "xmlParser.h"
 #include <cstdlib>
 #include <cstring>
 
@@ -13,9 +14,9 @@ namespace osm_diff_watcher
     class generic_dom_utilities
     {
     public:
-      static osm_node * extract_node_info(const T & p_node);
-      static osm_way * extract_way_info(const T & p_node);
-      static osm_relation * extract_relation_info(const T & p_node);
+      template <class OSM_OBJ>
+        static OSM_OBJ * extract_info(const T & p_node);  
+
       static void extract_tag_info(const T & p_node, osm_object & p_object);
       static void extract_node_ref_info(const T & p_node, osm_way & p_way);
       static void extract_member_info(const T & p_node, osm_relation & p_relation);
@@ -32,36 +33,34 @@ namespace osm_diff_watcher
     class generic_dom_utilities<XMLNode>
     {
     public:
-      static osm_node * extract_node_info(const XMLNode & p_node);  
-      static osm_way * extract_way_info(const XMLNode & p_node);  
-      static osm_relation * extract_relation_info(const XMLNode & p_node);  
-      static void extract_tag_info(const XMLNode & p_node, osm_object & p_object);
-      static void extract_node_ref_info(const XMLNode & p_node, osm_way & p_way);
-      static void extract_member_info(const XMLNode & p_node, osm_relation & p_relation);
-      static void extract_attributes(const XMLNode & p_node,
-                                     osm_object::t_osm_id & p_id,
-                                     osm_object::t_osm_version & p_version,
-                                     std::string & p_timestamp,
-                                     std::string & p_user,
-                                     osm_object::t_osm_id & p_uid,
-                                     osm_object::t_osm_id & p_changeset);
+      template <class OSM_OBJ>
+        inline static OSM_OBJ * extract_info(const XMLNode & p_node);  
+
+      inline static void extract_tag_info(const XMLNode & p_node, osm_object & p_object);
+      inline static void extract_node_ref_info(const XMLNode & p_node, osm_way & p_way);
+      inline static void extract_member_info(const XMLNode & p_node, osm_relation & p_relation);
+      inline static void extract_attributes(const XMLNode & p_node,
+					    osm_object::t_osm_id & p_id,
+					    osm_object::t_osm_version & p_version,
+					    std::string & p_timestamp,
+					    std::string & p_user,
+					    osm_object::t_osm_id & p_uid,
+					    osm_object::t_osm_id & p_changeset);
     };
 
   //----------------------------------------------------------------------------
-  void generic_dom_utilities<XMLNode>::extract_tag_info(const XMLNode & p_node, osm_object & p_object)
-  {
-    assert(!strcmp(p_node.getName(),"tag"));
-    int l_nb_attribute = p_node.nAttribute();
-    assert(l_nb_attribute >= 2);
-    XMLCSTR l_key_str = p_node.getAttribute("k");
-    assert(l_key_str);
-    XMLCSTR l_value_str = p_node.getAttribute("v",0);
-    assert(l_value_str);
-    p_object.add_tag(l_key_str,l_value_str);
-  }
+  template <class OSM_OBJ>
+    OSM_OBJ * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node)
+    {
+      // Dummy implementation should not be called
+      std::cout << "Dummy implementation should not be called" << std::endl ;
+      exit(-1);
+      return NULL;
+    }
 
   //----------------------------------------------------------------------------
-  osm_node * generic_dom_utilities<XMLNode>::extract_node_info(const XMLNode & p_node)
+  template <>
+    inline osm_node * generic_dom_utilities<XMLNode>::extract_info<osm_node>(const XMLNode & p_node)
     {
       osm_object::t_osm_id l_id;
       osm_object::t_osm_version l_version;
@@ -91,44 +90,8 @@ namespace osm_diff_watcher
     }
 
   //----------------------------------------------------------------------------
-  void generic_dom_utilities<XMLNode>::extract_attributes(const XMLNode & p_node,
-                                                          osm_object::t_osm_id & p_id,
-                                                          osm_object::t_osm_version & p_version,
-                                                          std::string & p_timestamp,
-                                                          std::string & p_user,
-                                                          osm_object::t_osm_id & p_uid,
-                                                          osm_object::t_osm_id & p_changeset)
-  {
-      int l_nb_attribute = p_node.nAttribute();
-      assert(l_nb_attribute >= 6);
-      // Get node id
-      XMLCSTR l_id_str = p_node.getAttribute("id");
-      assert(l_id_str);
-      p_id = strtoull(l_id_str,NULL,10); 
-      // Get version
-      XMLCSTR l_version_str = p_node.getAttribute("version");
-      assert(l_version_str);
-      p_version = (osm_object::t_osm_version)strtoul(l_version_str,NULL,10);
-      // Timestamp
-      XMLCSTR l_timestamp_str = p_node.getAttribute("timestamp");
-      assert(l_version_str);
-      p_timestamp = l_timestamp_str;
-      // User
-      XMLCSTR l_user_str = p_node.getAttribute("user");
-      assert(l_user_str);
-      p_user = l_user_str;
-      // Get node uid
-      XMLCSTR l_uid_str = p_node.getAttribute("uid");
-      assert(l_uid_str);
-      p_uid = strtoull(l_uid_str,NULL,10); 
-      // Get node changeset
-      XMLCSTR l_changeset_str = p_node.getAttribute("changeset");
-      assert(l_changeset_str);
-      p_changeset = strtoull(l_changeset_str,NULL,10); 
-  }
-
-  //----------------------------------------------------------------------------
-  osm_way * generic_dom_utilities<XMLNode>::extract_way_info(const XMLNode & p_node)
+  template <>
+    inline osm_way * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node)
     {
       osm_object::t_osm_id l_id;
       osm_object::t_osm_version l_version;
@@ -162,9 +125,10 @@ namespace osm_diff_watcher
         }
       return l_osm_way;
     }
-  
+
   //----------------------------------------------------------------------------
-  osm_relation * generic_dom_utilities<XMLNode>::extract_relation_info(const XMLNode & p_node)
+  template <>
+    inline osm_relation * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node)
     {
       osm_object::t_osm_id l_id;
       osm_object::t_osm_version l_version;
@@ -198,6 +162,57 @@ namespace osm_diff_watcher
         }
       return l_osm_relation;
     }
+
+
+  //----------------------------------------------------------------------------
+  void generic_dom_utilities<XMLNode>::extract_tag_info(const XMLNode & p_node, osm_object & p_object)
+  {
+    assert(!strcmp(p_node.getName(),"tag"));
+    int l_nb_attribute = p_node.nAttribute();
+    assert(l_nb_attribute >= 2);
+    XMLCSTR l_key_str = p_node.getAttribute("k");
+    assert(l_key_str);
+    XMLCSTR l_value_str = p_node.getAttribute("v",0);
+    assert(l_value_str);
+    p_object.add_tag(l_key_str,l_value_str);
+  }
+
+  //----------------------------------------------------------------------------
+  void generic_dom_utilities<XMLNode>::extract_attributes(const XMLNode & p_node,
+							  osm_object::t_osm_id & p_id,
+							  osm_object::t_osm_version & p_version,
+							  std::string & p_timestamp,
+							  std::string & p_user,
+							  osm_object::t_osm_id & p_uid,
+							  osm_object::t_osm_id & p_changeset)
+  {
+    int l_nb_attribute = p_node.nAttribute();
+    assert(l_nb_attribute >= 6);
+    // Get node id
+    XMLCSTR l_id_str = p_node.getAttribute("id");
+    assert(l_id_str);
+    p_id = strtoull(l_id_str,NULL,10); 
+    // Get version
+    XMLCSTR l_version_str = p_node.getAttribute("version");
+    assert(l_version_str);
+    p_version = (osm_object::t_osm_version)strtoul(l_version_str,NULL,10);
+    // Timestamp
+    XMLCSTR l_timestamp_str = p_node.getAttribute("timestamp");
+    assert(l_version_str);
+    p_timestamp = l_timestamp_str;
+    // User
+    XMLCSTR l_user_str = p_node.getAttribute("user");
+    assert(l_user_str);
+    p_user = l_user_str;
+    // Get node uid
+    XMLCSTR l_uid_str = p_node.getAttribute("uid");
+    assert(l_uid_str);
+    p_uid = strtoull(l_uid_str,NULL,10); 
+    // Get node changeset
+    XMLCSTR l_changeset_str = p_node.getAttribute("changeset");
+    assert(l_changeset_str);
+    p_changeset = strtoull(l_changeset_str,NULL,10); 
+  }
 
   //----------------------------------------------------------------------------
   void generic_dom_utilities<XMLNode>::extract_node_ref_info(const XMLNode & p_node, osm_way & p_way)
@@ -235,4 +250,4 @@ namespace osm_diff_watcher
 }
 
 #endif // _DOM_UTILITIES_H_
-  //EOF
+//EOF
