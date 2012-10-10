@@ -3,6 +3,7 @@
 
 #include "osm_object.h"
 #include "osm_relation_member.h"
+#include <vector>
 
 namespace osm_diff_watcher
 {
@@ -21,9 +22,19 @@ namespace osm_diff_watcher
                            const osm_object::t_osm_id & p_object_ref,
                            const std::string & p_role);
     inline ~osm_relation(void);
+
+    // Utilitie
+    static inline const std::string & get_type_str(void);
   private:
     std::vector<osm_relation_member*> m_members;
-  };
+    static const std::string m_type_str;
+ };
+
+  //------------------------------------------------------------------------------
+  const std::string & osm_relation::get_type_str(void)
+    {
+      return m_type_str;
+    }
 
   //----------------------------------------------------------------------------
   osm_relation::osm_relation(const t_osm_id  & p_id,

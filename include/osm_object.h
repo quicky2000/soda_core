@@ -42,6 +42,7 @@ namespace osm_diff_watcher
     inline const std::string & get_tag_value(const std::string & p_name)const;
     inline void modify_tag_value(const std::string & p_name,const std::string & p_value);
     inline bool contains_tag(const std::string & p_name)const;
+    inline const std::map<std::string,std::string> & get_tags(void)const;
 
     // Utility
     static inline osm_object::t_osm_type get_osm_type(const std::string & p_name);
@@ -167,6 +168,12 @@ namespace osm_diff_watcher
       std::map<std::string,std::string>::const_iterator l_iter = m_tags.find(p_name);
       return(l_iter != m_tags.end());      
     }
+
+    //----------------------------------------------------------------------------
+    const std::map<std::string,std::string> & osm_object::get_tags(void)const
+      {
+        return m_tags;
+      }
 }
 
 #endif // _OSM_OBJECT_H_

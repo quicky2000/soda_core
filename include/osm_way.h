@@ -19,9 +19,19 @@ namespace osm_diff_watcher
     inline void add_node(const osm_object::t_osm_id & p_node_ref);
     inline void remove_node(const osm_object::t_osm_id & p_node_ref);
     inline bool contains_node(const osm_object::t_osm_id & p_node_ref)const;
+
+    // Utilitie
+    static inline const std::string & get_type_str(void);
   private:
     std::vector<osm_object::t_osm_id> m_node_refs;
+    static const std::string m_type_str;
   };
+
+    //------------------------------------------------------------------------------
+    const std::string & osm_way::get_type_str(void)
+      {
+        return m_type_str;
+      }
 
   //------------------------------------------------------------------------------
   osm_way::osm_way(const t_osm_id  & p_id,
