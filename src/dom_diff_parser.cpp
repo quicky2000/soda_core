@@ -7,11 +7,11 @@ using namespace std;
 namespace osm_diff_watcher
 {
   //------------------------------------------------------------------------------
-  //TO DELETEvoid dom_diff_parser::add_analyser(dom_analyser_if & p_analyser)
-  //TO DELETE{
-  //TO DELETE  m_analysers.insert(&p_analyser);
-  //TO DELETE}
- 
+  dom_diff_parser::dom_diff_parser(const std::string & p_root):
+    m_root(p_root)
+  {
+  }
+
   //------------------------------------------------------------------------------
   void dom_diff_parser::parse_stream(std::istream & p_stream)
   {
@@ -21,8 +21,14 @@ namespace osm_diff_watcher
       {
 	l_xml_string += l_line;
       }
+    parse_string(l_xml_string);
+  }
+
+  //------------------------------------------------------------------------------
+  void dom_diff_parser::parse_string(const std::string & p_string)
+  {
     XMLResults l_err= {eXMLErrorNone,0,0};
-    XMLNode l_node = XMLNode::parseString(l_xml_string.c_str(),"osmChange",&l_err);
+    XMLNode l_node = XMLNode::parseString(p_string.c_str(),m_root.c_str(),&l_err);
     std::string l_error_msg;
     dom_diff_parser::error_message(l_err,l_error_msg);
     if(l_error_msg != "")
@@ -32,14 +38,8 @@ namespace osm_diff_watcher
       }
     std::cout << "DOM PARSE SUCCESSFULL" << std::endl ;
 
-    //TO DELETE  std::set<dom_analyser_if*>::iterator l_iter = m_analysers.begin();
-    //TO DELETE  std::set<dom_analyser_if*>::iterator l_iter_end = m_analysers.end();
-    //TO DELETE  while(l_iter != l_iter_end)
-    //TO DELETE    {
-    //TO DELETE      (*l_iter)->analyse(l_node);
-    //TO DELETE      ++l_iter;
-    //TO DELETE    }
     this->perform_analyse(dom_analyse_operation(l_node));
+
     std::cout << "End of DOM based analysers" << std::endl ;
   }
 
