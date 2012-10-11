@@ -15,7 +15,7 @@ namespace osm_diff_watcher
     {
     public:
       template <class OSM_OBJ>
-        static OSM_OBJ * extract_info(const T & p_node);  
+        static OSM_OBJ * extract_info(const T & p_node,bool p_search_visible=false);  
 
       static void extract_tag_info(const T & p_node, osm_object & p_object);
       static void extract_node_ref_info(const T & p_node, osm_way & p_way);
@@ -26,7 +26,10 @@ namespace osm_diff_watcher
                                      std::string & p_timestamp,
                                      std::string & p_user,
                                      osm_object::t_osm_id & p_uid,
-                                     osm_object::t_osm_id & p_changeset);
+                                     osm_object::t_osm_id & p_changeset,
+				     bool & p_visible,
+				     bool p_search_visible);
+    private:
     };
 
   template <>
@@ -34,7 +37,7 @@ namespace osm_diff_watcher
     {
     public:
       template <class OSM_OBJ>
-        inline static OSM_OBJ * extract_info(const XMLNode & p_node);  
+        inline static OSM_OBJ * extract_info(const XMLNode & p_node,bool p_search_visible=false);  
 
       inline static void extract_tag_info(const XMLNode & p_node, osm_object & p_object);
       inline static void extract_node_ref_info(const XMLNode & p_node, osm_way & p_way);
@@ -45,22 +48,26 @@ namespace osm_diff_watcher
 					    std::string & p_timestamp,
 					    std::string & p_user,
 					    osm_object::t_osm_id & p_uid,
-					    osm_object::t_osm_id & p_changeset);
-    };
+					    osm_object::t_osm_id & p_changeset,
+					    bool & p_visible,
+					    bool p_search_visible);
+     private:
+   };
 
   //----------------------------------------------------------------------------
   template <class OSM_OBJ>
-    OSM_OBJ * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node)
+    OSM_OBJ * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node,bool p_search_visible)
     {
       // Dummy implementation should not be called
-      std::cout << "Dummy implementation should not be called" << std::endl ;
+      std::cout << "No implementation provided for type \"" << OSM_OBJ::get_type_str() << "\"" << std::endl ;
       exit(-1);
       return NULL;
     }
 
+
   //----------------------------------------------------------------------------
   template <>
-    inline osm_node * generic_dom_utilities<XMLNode>::extract_info<osm_node>(const XMLNode & p_node)
+    inline osm_node * generic_dom_utilities<XMLNode>::extract_info<osm_node>(const XMLNode & p_node,bool p_search_visible)
     {
       osm_object::t_osm_id l_id;
       osm_object::t_osm_version l_version;
@@ -68,30 +75,34 @@ namespace osm_diff_watcher
       std::string l_user;
       osm_object::t_osm_id l_uid;
       osm_object::t_osm_id l_changeset;
+      bool l_visible;
 
-      extract_attributes(p_node,l_id,l_version,l_timestamp,l_user,l_uid,l_changeset);
+      extract_attributes(p_node,l_id,l_version,l_timestamp,l_user,l_uid,l_changeset,l_visible,p_search_visible);
 
       // Get node lat
-      XMLCSTR l_lat_str = p_node.getAttribute("lat");
+      XMLCSTR l_lat_str = (l_visible ? p_node.getAttribute("lat") : "0.0");
       assert(l_lat_str);
       float l_lat = atof(l_lat_str); 
       // Get node lont
-      XMLCSTR l_lon_str = p_node.getAttribute("lon");
+      XMLCSTR l_lon_str = (l_visible ? p_node.getAttribute("lon") : "0.0");
       assert(l_lon_str);
       float l_lon = atof(l_lon_str); 
 
       osm_node * l_osm_node = new osm_node(l_id,l_lat,l_lon,l_timestamp,l_version,l_changeset,l_uid,l_user);
-      int l_nb_child_object = p_node.nChildNode();
-      for(int l_index = 0 ; l_index < l_nb_child_object ; ++l_index)
+      if(l_visible)
 	{
-	  extract_tag_info(p_node.getChildNode(l_index),*l_osm_node);
+	  int l_nb_child_object = p_node.nChildNode();
+	  for(int l_index = 0 ; l_index < l_nb_child_object ; ++l_index)
+	    {
+	      extract_tag_info(p_node.getChildNode(l_index),*l_osm_node);
+	    }
 	}
       return l_osm_node;
     }
 
   //----------------------------------------------------------------------------
   template <>
-    inline osm_way * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node)
+    inline osm_way * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node,bool p_search_visible)
     {
       osm_object::t_osm_id l_id;
       osm_object::t_osm_version l_version;
@@ -99,36 +110,40 @@ namespace osm_diff_watcher
       std::string l_user;
       osm_object::t_osm_id l_uid;
       osm_object::t_osm_id l_changeset;
+      bool l_visible;
 
-      extract_attributes(p_node,l_id,l_version,l_timestamp,l_user,l_uid,l_changeset);
+      extract_attributes(p_node,l_id,l_version,l_timestamp,l_user,l_uid,l_changeset,l_visible,p_search_visible);
 
       osm_way * l_osm_way = new osm_way(l_id,l_timestamp,l_version,l_changeset,l_uid,l_user);
-      int l_nb_child_object = p_node.nChildNode();
-      if(l_nb_child_object)
-	{
-	  int l_index = 0;
-	  
-	  while(l_index < l_nb_child_object)
-            {
-              const XMLNode & l_node = p_node.getChildNode(l_index);
-              
-              if(!strcmp(l_node.getName(),"nd"))
-                {
-                  extract_node_ref_info(l_node,*l_osm_way);
-                }
-              else if(!strcmp(l_node.getName(),"tag"))
-                {
-                  extract_tag_info(l_node,*l_osm_way);
-                }
-              ++l_index;
-            }
-        }
+      if(l_visible)
+      	{
+      	  int l_nb_child_object = p_node.nChildNode();
+      	  if(l_nb_child_object)
+      	    {
+      	      int l_index = 0;
+	      
+      	      while(l_index < l_nb_child_object)
+      		{
+      		  const XMLNode & l_node = p_node.getChildNode(l_index);
+		  
+      		  if(!strcmp(l_node.getName(),"nd"))
+      		    {
+      		      extract_node_ref_info(l_node,*l_osm_way);
+      		    }
+      		  else if(!strcmp(l_node.getName(),"tag"))
+      		    {
+      		      extract_tag_info(l_node,*l_osm_way);
+      		    }
+      		  ++l_index;
+      		}
+      	    }
+      	}
       return l_osm_way;
     }
 
   //----------------------------------------------------------------------------
   template <>
-    inline osm_relation * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node)
+    inline osm_relation * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node,bool p_search_visible)
     {
       osm_object::t_osm_id l_id;
       osm_object::t_osm_version l_version;
@@ -136,30 +151,34 @@ namespace osm_diff_watcher
       std::string l_user;
       osm_object::t_osm_id l_uid;
       osm_object::t_osm_id l_changeset;
+      bool l_visible;
 
-      extract_attributes(p_node,l_id,l_version,l_timestamp,l_user,l_uid,l_changeset);
+      extract_attributes(p_node,l_id,l_version,l_timestamp,l_user,l_uid,l_changeset,l_visible,p_search_visible);
 
       osm_relation * l_osm_relation = new osm_relation(l_id,l_timestamp,l_version,l_changeset,l_uid,l_user);
-      int l_nb_child_object = p_node.nChildNode();
-      if(l_nb_child_object)
+      if(l_visible)
 	{
-	  int l_index = 0;
-	  
-	  while(l_index < l_nb_child_object)
-            {
-              const XMLNode & l_node = p_node.getChildNode(l_index);
-              
-              if(!strcmp(l_node.getName(),"member"))
-                {
-                  extract_member_info(l_node,*l_osm_relation);
-                }
-              else if(!strcmp(l_node.getName(),"tag"))
-                {
-                  extract_tag_info(l_node,*l_osm_relation);
-                }
-              ++l_index;
-            }
-        }
+	  int l_nb_child_object = p_node.nChildNode();
+	  if(l_nb_child_object)
+	    {
+	      int l_index = 0;
+	      
+	      while(l_index < l_nb_child_object)
+		{
+		  const XMLNode & l_node = p_node.getChildNode(l_index);
+		  
+		  if(!strcmp(l_node.getName(),"member"))
+		    {
+		      extract_member_info(l_node,*l_osm_relation);
+		    }
+		  else if(!strcmp(l_node.getName(),"tag"))
+		    {
+		      extract_tag_info(l_node,*l_osm_relation);
+		    }
+		  ++l_index;
+		}
+	    }
+	}
       return l_osm_relation;
     }
 
@@ -184,7 +203,9 @@ namespace osm_diff_watcher
 							  std::string & p_timestamp,
 							  std::string & p_user,
 							  osm_object::t_osm_id & p_uid,
-							  osm_object::t_osm_id & p_changeset)
+							  osm_object::t_osm_id & p_changeset,
+							  bool & p_visible,
+							  bool p_search_visible)
   {
     int l_nb_attribute = p_node.nAttribute();
     assert(l_nb_attribute >= 6);
@@ -212,6 +233,14 @@ namespace osm_diff_watcher
     XMLCSTR l_changeset_str = p_node.getAttribute("changeset");
     assert(l_changeset_str);
     p_changeset = strtoull(l_changeset_str,NULL,10); 
+    if(p_search_visible)
+      {
+	p_visible = strcmp(p_node.getAttribute("visible"),"false");
+      }
+    else
+      {
+	p_visible = true;
+      }
   }
 
   //----------------------------------------------------------------------------
@@ -241,10 +270,10 @@ namespace osm_diff_watcher
     assert(l_ref_str);
     osm_object::t_osm_id l_node_ref = strtoull(l_ref_str,NULL,10);
 
-    XMLCSTR l_role_str = p_node.getAttribute("ref");
+    XMLCSTR l_role_str = p_node.getAttribute("role");
     assert(l_role_str);
 
-    p_relation.add_member(l_type,l_node_ref,l_role_str);
+    p_relation.add_member(l_type,l_node_ref,std::string(l_role_str));
   }
   
 }
