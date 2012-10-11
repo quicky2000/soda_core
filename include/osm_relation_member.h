@@ -7,6 +7,7 @@ namespace osm_diff_watcher
 {
   class osm_relation_member
   {
+    friend std::ostream & operator<<(std::ostream & p_stream,const osm_relation_member & p_relation_member);
   public:
     inline osm_relation_member(const osm_object::t_osm_type & p_type,
                                const osm_object::t_osm_id & p_object_ref,
@@ -19,6 +20,13 @@ namespace osm_diff_watcher
     const osm_object::t_osm_id m_object_ref;
     const std::string m_role;
   };
+
+  //------------------------------------------------------------------------------
+  inline std::ostream & operator<<(std::ostream & p_stream,const osm_relation_member & p_relation_member)
+    {
+      p_stream << "relation_member type=" << osm_object::get_osm_type_str(p_relation_member.m_type) << " object_ref=" << p_relation_member.m_object_ref << " role=" << p_relation_member.m_role << std::endl ;
+      return p_stream;
+    }
 
   //----------------------------------------------------------------------------
   osm_relation_member::osm_relation_member(const osm_object::t_osm_type & p_type,
