@@ -7,6 +7,7 @@
 
 // TO be replaced by #include <cstdint> to follow C++0x standard
 #include <inttypes.h>
+#include <iostream>
 
 namespace osm_diff_watcher
 {
@@ -46,6 +47,8 @@ namespace osm_diff_watcher
 
     // Utility
     static inline osm_object::t_osm_type get_osm_type(const std::string & p_name);
+    static inline const std::string & get_osm_type_str(const osm_object::t_osm_type & p_type);
+    inline void tags_to_string(std::string & p_string)const;
   private:
     t_osm_id m_id;
     bool m_visible;
@@ -57,6 +60,7 @@ namespace osm_diff_watcher
     std::map<std::string,std::string> m_tags;
 
     static std::map<std::string,t_osm_type> m_osm_types;
+    static std::map<t_osm_type,std::string> m_osm_types_str;
   };
 
   //----------------------------------------------------------------------------
@@ -70,6 +74,20 @@ namespace osm_diff_watcher
         }
       std::map<std::string,t_osm_type>::const_iterator l_iter = m_osm_types.find(p_name);
       assert(m_osm_types.end() != l_iter);
+      return l_iter->second;
+    }
+
+  //----------------------------------------------------------------------------
+  const std::string & osm_object::get_osm_type_str(const osm_object::t_osm_type & p_type)
+    {
+      if(m_osm_types_str.size()==0)
+        {
+          m_osm_types_str.insert(std::map<t_osm_type,std::string>::value_type(osm_object::NODE,"node"));
+          m_osm_types_str.insert(std::map<t_osm_type,std::string>::value_type(osm_object::WAY,"way"));
+          m_osm_types_str.insert(std::map<t_osm_type,std::string>::value_type(osm_object::RELATION,"relation"));
+        }
+      std::map<t_osm_type,std::string>::const_iterator l_iter = m_osm_types_str.find(p_type);
+      assert(m_osm_types_str.end() != l_iter);
       return l_iter->second;
     }
 
@@ -174,6 +192,17 @@ namespace osm_diff_watcher
       {
         return m_tags;
       }
+    //----------------------------------------------------------------------------
+    void osm_object::tags_to_string(std::string & p_string)const
+    {
+      for(std::map<std::string,std::string>::const_iterator l_iter = m_tags.begin();
+            l_iter != m_tags.end();
+            ++l_iter)
+        {
+          p_string += "  " + l_iter->first + "=" + l_iter->second + "\n" ;
+        }
+    }
+
 }
 
 #endif // _OSM_OBJECT_H_

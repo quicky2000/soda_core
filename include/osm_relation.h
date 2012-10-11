@@ -9,6 +9,7 @@ namespace osm_diff_watcher
 {
   class osm_relation: public osm_object
   {
+    friend std::ostream & operator<<(std::ostream & p_stream,const osm_relation & p_relation);
   public:
     inline osm_relation(const t_osm_id  & p_id,
                         const std::string & p_timestamp,
@@ -21,6 +22,8 @@ namespace osm_diff_watcher
     inline void add_member(const osm_object::t_osm_type & p_type,
                            const osm_object::t_osm_id & p_object_ref,
                            const std::string & p_role);
+    inline const std::vector<osm_relation_member*> & get_members(void)const;
+
     inline ~osm_relation(void);
 
     // Utilitie
@@ -29,6 +32,24 @@ namespace osm_diff_watcher
     std::vector<osm_relation_member*> m_members;
     static const std::string m_type_str;
  };
+
+  //------------------------------------------------------------------------------
+  inline std::ostream & operator<<(std::ostream & p_stream,const osm_relation & p_relation)
+    {
+      p_stream << "relation id=" << p_relation.get_id() << " version=" << p_relation.get_version() << std::endl ;
+      const std::vector<osm_relation_member*> & l_members = p_relation.get_members();
+      for(std::vector<osm_relation_member*>::const_iterator l_iter = l_members.begin();
+          l_iter != l_members.end();
+          ++l_iter)
+        {
+          p_stream << **l_iter;
+        }
+ 
+      std::string l_tags_str;
+      p_relation.tags_to_string(l_tags_str);
+      p_stream << l_tags_str ;
+      return p_stream;
+    }
 
   //------------------------------------------------------------------------------
   const std::string & osm_relation::get_type_str(void)
@@ -66,7 +87,13 @@ namespace osm_diff_watcher
           delete *l_iter;
         }
     }
-   
+
+    //----------------------------------------------------------------------------
+    const std::vector<osm_relation_member*> & osm_relation::get_members(void)const
+     {
+       return m_members;
+     }
+
 }
 #endif // _OSM_RELATION_H_
 //EOF

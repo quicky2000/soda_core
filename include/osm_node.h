@@ -38,14 +38,13 @@ namespace osm_diff_watcher
   inline std::ostream & operator<<(std::ostream & p_stream,const osm_node & p_node)
     {
       p_stream << "node id=" << p_node.get_id() << " version=" << p_node.get_version() << std::endl ;
-      p_stream << "  lat=" << p_node.m_lat << " lon=" << p_node.m_lon << std::endl ;
-      std::map<std::string,std::string> l_tags = p_node.get_tags();
-      for(std::map<std::string,std::string>::const_iterator l_iter = l_tags.begin();
-            l_iter != l_tags.end();
-            ++l_iter)
+      if(p_node.is_visible())
         {
-          p_stream << "  " << l_iter->first << "=" << l_iter->second << std::endl ;
+          p_stream << "  lat=" << p_node.m_lat << " lon=" << p_node.m_lon << std::endl ;
         }
+      std::string l_tags_str;
+      p_node.tags_to_string(l_tags_str);
+      p_stream << l_tags_str ;
       return p_stream;
     }
 

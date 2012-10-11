@@ -8,6 +8,7 @@ namespace osm_diff_watcher
 {
   class osm_way:public osm_object
   {
+    friend std::ostream & operator<<(std::ostream & p_stream,const osm_way & p_way);
   public:
     inline osm_way(const t_osm_id  & p_id,
                    const std::string & p_timestamp,
@@ -19,6 +20,7 @@ namespace osm_diff_watcher
     inline void add_node(const osm_object::t_osm_id & p_node_ref);
     inline void remove_node(const osm_object::t_osm_id & p_node_ref);
     inline bool contains_node(const osm_object::t_osm_id & p_node_ref)const;
+    inline const std::vector<osm_object::t_osm_id> & get_node_refs(void)const;
 
     // Utilitie
     static inline const std::string & get_type_str(void);
@@ -27,7 +29,24 @@ namespace osm_diff_watcher
     static const std::string m_type_str;
   };
 
-    //------------------------------------------------------------------------------
+   //------------------------------------------------------------------------------
+  inline std::ostream & operator<<(std::ostream & p_stream,const osm_way & p_way)
+    {
+      p_stream << "way id=" << p_way.get_id() << " version=" << p_way.get_version() << std::endl ;
+      const std::vector<osm_object::t_osm_id> & l_node_refs = p_way.get_node_refs();
+      for(std::vector<osm_object::t_osm_id>::const_iterator l_iter = l_node_refs.begin();
+          l_iter != l_node_refs.end();
+          ++l_iter)
+        {
+          p_stream << "  node ref=" << *l_iter << std::endl ;
+        }
+      std::string l_tags_str;
+      p_way.tags_to_string(l_tags_str);
+      p_stream << l_tags_str ;
+      return p_stream;
+    }
+
+   //------------------------------------------------------------------------------
     const std::string & osm_way::get_type_str(void)
       {
         return m_type_str;
@@ -83,6 +102,12 @@ namespace osm_diff_watcher
         }
       return false;
     }
+
+    //----------------------------------------------------------------------------
+    const std::vector<osm_object::t_osm_id> & osm_way::get_node_refs(void)const
+      {
+        return m_node_refs;
+      }
 }
 
 #endif // _OSM_WAY_H_
