@@ -96,7 +96,7 @@ namespace osm_diff_watcher
 
 	    time_t l_inscription_date = mktime(&l_inscription);
 
-	    time_t l_duration_time = difftime(l_today, l_inscription_date);
+	    time_t l_duration_time = (time_t)difftime(l_today, l_inscription_date);
 	    struct tm * l_duration = localtime(&l_duration_time);
 	    std::cout << (l_duration->tm_year - 70 ) << " year " << (l_duration->tm_mon ) << " months " << l_duration->tm_mday << " days" << std::endl ;
 	    if((l_duration->tm_year - 70 )== 0 && l_duration->tm_mon == 0)
