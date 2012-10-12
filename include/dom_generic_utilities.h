@@ -4,6 +4,7 @@
 #include "osm_node.h"
 #include "osm_way.h"
 #include "osm_relation.h"
+#include "osm_changeset.h"
 #include "xmlParser.h"
 #include <cstdlib>
 #include <cstring>
@@ -20,15 +21,15 @@ namespace osm_diff_watcher
       static void extract_tag_info(const T & p_node, osm_object & p_object);
       static void extract_node_ref_info(const T & p_node, osm_way & p_way);
       static void extract_member_info(const T & p_node, osm_relation & p_relation);
-      static void extract_attributes(const T & p_node,
-                                     osm_object::t_osm_id & p_id,
-                                     osm_object::t_osm_version & p_version,
-                                     std::string & p_timestamp,
-                                     std::string & p_user,
-                                     osm_object::t_osm_id & p_uid,
-                                     osm_object::t_osm_id & p_changeset,
-				     bool & p_visible,
-				     bool p_search_visible);
+      static void extract_core_element_attributes(const T & p_node,
+                                                  osm_object::t_osm_id & p_id,
+                                                  osm_core_element::t_osm_version & p_version,
+                                                  std::string & p_timestamp,
+                                                  std::string & p_user,
+                                                  osm_object::t_osm_id & p_uid,
+                                                  osm_core_element::t_osm_id & p_changeset,
+                                                  bool & p_visible,
+                                                  bool p_search_visible);
     private:
     };
 
@@ -42,17 +43,17 @@ namespace osm_diff_watcher
       inline static void extract_tag_info(const XMLNode & p_node, osm_object & p_object);
       inline static void extract_node_ref_info(const XMLNode & p_node, osm_way & p_way);
       inline static void extract_member_info(const XMLNode & p_node, osm_relation & p_relation);
-      inline static void extract_attributes(const XMLNode & p_node,
-					    osm_object::t_osm_id & p_id,
-					    osm_object::t_osm_version & p_version,
-					    std::string & p_timestamp,
-					    std::string & p_user,
-					    osm_object::t_osm_id & p_uid,
-					    osm_object::t_osm_id & p_changeset,
-					    bool & p_visible,
-					    bool p_search_visible);
-     private:
-   };
+      inline static void extract_core_element_attributes(const XMLNode & p_node,
+                                                         osm_object::t_osm_id & p_id,
+                                                         osm_core_element::t_osm_version & p_version,
+                                                         std::string & p_timestamp,
+                                                         std::string & p_user,
+                                                         osm_object::t_osm_id & p_uid,
+                                                         osm_core_element::t_osm_id & p_changeset,
+                                                         bool & p_visible,
+                                                         bool p_search_visible);
+    private:
+    };
 
   //----------------------------------------------------------------------------
   template <class OSM_OBJ>
@@ -70,14 +71,14 @@ namespace osm_diff_watcher
     inline osm_node * generic_dom_utilities<XMLNode>::extract_info<osm_node>(const XMLNode & p_node,bool p_search_visible)
     {
       osm_object::t_osm_id l_id;
-      osm_object::t_osm_version l_version;
+      osm_core_element::t_osm_version l_version;
       std::string l_timestamp;
       std::string l_user;
       osm_object::t_osm_id l_uid;
-      osm_object::t_osm_id l_changeset;
+      osm_core_element::t_osm_id l_changeset;
       bool l_visible;
 
-      extract_attributes(p_node,l_id,l_version,l_timestamp,l_user,l_uid,l_changeset,l_visible,p_search_visible);
+      extract_core_element_attributes(p_node,l_id,l_version,l_timestamp,l_user,l_uid,l_changeset,l_visible,p_search_visible);
 
       // Get node lat
       XMLCSTR l_lat_str = (l_visible ? p_node.getAttribute("lat") : "0.0");
@@ -105,14 +106,14 @@ namespace osm_diff_watcher
     inline osm_way * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node,bool p_search_visible)
     {
       osm_object::t_osm_id l_id;
-      osm_object::t_osm_version l_version;
+      osm_core_element::t_osm_version l_version;
       std::string l_timestamp;
       std::string l_user;
       osm_object::t_osm_id l_uid;
-      osm_object::t_osm_id l_changeset;
+      osm_core_element::t_osm_id l_changeset;
       bool l_visible;
 
-      extract_attributes(p_node,l_id,l_version,l_timestamp,l_user,l_uid,l_changeset,l_visible,p_search_visible);
+      extract_core_element_attributes(p_node,l_id,l_version,l_timestamp,l_user,l_uid,l_changeset,l_visible,p_search_visible);
 
       osm_way * l_osm_way = new osm_way(l_id,l_timestamp,l_version,l_changeset,l_uid,l_user);
       if(l_visible)
@@ -146,14 +147,14 @@ namespace osm_diff_watcher
     inline osm_relation * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node,bool p_search_visible)
     {
       osm_object::t_osm_id l_id;
-      osm_object::t_osm_version l_version;
+      osm_core_element::t_osm_version l_version;
       std::string l_timestamp;
       std::string l_user;
       osm_object::t_osm_id l_uid;
-      osm_object::t_osm_id l_changeset;
+      osm_core_element::t_osm_id l_changeset;
       bool l_visible;
 
-      extract_attributes(p_node,l_id,l_version,l_timestamp,l_user,l_uid,l_changeset,l_visible,p_search_visible);
+      extract_core_element_attributes(p_node,l_id,l_version,l_timestamp,l_user,l_uid,l_changeset,l_visible,p_search_visible);
 
       osm_relation * l_osm_relation = new osm_relation(l_id,l_timestamp,l_version,l_changeset,l_uid,l_user);
       if(l_visible)
@@ -197,15 +198,15 @@ namespace osm_diff_watcher
   }
 
   //----------------------------------------------------------------------------
-  void generic_dom_utilities<XMLNode>::extract_attributes(const XMLNode & p_node,
-							  osm_object::t_osm_id & p_id,
-							  osm_object::t_osm_version & p_version,
-							  std::string & p_timestamp,
-							  std::string & p_user,
-							  osm_object::t_osm_id & p_uid,
-							  osm_object::t_osm_id & p_changeset,
-							  bool & p_visible,
-							  bool p_search_visible)
+  void generic_dom_utilities<XMLNode>::extract_core_element_attributes(const XMLNode & p_node,
+                                                                       osm_object::t_osm_id & p_id,
+                                                                       osm_core_element::t_osm_version & p_version,
+                                                                       std::string & p_timestamp,
+                                                                       std::string & p_user,
+                                                                       osm_object::t_osm_id & p_uid,
+                                                                       osm_core_element::t_osm_id & p_changeset,
+                                                                       bool & p_visible,
+                                                                       bool p_search_visible)
   {
     int l_nb_attribute = p_node.nAttribute();
     assert(l_nb_attribute >= 6);
@@ -216,7 +217,7 @@ namespace osm_diff_watcher
     // Get version
     XMLCSTR l_version_str = p_node.getAttribute("version");
     assert(l_version_str);
-    p_version = (osm_object::t_osm_version)strtoul(l_version_str,NULL,10);
+    p_version = (osm_core_element::t_osm_version)strtoul(l_version_str,NULL,10);
     // Timestamp
     XMLCSTR l_timestamp_str = p_node.getAttribute("timestamp");
     assert(l_version_str);
@@ -264,7 +265,7 @@ namespace osm_diff_watcher
 
     XMLCSTR l_type_str = p_node.getAttribute("type");
     assert(l_type_str);
-    osm_object::t_osm_type l_type = osm_object::get_osm_type(l_type_str);
+    osm_core_element::t_osm_type l_type = osm_core_element::get_osm_type(l_type_str);
 
     XMLCSTR l_ref_str = p_node.getAttribute("ref");
     assert(l_ref_str);

@@ -1,6 +1,5 @@
 #include "dom2cpp_analyser.h"
 #include "osm_change.h"
-#include "osm_change.h"
 #include "osm_node.h"
 #include "dom_generic_utilities.h"
 #include <cassert>
@@ -30,16 +29,16 @@ namespace osm_diff_watcher
 	for(int l_index_object = 0 ; l_index_object < l_nb_child_object_nodes ; ++l_index_object)
 	  {
 	    const t_dom_tree & l_object_node = l_node.getChildNode(l_index_object);
-	    osm_object::t_osm_type l_osm_type = osm_object::get_osm_type(l_object_node.getName());
+	    osm_core_element::t_osm_type l_osm_type = osm_core_element::get_osm_type(l_object_node.getName());
 	    switch(l_osm_type)
 	      {
-	      case osm_object::NODE :
+	      case osm_core_element::NODE :
 		l_changes.push_back(new osm_change_generic<osm_node>(l_change_type,generic_dom_utilities<XMLNode>::extract_info<osm_node>(l_object_node)));
 		break;
-	      case osm_object::WAY :
+	      case osm_core_element::WAY :
                 l_changes.push_back(new osm_change_generic<osm_way>(l_change_type,generic_dom_utilities<XMLNode>::extract_info<osm_way>(l_object_node)));
 		break;
-	      case osm_object::RELATION :
+	      case osm_core_element::RELATION :
                 l_changes.push_back(new osm_change_generic<osm_relation>(l_change_type,generic_dom_utilities<XMLNode>::extract_info<osm_relation>(l_object_node)));
 		break;
 	      default:

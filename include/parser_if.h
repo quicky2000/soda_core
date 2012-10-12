@@ -9,7 +9,7 @@ namespace osm_diff_watcher
   {
   public:
     virtual void parse(const std::string & p_name)=0;
-    inline ~parser_if(void){}
+    inline virtual ~parser_if(void){}
   };
 }
 #endif // _PARSER_IF_H_

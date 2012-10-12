@@ -1,12 +1,12 @@
 #ifndef _OSM_NODE_H_
 #define _OSM_NODE_H_
 
-#include "osm_object.h"
+#include "osm_core_element.h"
 #include <iostream>
 
 namespace osm_diff_watcher
 {
-  class osm_node: public osm_object
+  class osm_node: public osm_core_element
   {
     friend std::ostream & operator<<(std::ostream & p_stream,const osm_node & p_node);
   public:
@@ -58,7 +58,7 @@ namespace osm_diff_watcher
 		     const t_osm_id & p_user_id,
 		     const std::string & p_user,
 		     bool p_visible):
-    osm_object(p_id,true,p_timestamp,p_version,p_changeset,p_user_id,p_user),
+    osm_core_element(p_id,true,p_timestamp,p_version,p_changeset,p_user_id,p_user),
     m_lat(p_lat),
     m_lon(p_lon)
       {
