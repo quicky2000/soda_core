@@ -33,7 +33,7 @@ namespace osm_diff_watcher
 	    switch(l_osm_type)
 	      {
 	      case osm_core_element::NODE :
-		l_changes.push_back(new osm_change_generic<osm_node>(l_change_type,generic_dom_utilities<XMLNode>::extract_info<osm_node>(l_object_node)));
+		l_changes.push_back(new osm_change_generic<osm_node>(l_change_type,generic_dom_utilities<XMLNode>::extract_info<osm_node>(l_object_node,false,l_change_type == osm_change::DELETION)));
 		break;
 	      case osm_core_element::WAY :
                 l_changes.push_back(new osm_change_generic<osm_way>(l_change_type,generic_dom_utilities<XMLNode>::extract_info<osm_way>(l_object_node)));

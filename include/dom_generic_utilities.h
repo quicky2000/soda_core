@@ -16,7 +16,7 @@ namespace osm_diff_watcher
     {
     public:
       template <class OSM_OBJ>
-        static OSM_OBJ * extract_info(const T & p_node,bool p_search_visible=false);  
+        static OSM_OBJ * extract_info(const T & p_node,bool p_search_visible=false,bool p_delete_change=false);  
 
       static void extract_tag_info(const T & p_node, osm_object & p_object);
       static void extract_node_ref_info(const T & p_node, osm_way & p_way);
@@ -30,7 +30,13 @@ namespace osm_diff_watcher
                                                   osm_core_element::t_osm_id & p_changeset,
                                                   bool & p_visible,
                                                   bool p_search_visible);
-    private:
+      static void extract_attributes(const T & p_node,
+				     osm_object::t_osm_id & p_id,
+				     std::string & p_user,
+				     osm_object::t_osm_id & p_uid);
+      template <class ATTR_TYPE>
+	static ATTR_TYPE extract_attribute(const T & p_node,const char * p_attribute_name);
+     private:
     };
 
   template <>
@@ -38,7 +44,7 @@ namespace osm_diff_watcher
     {
     public:
       template <class OSM_OBJ>
-        inline static OSM_OBJ * extract_info(const XMLNode & p_node,bool p_search_visible=false);  
+        inline static OSM_OBJ * extract_info(const XMLNode & p_node,bool p_search_visible=false,bool p_delete_change=false);  
 
       inline static void extract_tag_info(const XMLNode & p_node, osm_object & p_object);
       inline static void extract_node_ref_info(const XMLNode & p_node, osm_way & p_way);
@@ -52,12 +58,18 @@ namespace osm_diff_watcher
                                                          osm_core_element::t_osm_id & p_changeset,
                                                          bool & p_visible,
                                                          bool p_search_visible);
-    private:
+      inline static void extract_attributes(const XMLNode & p_node,
+					    osm_object::t_osm_id & p_id,
+					    std::string & p_user,
+					    osm_object::t_osm_id & p_uid);
+       template <class ATTR_TYPE>
+	inline static ATTR_TYPE extract_attribute(const XMLNode & p_node,const char * p_attribute_name);
+   private:
     };
 
   //----------------------------------------------------------------------------
   template <class OSM_OBJ>
-    OSM_OBJ * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node,bool p_search_visible)
+    OSM_OBJ * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node,bool p_search_visible,bool p_delete_change)
     {
       // Dummy implementation should not be called
       std::cout << "No implementation provided for type \"" << OSM_OBJ::get_type_str() << "\"" << std::endl ;
@@ -65,10 +77,79 @@ namespace osm_diff_watcher
       return NULL;
     }
 
+  //----------------------------------------------------------------------------
+  template <class ATTR_TYPE>
+    ATTR_TYPE extract_attribute(const XMLNode & p_node,const char * p_attribute_name)
+    {
+      // Dummy implementation should not be called
+      std::cout << "No implementation provided for " << __FUNCTION__ << " of attribute \"" << p_attribute_name << "\" of node \"" << p_node.getName() << "\"" << std::endl ;
+      exit(-1);
+      return NULL;
+    }
 
   //----------------------------------------------------------------------------
   template <>
-    inline osm_node * generic_dom_utilities<XMLNode>::extract_info<osm_node>(const XMLNode & p_node,bool p_search_visible)
+  inline const char * generic_dom_utilities<XMLNode>::extract_attribute(const XMLNode & p_node,
+								 const char * p_attribute_name)
+    {
+      XMLCSTR l_str = p_node.getAttribute(p_attribute_name);
+      assert(l_str);
+      return l_str;
+    }
+
+  //----------------------------------------------------------------------------
+  template <>
+    inline osm_object::t_osm_id generic_dom_utilities<XMLNode>::extract_attribute(const XMLNode & p_node,
+								 const char * p_attribute_name)
+    {
+      XMLCSTR l_str = p_node.getAttribute(p_attribute_name);
+      assert(l_str);
+    return strtoull(l_str,NULL,10); 
+    }
+
+  //----------------------------------------------------------------------------
+  template <>
+    inline osm_core_element::t_osm_version generic_dom_utilities<XMLNode>::extract_attribute(const XMLNode & p_node,
+                                                                                             const char * p_attribute_name)
+    {
+      XMLCSTR l_str = p_node.getAttribute(p_attribute_name);
+      assert(l_str);
+    return strtoul(l_str,NULL,10); 
+    }
+
+  //----------------------------------------------------------------------------
+  template <>
+    inline float generic_dom_utilities<XMLNode>::extract_attribute(const XMLNode & p_node,
+								 const char * p_attribute_name)
+    {
+      XMLCSTR l_str = p_node.getAttribute(p_attribute_name);
+      assert(l_str);
+    return atof(l_str); 
+    }
+
+  //----------------------------------------------------------------------------
+  template <>
+    inline bool generic_dom_utilities<XMLNode>::extract_attribute(const XMLNode & p_node,
+                                                           const char * p_attribute_name)
+    {
+      XMLCSTR l_str = p_node.getAttribute(p_attribute_name);
+      assert(l_str);
+      return !strcmp(l_str,"true"); 
+    }
+
+  //----------------------------------------------------------------------------
+  template <>
+    inline osm_core_element::t_osm_type generic_dom_utilities<XMLNode>::extract_attribute(const XMLNode & p_node,
+                                                                                          const char * p_attribute_name)
+    {
+      XMLCSTR l_type_str = p_node.getAttribute(p_attribute_name);
+      assert(l_type_str);
+      return osm_core_element::get_osm_type(l_type_str);
+    }
+
+  //----------------------------------------------------------------------------
+  template <>
+    inline osm_node * generic_dom_utilities<XMLNode>::extract_info<osm_node>(const XMLNode & p_node,bool p_search_visible,bool p_delete_change)
     {
       osm_object::t_osm_id l_id;
       osm_core_element::t_osm_version l_version;
@@ -80,14 +161,8 @@ namespace osm_diff_watcher
 
       extract_core_element_attributes(p_node,l_id,l_version,l_timestamp,l_user,l_uid,l_changeset,l_visible,p_search_visible);
 
-      // Get node lat
-      XMLCSTR l_lat_str = (l_visible ? p_node.getAttribute("lat") : "0.0");
-      assert(l_lat_str);
-      float l_lat = atof(l_lat_str); 
-      // Get node lont
-      XMLCSTR l_lon_str = (l_visible ? p_node.getAttribute("lon") : "0.0");
-      assert(l_lon_str);
-      float l_lon = atof(l_lon_str); 
+      float l_lat = (l_visible && !p_delete_change ? extract_attribute<float>(p_node,"lat") : 0.0);
+      float l_lon = (l_visible && !p_delete_change ? extract_attribute<float>(p_node,"lon") : 0.0);
 
       osm_node * l_osm_node = new osm_node(l_id,l_lat,l_lon,l_timestamp,l_version,l_changeset,l_uid,l_user);
       if(l_visible)
@@ -103,7 +178,7 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   template <>
-    inline osm_way * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node,bool p_search_visible)
+    inline osm_way * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node,bool p_search_visible,bool p_delete_change)
     {
       osm_object::t_osm_id l_id;
       osm_core_element::t_osm_version l_version;
@@ -144,7 +219,7 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   template <>
-    inline osm_relation * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node,bool p_search_visible)
+    inline osm_relation * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node,bool p_search_visible,bool p_delete_change)
     {
       osm_object::t_osm_id l_id;
       osm_core_element::t_osm_version l_version;
@@ -183,7 +258,33 @@ namespace osm_diff_watcher
       return l_osm_relation;
     }
 
+  //----------------------------------------------------------------------------
+  template <>
+    inline osm_changeset * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node,bool p_search_visible,bool p_delete_change)
+    {
+      osm_object::t_osm_id l_id;
+      std::string l_user;
+      osm_object::t_osm_id l_uid;
 
+      extract_attributes(p_node,l_id,l_user,l_uid);
+
+      std::string l_created_at(extract_attribute<const char *>(p_node,"created_at"));
+      std::string l_closed_at(extract_attribute<const char *>(p_node,"closed_at"));
+      bool l_open = extract_attribute<bool>(p_node,"open");
+      float l_min_lat = extract_attribute<float>(p_node,"min_lat");
+      float l_min_lon = extract_attribute<float>(p_node,"min_lon");
+      float l_max_lat = extract_attribute<float>(p_node,"max_lat");
+      float l_max_lon = extract_attribute<float>(p_node,"max_lon");
+
+      osm_changeset * l_changeset = new osm_changeset(l_id,l_uid,l_user,l_created_at,l_closed_at,l_open,osm_bounding_box(l_min_lat,l_min_lon,l_max_lat,l_max_lon));
+
+      int l_nb_child_object = p_node.nChildNode();
+      for(int l_index = 0 ; l_index < l_nb_child_object ; ++l_index)
+	{
+	  extract_tag_info(p_node.getChildNode(l_index),*l_changeset);
+	}
+      return l_changeset;
+    }
   //----------------------------------------------------------------------------
   void generic_dom_utilities<XMLNode>::extract_tag_info(const XMLNode & p_node, osm_object & p_object)
   {
@@ -210,33 +311,21 @@ namespace osm_diff_watcher
   {
     int l_nb_attribute = p_node.nAttribute();
     assert(l_nb_attribute >= 6);
-    // Get node id
-    XMLCSTR l_id_str = p_node.getAttribute("id");
-    assert(l_id_str);
-    p_id = strtoull(l_id_str,NULL,10); 
-    // Get version
-    XMLCSTR l_version_str = p_node.getAttribute("version");
-    assert(l_version_str);
-    p_version = (osm_core_element::t_osm_version)strtoul(l_version_str,NULL,10);
+
+    extract_attributes(p_node,p_id,p_user,p_uid);
+
+    // Version
+    p_version = extract_attribute<osm_core_element::t_osm_version>(p_node,"version");
+
     // Timestamp
-    XMLCSTR l_timestamp_str = p_node.getAttribute("timestamp");
-    assert(l_version_str);
-    p_timestamp = l_timestamp_str;
-    // User
-    XMLCSTR l_user_str = p_node.getAttribute("user");
-    assert(l_user_str);
-    p_user = l_user_str;
-    // Get node uid
-    XMLCSTR l_uid_str = p_node.getAttribute("uid");
-    assert(l_uid_str);
-    p_uid = strtoull(l_uid_str,NULL,10); 
+    p_timestamp = extract_attribute<const char *>(p_node,"timestamp");
+
     // Get node changeset
-    XMLCSTR l_changeset_str = p_node.getAttribute("changeset");
-    assert(l_changeset_str);
-    p_changeset = strtoull(l_changeset_str,NULL,10); 
+    p_changeset = extract_attribute<osm_core_element::t_osm_id>(p_node,"changeset");
+
     if(p_search_visible)
       {
-	p_visible = strcmp(p_node.getAttribute("visible"),"false");
+        p_visible = extract_attribute<bool>(p_node,"visible");
       }
     else
       {
@@ -245,14 +334,27 @@ namespace osm_diff_watcher
   }
 
   //----------------------------------------------------------------------------
+  void generic_dom_utilities<XMLNode>::extract_attributes(const XMLNode & p_node,
+							  osm_object::t_osm_id & p_id,
+							  std::string & p_user,
+							  osm_object::t_osm_id & p_uid)
+  {
+    int l_nb_attribute = p_node.nAttribute();
+    assert(l_nb_attribute >= 3);
+
+    p_id = extract_attribute<osm_object::t_osm_id>(p_node,"id");
+    p_user = extract_attribute<const char *>(p_node,"user");
+    p_uid = extract_attribute<osm_object::t_osm_id>(p_node,"uid");
+  }
+
+  //----------------------------------------------------------------------------
   void generic_dom_utilities<XMLNode>::extract_node_ref_info(const XMLNode & p_node, osm_way & p_way)
   {
     assert(!strcmp(p_node.getName(),"nd"));
     int l_nb_attribute = p_node.nAttribute();
     assert(l_nb_attribute >= 1);
-    XMLCSTR l_ref_str = p_node.getAttribute("ref");
-    assert(l_ref_str);
-    osm_object::t_osm_id l_node_ref = strtoull(l_ref_str,NULL,10);
+
+    osm_object::t_osm_id l_node_ref = extract_attribute<osm_object::t_osm_id>(p_node,"ref");
     p_way.add_node(l_node_ref);
   }
 
@@ -263,18 +365,11 @@ namespace osm_diff_watcher
     int l_nb_attribute = p_node.nAttribute();
     assert(l_nb_attribute >= 3);
 
-    XMLCSTR l_type_str = p_node.getAttribute("type");
-    assert(l_type_str);
-    osm_core_element::t_osm_type l_type = osm_core_element::get_osm_type(l_type_str);
+    osm_core_element::t_osm_type l_type = extract_attribute<osm_core_element::t_osm_type>(p_node,"type");
+    osm_object::t_osm_id l_node_ref = extract_attribute<osm_object::t_osm_id>(p_node,"ref");
+    const std::string l_role = extract_attribute<const char *>(p_node,"role");
 
-    XMLCSTR l_ref_str = p_node.getAttribute("ref");
-    assert(l_ref_str);
-    osm_object::t_osm_id l_node_ref = strtoull(l_ref_str,NULL,10);
-
-    XMLCSTR l_role_str = p_node.getAttribute("role");
-    assert(l_role_str);
-
-    p_relation.add_member(l_type,l_node_ref,std::string(l_role_str));
+    p_relation.add_member(l_type,l_node_ref,l_role);
   }
   
 }
