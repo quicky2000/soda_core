@@ -13,6 +13,7 @@ namespace osm_diff_watcher
 {
   //------------------------------------------------------------------------------
   user_analyzer::user_analyzer(void):
+    osm_diff_analyzer_if::sax_analyzer_base("user_analyser","instance","sax",""),
     m_report("new_user.txt")
   {
     if(m_report == NULL)

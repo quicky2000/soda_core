@@ -1,14 +1,14 @@
 #ifndef _USER_ANALYZER_H_
 #define _USER_ANALYZER_H_
 
-#include "sax_analyzer_if.h"
+#include "sax_analyzer_base.h"
 #include "stdint.h"
 #include <map>
 #include <fstream>
 
 namespace osm_diff_watcher
 {
-  class user_analyzer:public sax_analyzer_if
+  class user_analyzer:public osm_diff_analyzer_if::sax_analyzer_base
   {
   public:
     user_analyzer(void);

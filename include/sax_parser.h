@@ -2,6 +2,7 @@
 #define _SAX_PARSER_H_
 
 #include <expat.h>
+#include "sax_analyzer_if.h"
 #include "parser_base.h"
 #include <iostream>
 #include <set>
@@ -9,9 +10,7 @@
 
 namespace osm_diff_watcher
 {
-  class sax_analyzer_if;
-
-  class sax_parser: public parser_base<sax_analyzer_if>
+  class sax_parser: public parser_base<osm_diff_analyzer_if::sax_analyzer_if>
   {
   public:
     // Callbacks for expat
