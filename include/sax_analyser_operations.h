@@ -1,34 +1,34 @@
-#ifndef _SAX_ANALYSER_OPERATIONS_H_
-#define _SAX_ANALYSER_OPERATIONS_H_
+#ifndef _SAX_ANALYZER_OPERATIONS_H_
+#define _SAX_ANALYZER_OPERATIONS_H_
 
 #include "sax_analyser_if.h"
 #include "analyse_operation.h"
 
 namespace osm_diff_watcher
 {
-  class apply_init: public analyse_operation<sax_analyser_if>
+  class apply_init: public analyze_operation<sax_analyzer_if>
   {
   public:
-    void operator()(sax_analyser_if * p_analyser)const
+    void operator()(sax_analyzer_if * p_analyzer)const
     {
-      p_analyser->init();
+      p_analyzer->init();
     }
   }
   ;
 
-  class apply_element: public analyse_operation<sax_analyser_if>
+  class apply_element: public analyze_operation<sax_analyzer_if>
   {
   private:
-    typedef void (sax_analyser_if::* t_method_ptr)(const std::string &);
+    typedef void (sax_analyzer_if::* t_method_ptr)(const std::string &);
   public:
     apply_element(const char * p_element, t_method_ptr p_method_ptr):
       m_element(p_element),
       m_method_ptr(p_method_ptr)
 	{
 	}
-      void operator()(sax_analyser_if * p_analyser)const
+      void operator()(sax_analyzer_if * p_analyzer)const
       {
-	(p_analyser->*m_method_ptr)(m_element);
+	(p_analyzer->*m_method_ptr)(m_element);
       }
   private:
       const char * m_element;
@@ -36,7 +36,7 @@ namespace osm_diff_watcher
   }
   ;
 
-  class apply_attribute: public analyse_operation<sax_analyser_if>
+  class apply_attribute: public analyze_operation<sax_analyzer_if>
   {
   public:
     apply_attribute(const char * p_name,const char * p_value):
@@ -44,9 +44,9 @@ namespace osm_diff_watcher
       m_value(p_value)
 	{
 	}
-      void operator()(sax_analyser_if * p_analyser)const
+      void operator()(sax_analyzer_if * p_analyzer)const
       {
-	p_analyser->get_attribute(m_name,m_value);
+	p_analyzer->get_attribute(m_name,m_value);
       }
   private:
       const char * m_name;

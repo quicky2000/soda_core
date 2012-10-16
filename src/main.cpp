@@ -15,7 +15,7 @@ int main(int p_argc,char ** p_argv)
     }
 
   osm_diff_watcher::osm_api l_api;
-
+#ifdef TEST_API
   // Get API capabilities
   const osm_diff_watcher::osm_api_capabilities * l_capabilities = l_api.get_capabilities();
   assert(l_capabilities);
@@ -199,7 +199,7 @@ int main(int p_argc,char ** p_argv)
     }
   
   exit(-1);
-
+#endif
 
   osm_diff_watcher::osm_diff_watcher l_watcher;
   l_watcher.run(l_start_seq_number);

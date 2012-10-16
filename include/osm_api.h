@@ -197,7 +197,7 @@ namespace osm_diff_watcher
       dump_url(l_url,l_result);
       dom_parser l_osm_change_parser;
       dom_osm_change_extractor l_extractor;
-      l_osm_change_parser.add_analyser(l_extractor);
+      l_osm_change_parser.add_analyzer(l_extractor);
       l_osm_change_parser.parse_string(l_result);
       return l_extractor.get_result();           
     }

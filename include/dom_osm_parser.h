@@ -44,7 +44,7 @@ namespace osm_diff_watcher
     {
       dom_parser l_dom_parser("osm");
       dom_osm_extractor<T> l_extractor;
-      l_dom_parser.add_analyser(l_extractor);
+      l_dom_parser.add_analyzer(l_extractor);
       l_dom_parser.parse_string(p_xml_string);
       return l_extractor.get_result();
 
@@ -55,7 +55,7 @@ namespace osm_diff_watcher
     {
       dom_parser l_dom_parser("osm");
       dom_osm_api_capabilities_extractor l_extractor;
-      l_dom_parser.add_analyser(l_extractor);
+      l_dom_parser.add_analyzer(l_extractor);
       l_dom_parser.parse_string(p_xml_string);
       return l_extractor.get_result();
     }
@@ -66,7 +66,7 @@ namespace osm_diff_watcher
     {
       dom_parser l_dom_parser("osm");
       dom_osm_object_list_extractor<T> l_extractor;
-      l_dom_parser.add_analyser(l_extractor);
+      l_dom_parser.add_analyzer(l_extractor);
       l_dom_parser.parse_string(p_xml_string);
       return l_extractor.get_result();
     }
@@ -77,7 +77,7 @@ namespace osm_diff_watcher
     {
       dom_parser l_dom_parser("osm");
       dom_osm_full_way_extractor l_extractor(p_nodes);
-      l_dom_parser.add_analyser(l_extractor);
+      l_dom_parser.add_analyzer(l_extractor);
       l_dom_parser.parse_string(p_xml_string);
       return l_extractor.get_result();    
     }
@@ -89,7 +89,7 @@ namespace osm_diff_watcher
     {
       dom_parser l_dom_parser("osm");
       dom_osm_full_relation_extractor l_extractor(p_nodes,p_ways);
-      l_dom_parser.add_analyser(l_extractor);
+      l_dom_parser.add_analyzer(l_extractor);
       l_dom_parser.parse_string(p_xml_string);
       return l_extractor.get_result();    
     }
@@ -102,7 +102,7 @@ namespace osm_diff_watcher
   {
     dom_parser l_dom_parser("osm");
     dom_osm_full_extractor l_extractor(p_nodes,p_ways,p_relations);
-    l_dom_parser.add_analyser(l_extractor);
+    l_dom_parser.add_analyzer(l_extractor);
     l_dom_parser.parse_string(p_xml_string);
   }
 }

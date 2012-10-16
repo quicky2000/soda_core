@@ -12,7 +12,7 @@ using namespace quicky_url_reader;
 namespace osm_diff_watcher
 {
   //------------------------------------------------------------------------------
-  user_analyser::user_analyser(void):
+  user_analyzer::user_analyzer(void):
     m_report("new_user.txt")
   {
     if(m_report == NULL)
@@ -37,25 +37,25 @@ namespace osm_diff_watcher
   }
 
   //------------------------------------------------------------------------------
-  user_analyser::~user_analyser(void)
+  user_analyzer::~user_analyzer(void)
   {
     m_report.close();
   }
 
   //------------------------------------------------------------------------------
-  void user_analyser::init(void)
+  void user_analyzer::init(void)
   {
   }
 
   //------------------------------------------------------------------------------
-  void user_analyser::start_element(const std::string & p_name)
+  void user_analyzer::start_element(const std::string & p_name)
   {
     m_uid = 0;
     m_user_name = "";
   }
 
   //------------------------------------------------------------------------------
-  void user_analyser::end_element(const std::string & p_name)
+  void user_analyzer::end_element(const std::string & p_name)
   {
     if(m_uid != 0 && m_user_name != "")
       {
@@ -72,7 +72,7 @@ namespace osm_diff_watcher
 	    std::string l_month_str = l_date.substr(0,l_first_space);
 	    std::string l_day_str = l_date.substr(l_first_space+1,l_comma-l_first_space-1);
 	    std::string l_year_str = l_date.substr(l_comma+1);
-#ifdef DEBUG_USER_ANALYSER
+#ifdef DEBUG_USER_ANALYZER
 	    std::cout << "Day = \"" << l_day_str << "\"" << std::endl ;
 	    std::cout << "Month = \"" << l_month_str << "\"" << std::endl ;
 	    std::cout << "Year = \"" << l_year_str << "\"" << std::endl ;
@@ -108,14 +108,14 @@ namespace osm_diff_watcher
   }
 
   //------------------------------------------------------------------------------
-  void user_analyser::get_attribute(const std::string & p_name,const std::string & p_value)
+  void user_analyzer::get_attribute(const std::string & p_name,const std::string & p_value)
   {
     if(p_name == "uid") m_uid = atoi(p_value.c_str());
     if(p_name == "user") m_user_name = p_value;
   }
 
   //------------------------------------------------------------------------------
-  std::string user_analyser::get_user_inscription_date(const std::string & p_user)const
+  std::string user_analyzer::get_user_inscription_date(const std::string & p_user)const
   {
     std::string l_user = p_user;
     std::string l_user_date;

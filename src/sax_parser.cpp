@@ -30,14 +30,14 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   void sax_parser::parse_stream(std::istream & p_stream)
   {
-    //TO DELETE std::set<sax_analyser_if*>::iterator l_iter = m_analysers.begin();
-    //TO DELETE  std::set<sax_analyser_if*>::iterator l_iter_end = m_analysers.end();
+    //TO DELETE std::set<sax_analyzer_if*>::iterator l_iter = m_analyzers.begin();
+    //TO DELETE  std::set<sax_analyzer_if*>::iterator l_iter_end = m_analyzers.end();
     //TO DELETE   while(l_iter != l_iter_end)
     //TO DELETE     {
     //TO DELETE       (*l_iter)->init();
     //TO DELETE       ++l_iter;
     //TO DELETE     }
-    this->perform_analyse(apply_init());
+    this->perform_analyze(apply_init());
 
     const uint32_t l_size = 10000;
     char l_buf[l_size];
@@ -59,7 +59,7 @@ namespace osm_diff_watcher
   {
     sax_parser *l_parser = static_cast<sax_parser*>(p_data);
     assert(l_parser);
-    l_parser->analyse_start_element(p_element,p_attribute);
+    l_parser->analyze_start_element(p_element,p_attribute);
 
   }
 
@@ -68,20 +68,20 @@ namespace osm_diff_watcher
   {
     sax_parser *l_parser = static_cast<sax_parser*>(p_data);
     assert(l_parser);
-    l_parser->analyse_end_element(p_element);
+    l_parser->analyze_end_element(p_element);
   }
 
   //------------------------------------------------------------------------------
-  //TO DELETE void sax_parser::add_analyser(sax_analyser_if & p_analyser)
+  //TO DELETE void sax_parser::add_analyzer(sax_analyzer_if & p_analyzer)
   //TO DELETE {
-  //TO DELETE   m_analysers.insert(&p_analyser);
+  //TO DELETE   m_analyzers.insert(&p_analyzer);
   //TO DELETE }
 
   //------------------------------------------------------------------------------
-  void sax_parser::analyse_start_element(const char *p_element, const char **p_attribute)
+  void sax_parser::analyze_start_element(const char *p_element, const char **p_attribute)
   {
-    //TO DELETE    std::set<sax_analyser_if*>::iterator l_iter = m_analysers.begin();
-    //TO DELETE    std::set<sax_analyser_if*>::iterator l_iter_end = m_analysers.end();
+    //TO DELETE    std::set<sax_analyzer_if*>::iterator l_iter = m_analyzers.begin();
+    //TO DELETE    std::set<sax_analyzer_if*>::iterator l_iter_end = m_analyzers.end();
     //TO DELETE    while(l_iter != l_iter_end)
     //TO DELETE      {
     //TO DELETE        (*l_iter)->start_element(p_element);
@@ -91,24 +91,24 @@ namespace osm_diff_watcher
     //TO DELETE  	}
     //TO DELETE       ++l_iter;
     //TO DELETE      }
-    this->perform_analyse(apply_element(p_element,&sax_analyser_if::start_element));
+    this->perform_analyze(apply_element(p_element,&sax_analyzer_if::start_element));
     for (uint32_t i = 0; p_attribute[i]; i += 2)
       {
-	this->perform_analyse(apply_attribute(p_attribute[i],p_attribute[i+1]));
+	this->perform_analyze(apply_attribute(p_attribute[i],p_attribute[i+1]));
       }
   }
 
   //------------------------------------------------------------------------------
-  void sax_parser::analyse_end_element(const char *p_element)
+  void sax_parser::analyze_end_element(const char *p_element)
   {
-    //TO DELETE    std::set<sax_analyser_if*>::iterator l_iter = m_analysers.begin();
-    //TO DELETE    std::set<sax_analyser_if*>::iterator l_iter_end = m_analysers.end();
+    //TO DELETE    std::set<sax_analyzer_if*>::iterator l_iter = m_analyzers.begin();
+    //TO DELETE    std::set<sax_analyzer_if*>::iterator l_iter_end = m_analyzers.end();
     //TO DELETE    while(l_iter != l_iter_end)
     //TO DELETE      {
     //TO DELETE        (*l_iter)->end_element(p_element);
     //TO DELETE        ++l_iter;
     //TO DELETE      }
-    this->perform_analyse(apply_element(p_element,&sax_analyser_if::end_element));
+    this->perform_analyze(apply_element(p_element,&sax_analyzer_if::end_element));
   }
 }
 //EOF

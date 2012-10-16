@@ -1,17 +1,51 @@
-#ifndef _DOM2CPP_ANALYSER_H_
-#define _DOM2CPP_ANALYSER_H_
+#ifndef _DOM2CPP_ANALYZER_H_
+#define _DOM2CPP_ANALYZER_H_
 
-#include "dom_analyser_if.h"
+#include "dom_analyzer_if.h"
 
 namespace osm_diff_watcher
 {
-  class dom2cpp_analyser: public dom_analyser_if
+  class dom2cpp_analyzer: public osm_diff_analyzer_if::dom_analyzer_if
   {
   public:
-    dom2cpp_analyser(void);
-    void analyse(const t_dom_tree & p_tree);
+    dom2cpp_analyzer(const std::string & p_name);
+    // Method inherited from dom_analyzer_if
+    inline const std::string & get_input_type(void)const;
+    inline const std::string & get_output_type(void)const;
+    inline const std::string & get_type(void)const;
+    inline const std::string & get_name(void)const;
+    void analyze(const osm_diff_analyzer_if::t_dom_tree & p_tree);
+    // end of Method inherited from dom_analyzer_if
   private:
+    static const std::string m_input_type;
+    static const std::string m_output_type;
+    static const std::string m_type;
+    const std::string m_name;
   };
+
+  // Method inherited from dom_analyzer_if
+  //----------------------------------------------------------------------------
+  const std::string & dom2cpp_analyzer::get_input_type(void)const
+    {
+      return m_input_type;
+    }
+  //----------------------------------------------------------------------------
+  const std::string & dom2cpp_analyzer::get_output_type(void)const
+    {
+      return m_output_type;
+    }
+  //----------------------------------------------------------------------------
+  const std::string & dom2cpp_analyzer::get_type(void)const
+    {
+      return m_type;
+    }
+  //----------------------------------------------------------------------------
+  const std::string & dom2cpp_analyzer::get_name(void)const
+    {
+      return m_name;
+    }
+
+
 }
 #endif
 //EOF

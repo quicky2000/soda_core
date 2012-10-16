@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include "gzstream.h"
 #include "dom_parser.h"
-#include "basic_dom_analyser.h"
 #include "dom2cpp_analyser.h"
 
 using namespace quicky_url_reader;
@@ -19,6 +18,9 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   osm_diff_watcher::osm_diff_watcher(void)
   {
+    m_module_manager.load_library("../osm_diff_analyzer_test_dom/bin/libosm_diff_analyzer_test_dom.so");
+    osm_diff_analyzer_if::dom_analyzer_if * l_analyzer = m_module_manager.create_module<osm_diff_analyzer_if::dom_analyzer_if>("test_dom","test_dom_instance");
+    m_dom_analyzers.insert(make_pair(l_analyzer->get_name(),l_analyzer));
   }
 
   //------------------------------------------------------------------------------
@@ -26,6 +28,7 @@ namespace osm_diff_watcher
   {
     url_reader::remove_instance();
   }
+
 
   //------------------------------------------------------------------------------
   void osm_diff_watcher::run(const uint64_t & p_start_seq_number)
@@ -65,32 +68,24 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   void osm_diff_watcher::parse_diff(void)
   {
-    //TO DELETE  // Sax analyse
-    //TO DELETE  igzstream l_input_file("tmp_diff.gz");
-    //TO DELETE  m_analyser.init();
-    //TO DELETE  sax_parser l_sax_parser;
-    //TO DELETE  l_sax_parser.add_analyser(m_analyser);
-    //TO DELETE  l_sax_parser.parse(l_input_file);
-    //TO DELETE  l_input_file.close();
-
-    //TO DELETE  // DOM analyse
-    //TO DELETE  igzstream l_input_file_bis("tmp_diff.gz");
-    //TO DELETE  dom_parser l_dom_parser;
-    //TO DELETE  l_dom_parser.parse(l_input_file_bis);
-    //TO DELETE  l_input_file_bis.close();
-
-    // Sax analyse
-    m_analyser.init();
+    // Sax analyze
+    m_analyzer.init();
     sax_parser l_sax_parser;
-    l_sax_parser.add_analyser(m_analyser);
+    l_sax_parser.add_analyzer(m_analyzer);
     l_sax_parser.parse("tmp_diff.gz");
 
-    // DOM analyse
+    // DOM analyze
     dom_parser l_dom_parser;
-    basic_dom_analyser l_dom_analyser;
-    dom2cpp_analyser l_dom2cpp_analyser;
-    //l_dom_parser.add_analyser(l_dom_analyser);
-    l_dom_parser.add_analyser(l_dom2cpp_analyser);
+    dom2cpp_analyzer l_dom2cpp_analyzer("dom2cpp_analyzer_instance");
+
+    for(std::map<std::string,osm_diff_analyzer_if::dom_analyzer_if *>::iterator l_iter = m_dom_analyzers.begin();
+        l_iter != m_dom_analyzers.end();
+        ++l_iter)
+      {
+        l_dom_parser.add_analyzer(*(l_iter->second));
+      }
+
+    l_dom_parser.add_analyzer(l_dom2cpp_analyzer);
     l_dom_parser.parse("tmp_diff.gz");  
   }
 
@@ -149,6 +144,7 @@ namespace osm_diff_watcher
     assert(l_sequence_number != "");
     return atoll(l_sequence_number.c_str());
   }
+
 }
 
 //EOF

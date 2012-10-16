@@ -1,4 +1,4 @@
-depend:url_reader EXT_xmlParser EXT_gzstream EXT_expat
+depend:url_reader EXT_gzstream EXT_expat osm_diff_analyzer_if
 CFLAGS:-Wall -g
-LDFLAGS:
+LDFLAGS:-ldl
 

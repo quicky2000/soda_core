@@ -1,16 +1,16 @@
-#ifndef _ANALYSE_OPERATION_H_
-#define _ANALYSE_OPERATION_H_
+#ifndef _ANALYZE_OPERATION_H_
+#define _ANALYZE_OPERATION_H_
 
 namespace osm_diff_watcher
 {
   template <class T>
-    class analyse_operation
+    class analyze_operation
     {
     public:
       virtual void operator()(T *)const=0;
-      inline virtual ~analyse_operation(){}
+      inline virtual ~analyze_operation(){}
     private:
     };
 }
-#endif // _ANALYSE_OPERATION_H_
+#endif // _ANALYZE_OPERATION_H_
 //EOF

@@ -1,5 +1,5 @@
-#ifndef _USER_ANALYSER_H_
-#define _USER_ANALYSER_H_
+#ifndef _USER_ANALYZER_H_
+#define _USER_ANALYZER_H_
 
 #include "sax_analyser_if.h"
 #include "stdint.h"
@@ -8,12 +8,12 @@
 
 namespace osm_diff_watcher
 {
-  class user_analyser:public sax_analyser_if
+  class user_analyzer:public sax_analyzer_if
   {
   public:
-    user_analyser(void);
-    ~user_analyser(void);
-    // Methods inherited from sax_analyser_if
+    user_analyzer(void);
+    ~user_analyzer(void);
+    // Methods inherited from sax_analyzer_if
     void init(void);
     void start_element(const std::string & p_name);
     void get_attribute(const std::string & p_name,const std::string & p_value);

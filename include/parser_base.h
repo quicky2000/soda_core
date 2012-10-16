@@ -14,14 +14,14 @@ namespace osm_diff_watcher
     class parser_base:public parser_if
   {
   public:
-    void add_analyser(T & p_analyser);
+    void add_analyzer(T & p_analyzer);
     void parse(const std::string & p_name);
   protected:
-    void perform_analyse(const analyse_operation<T> & f);
+    void perform_analyze(const analyze_operation<T> & f);
   private:
     virtual void parse_stream(std::istream & p_stream)=0;
 
-    std::set<T*> m_analysers;
+    std::set<T*> m_analyzers;
   }
   ;
 

@@ -1,20 +1,21 @@
+
 #ifndef _DOM_OSM_API_CAPABILITIES_EXTRACTOR_H
 #define _DOM_OSM_API_CAPABILITIES_EXTRACTOR_H
 
-#include "dom_analyser_if.h"
+#include "dom_extractor_base.h"
 #include "dom_generic_utilities.h"
 #include "osm_api_capabilities.h"
 #include <cstring>
 
 namespace osm_diff_watcher
 {
-  class dom_osm_api_capabilities_extractor: public dom_analyser_if
+  class dom_osm_api_capabilities_extractor: public dom_extractor_base
   {
   public:
     inline dom_osm_api_capabilities_extractor(void);
-    // Method inherited from dom_analyser_if
-    inline void analyse(const t_dom_tree & p_tree);
-    // end of Method inherited from dom_analyser_if
+    // Method inherited from dom_analyzer_if
+    inline void analyze(const osm_diff_analyzer_if::t_dom_tree & p_tree);
+    // end of Method inherited from dom_analyzer_if
     inline const osm_api_capabilities * get_result(void);
   private:
     osm_api_capabilities * m_result;
@@ -22,6 +23,7 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   dom_osm_api_capabilities_extractor::dom_osm_api_capabilities_extractor(void):
+    dom_extractor_base("dom_osm_api_capabilities_extractor"),
     m_result(NULL)
     {
     }
@@ -33,12 +35,12 @@ namespace osm_diff_watcher
     }
 
   //----------------------------------------------------------------------------
-    void dom_osm_api_capabilities_extractor::analyse(const t_dom_tree & p_tree)
+    void dom_osm_api_capabilities_extractor::analyze(const osm_diff_analyzer_if::t_dom_tree & p_tree)
     {
       assert(!strcmp("osm",p_tree.getName()));
       int l_nb_child_object = p_tree.nChildNode();
       assert(l_nb_child_object==1);
-      const t_dom_tree & l_api_node = p_tree.getChildNode(0);
+      const osm_diff_analyzer_if::t_dom_tree & l_api_node = p_tree.getChildNode(0);
       assert(!strcmp(l_api_node.getName(),"api"));
       l_nb_child_object = l_api_node.nChildNode();
       assert(l_nb_child_object>=6);
@@ -53,7 +55,7 @@ namespace osm_diff_watcher
       
       for(int l_index = 0; l_index < l_nb_child_object; ++l_index)
 	{
-	  t_dom_tree l_node = l_api_node.getChildNode(l_index);
+	  osm_diff_analyzer_if::t_dom_tree l_node = l_api_node.getChildNode(l_index);
           std::string l_node_name = l_node.getName();
           if(l_node_name == "version")
             {

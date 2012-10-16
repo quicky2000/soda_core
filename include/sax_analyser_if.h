@@ -1,11 +1,11 @@
-#ifndef _SAX_ANALYSER_IF_H_
-#define _SAX_ANALYSER_IF_H_
+#ifndef _SAX_ANALYZER_IF_H_
+#define _SAX_ANALYZER_IF_H_
 
 #include <string>
 
 namespace osm_diff_watcher
 {
-  class sax_analyser_if
+  class sax_analyzer_if
   {
   public:
     virtual void init(void)=0;
@@ -17,7 +17,7 @@ namespace osm_diff_watcher
 
     virtual void end_element(const std::string & p_name)=0;
 
-    inline virtual ~sax_analyser_if(void){};
+    inline virtual ~sax_analyzer_if(void){};
   };
 }
 #endif

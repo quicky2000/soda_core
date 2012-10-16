@@ -3,9 +3,9 @@
 
 //------------------------------------------------------------------------------
 template <class T>
-void parser_base<T>::add_analyser(T & p_analyser)
+void parser_base<T>::add_analyzer(T & p_analyzer)
 {
-  m_analysers.insert(&p_analyser);
+  m_analyzers.insert(&p_analyzer);
 }
 
 //------------------------------------------------------------------------------
@@ -24,9 +24,9 @@ void parser_base<T>::parse(const std::string & p_name)
 
 //------------------------------------------------------------------------------
 template <class T>
-void parser_base<T>::perform_analyse(const analyse_operation<T> & func)
+void parser_base<T>::perform_analyze(const analyze_operation<T> & func)
 {
-  for(typename std::set<T*>::iterator l_iter = m_analysers.begin();l_iter != m_analysers.end() ; ++l_iter)
+  for(typename std::set<T*>::iterator l_iter = m_analyzers.begin();l_iter != m_analyzers.end() ; ++l_iter)
     {
       func(*l_iter);
     }

@@ -2,14 +2,14 @@
 #define _DOM_PARSER_H_
 
 #include "parser_base.h"
-#include "dom_analyser_if.h"
+#include "dom_analyzer_if.h"
 #include <string>
 #include <set>
 #include <iostream>
 
 namespace osm_diff_watcher
 {
-  class dom_parser: public parser_base<dom_analyser_if>
+  class dom_parser: public parser_base<osm_diff_analyzer_if::dom_analyzer_if>
   {
   public:
     dom_parser(const std::string & p_root="osmChange");
