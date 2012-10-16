@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <iostream>
 #include "gzstream.h"
-#include "analyse_operation.h"
+#include "analyze_operation.h"
 #include "parser_if.h"
 
 namespace osm_diff_watcher

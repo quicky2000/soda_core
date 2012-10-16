@@ -1,5 +1,5 @@
 #include "dom_parser.h"
-#include "dom_analyser_operations.h"
+#include "dom_analyzer_operations.h"
 #include <sstream>
 
 using namespace std;

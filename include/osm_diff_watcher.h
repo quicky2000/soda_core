@@ -1,7 +1,7 @@
 #ifndef _OSM_DIFF_WATCHER_H_
 #define _OSM_DIFF_WATCHER_H_
 
-#include "user_analyser.h"
+#include "user_analyzer.h"
 #include "module_manager.h"
 #include "dom_analyzer_if.h"
 

@@ -1,4 +1,4 @@
-#include "dom2cpp_analyser.h"
+#include "dom2cpp_analyzer.h"
 #include "osm_change.h"
 #include "osm_node.h"
 #include "dom_generic_utilities.h"

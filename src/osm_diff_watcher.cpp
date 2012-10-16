@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include "gzstream.h"
 #include "dom_parser.h"
-#include "dom2cpp_analyser.h"
+#include "dom2cpp_analyzer.h"
 
 using namespace quicky_url_reader;
 

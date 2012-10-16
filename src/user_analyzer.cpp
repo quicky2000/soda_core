@@ -1,4 +1,4 @@
-#include "user_analyser.h"
+#include "user_analyzer.h"
 #include "url_reader.h"
 #include "download_buffer.h"
 #include <cstdlib>
