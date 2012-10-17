@@ -81,6 +81,7 @@ namespace osm_diff_watcher
         l_iter != m_module_wrappers.end();
         ++l_iter)
       {
+        std::cout << "Delete module wrapper of analyzer type \"" << l_iter->second->get_description()->get_type() << "\"" << std::endl;
         delete l_iter->second;
       }
 
