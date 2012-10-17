@@ -13,10 +13,12 @@ namespace osm_diff_watcher
     const std::string & get_api_version(void)const;
     const osm_diff_analyzer_if::analyzer_description_if * get_description(void)const;
     osm_diff_analyzer_if::general_analyzer_if* create_analyzer(const std::string & p_name);
+    ~module_wrapper(void);
   private:
     std::string m_api_version;
     osm_diff_analyzer_if::analyzer_description_if * m_description;
     osm_diff_analyzer_if::module_library_if::t_create_analyzer m_create;
+    osm_diff_analyzer_if::module_library_if::t_cleanup m_clean_up;
   };
 }
 #endif // _MODULE_WRAPPER_H_
