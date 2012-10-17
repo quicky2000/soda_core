@@ -19,14 +19,31 @@ namespace osm_diff_watcher
   osm_diff_watcher::osm_diff_watcher(void)
   {
     m_module_manager.load_library("../osm_diff_analyzer_test_dom/bin/libosm_diff_analyzer_test_dom.so");
-    osm_diff_analyzer_if::dom_analyzer_if * l_analyzer = m_module_manager.create_module<osm_diff_analyzer_if::dom_analyzer_if>("test_dom","test_dom_instance");
-    m_dom_analyzers.insert(make_pair(l_analyzer->get_name(),l_analyzer));
+    osm_diff_analyzer_if::dom_analyzer_if * l_dom_analyzer = m_module_manager.create_module<osm_diff_analyzer_if::dom_analyzer_if>("test_dom","test_dom_instance");
+    m_dom_analyzers.insert(make_pair(l_dom_analyzer->get_name(),l_dom_analyzer));
+
+    m_module_manager.load_library("../osm_diff_analyzer_new_user/bin/libosm_diff_analyzer_new_user.so");
+    osm_diff_analyzer_if::sax_analyzer_base * l_sax_analyzer = m_module_manager.create_module<osm_diff_analyzer_if::sax_analyzer_base>("new_user","new_user_instance");
+     m_sax_analyzers.insert(make_pair(l_sax_analyzer->get_name(),l_sax_analyzer));
   }
 
   //------------------------------------------------------------------------------
   osm_diff_watcher::~osm_diff_watcher(void)
   {
-    url_reader::remove_instance();
+    for(std::map<std::string,osm_diff_analyzer_if::dom_analyzer_if *>::iterator l_iter = m_dom_analyzers.begin();
+        l_iter != m_dom_analyzers.end();
+        ++l_iter)
+      {
+        delete l_iter->second;
+      }
+
+    for(std::map<std::string,osm_diff_analyzer_if::sax_analyzer_base *>::iterator l_iter = m_sax_analyzers.begin();
+        l_iter != m_sax_analyzers.end();
+        ++l_iter)
+      {
+        delete l_iter->second;
+      }
+
   }
 
 
@@ -69,30 +86,41 @@ namespace osm_diff_watcher
   void osm_diff_watcher::parse_diff(void)
   {
     // Sax analyze
-    m_analyzer.init();
     sax_parser l_sax_parser;
-    l_sax_parser.add_analyzer(m_analyzer);
+
+    // Add loaded SAX parsers
+    for(std::map<std::string,osm_diff_analyzer_if::sax_analyzer_base *>::iterator l_iter = m_sax_analyzers.begin();
+        l_iter != m_sax_analyzers.end();
+        ++l_iter)
+      {
+        l_sax_parser.add_analyzer(*(l_iter->second));
+      }
+
+    // Add built-in SAX parsers
+
     l_sax_parser.parse("tmp_diff.gz");
 
     // DOM analyze
     dom_parser l_dom_parser;
-    dom2cpp_analyzer l_dom2cpp_analyzer("dom2cpp_analyzer_instance");
 
+    // Add loaded DOM parsers
     for(std::map<std::string,osm_diff_analyzer_if::dom_analyzer_if *>::iterator l_iter = m_dom_analyzers.begin();
         l_iter != m_dom_analyzers.end();
         ++l_iter)
       {
         l_dom_parser.add_analyzer(*(l_iter->second));
       }
-
+    // Add built-in DOM parsers
+    dom2cpp_analyzer l_dom2cpp_analyzer("dom2cpp_analyzer_instance");
     l_dom_parser.add_analyzer(l_dom2cpp_analyzer);
+
     l_dom_parser.parse("tmp_diff.gz");  
   }
 
   //------------------------------------------------------------------------------
   void osm_diff_watcher::dump_url(const std::string & p_url)
   {
-    url_reader & l_url_reader = url_reader::get_instance();
+    url_reader l_url_reader;
     download_buffer l_buffer;
     l_url_reader.read_url(p_url.c_str(),l_buffer);
     std::ofstream l_output_file("tmp_diff.gz",std::ios::out | std::ios::binary);
@@ -125,7 +153,7 @@ namespace osm_diff_watcher
   uint64_t osm_diff_watcher::get_sequence_number(void)const
   {
     std::string l_sequence_number;
-    url_reader & l_url_reader = url_reader::get_instance();
+    url_reader l_url_reader;
     download_buffer l_buffer;
     l_url_reader.read_url("http://planet.openstreetmap.org/replication/minute/state.txt",l_buffer);
     //  l_url_reader.read_url("http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt",l_buffer);
