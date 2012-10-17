@@ -2,6 +2,8 @@
 #define _OSM_RESSOURCES_H_
 
 #include <string>
+#include "url_reader.h"
+#include "download_buffer.h"
 
 namespace osm_diff_watcher
 {
@@ -10,6 +12,7 @@ namespace osm_diff_watcher
   public:
     osm_ressources(void);
     inline const std::string & get_api_url(void)const;
+    void get_user_subscription_date(const std::string & p_user_name,std::string & p_date)const;
   private:
     const std::string m_domain;
     const std::string m_data_domain;
@@ -27,6 +30,7 @@ namespace osm_diff_watcher
   {
     return m_current_api;
   }
+
 }
 #endif // _OSM_RESSOURCES_H_
 //EOF
