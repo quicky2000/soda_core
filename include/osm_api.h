@@ -93,7 +93,7 @@ namespace osm_diff_watcher
   private:
     dom_osm_parser m_osm_parser;
     osm_ressources m_ressources;
-    quicky_url_reader::url_reader & m_url_reader;
+    quicky_url_reader::url_reader m_url_reader;
   };
 
   //----------------------------------------------------------------------------

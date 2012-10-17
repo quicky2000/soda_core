@@ -8,8 +8,7 @@
 namespace osm_diff_watcher
 {
   //----------------------------------------------------------------------------
-  osm_api::osm_api(void):
-    m_url_reader(quicky_url_reader::url_reader::get_instance())
+  osm_api::osm_api(void)
   {
   }
 
