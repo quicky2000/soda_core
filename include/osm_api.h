@@ -51,38 +51,38 @@ namespace osm_diff_watcher
     osm_api(void);
 
     template <class T>
-      const T * const get(const osm_object::t_osm_id & p_id,
-                          const osm_core_element::t_osm_version & p_version=0);
+      const T * const get(const osm_api_data_types::osm_object::t_osm_id & p_id,
+                          const osm_api_data_types::osm_core_element::t_osm_version & p_version=0);
     template <class T>
-      const std::vector<T*> * const get_history(const osm_object::t_osm_id & p_id);
+      const std::vector<T*> * const get_history(const osm_api_data_types::osm_object::t_osm_id & p_id);
 
     template <class T,class T_RETURN>
-      const std::vector<T_RETURN *> * const get(const osm_object::t_osm_id & p_id);
+      const std::vector<T_RETURN *> * const get(const osm_api_data_types::osm_object::t_osm_id & p_id);
 
     template <class T>
-      const std::vector<T*> * const get(const std::vector<osm_object::t_osm_id> & p_ids);
+      const std::vector<T*> * const get(const std::vector<osm_api_data_types::osm_object::t_osm_id> & p_ids);
 
-    inline const osm_way * const get_full_way(const osm_object::t_osm_id & p_id,
-					      std::vector<osm_node*> & p_nodes);
+    inline const osm_api_data_types::osm_way * const get_full_way(const osm_api_data_types::osm_object::t_osm_id & p_id,
+					      std::vector<osm_api_data_types::osm_node*> & p_nodes);
 
-    inline const osm_relation * const get_full_relation(const osm_object::t_osm_id & p_id,
-							std::vector<osm_node*> & p_nodes,
-							std::vector<osm_way*> & p_ways);
+    inline const osm_api_data_types::osm_relation * const get_full_relation(const osm_api_data_types::osm_object::t_osm_id & p_id,
+							std::vector<osm_api_data_types::osm_node*> & p_nodes,
+							std::vector<osm_api_data_types::osm_way*> & p_ways);
 
-    inline const std::vector<osm_change*> * const get_changeset_content(const osm_object::t_osm_id & p_id);
+    inline const std::vector<osm_api_data_types::osm_change*> * const get_changeset_content(const osm_api_data_types::osm_object::t_osm_id & p_id);
 
-    inline const std::vector<osm_changeset* > * const get_changesets(const osm_bounding_box & p_bounding_box,
-                                                                     const osm_object::t_osm_id & p_id,
+    inline const std::vector<osm_api_data_types::osm_changeset* > * const get_changesets(const osm_api_data_types::osm_bounding_box & p_bounding_box,
+                                                                     const osm_api_data_types::osm_object::t_osm_id & p_id,
                                                                      const std::string & p_user_name,
                                                                      const std::string & p_time1,
                                                                      const std::string & p_time2,
                                                                      bool p_open,
                                                                      bool p_close);
 
-    inline void get_map(const osm_bounding_box & p_bounding_box,
-                        std::vector<osm_node*> & p_nodes,
-                        std::vector<osm_way*> & p_ways,
-                        std::vector<osm_relation*> & p_relations);
+    inline void get_map(const osm_api_data_types::osm_bounding_box & p_bounding_box,
+                        std::vector<osm_api_data_types::osm_node*> & p_nodes,
+                        std::vector<osm_api_data_types::osm_way*> & p_ways,
+                        std::vector<osm_api_data_types::osm_relation*> & p_relations);
 
     inline const osm_api_capabilities * get_capabilities(void);
 
@@ -98,8 +98,8 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   template <class T>
-    const T * const osm_api::get(const osm_object::t_osm_id & p_id,
-                                 const osm_core_element::t_osm_version & p_version)
+    const T * const osm_api::get(const osm_api_data_types::osm_object::t_osm_id & p_id,
+                                 const osm_api_data_types::osm_core_element::t_osm_version & p_version)
     {
       std::stringstream l_id_str;
       l_id_str << p_id;
@@ -117,7 +117,7 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   template <class T>
-    const std::vector<T*> * const osm_api::get_history(const osm_object::t_osm_id & p_id)
+    const std::vector<T*> * const osm_api::get_history(const osm_api_data_types::osm_object::t_osm_id & p_id)
     {
       std::stringstream l_id_str;
       l_id_str << p_id;
@@ -129,10 +129,10 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   template <class T>
-    const std::vector<T*> * const osm_api::get(const std::vector<osm_object::t_osm_id> & p_ids)
+    const std::vector<T*> * const osm_api::get(const std::vector<osm_api_data_types::osm_object::t_osm_id> & p_ids)
     {
       std::string l_url = m_ressources.get_api_url()+"/"+T::get_type_str()+"s?" + T::get_type_str() + "s=";
-      for(std::vector<osm_object::t_osm_id>::const_iterator l_iter = p_ids.begin();
+      for(std::vector<osm_api_data_types::osm_object::t_osm_id>::const_iterator l_iter = p_ids.begin();
 	  l_iter != p_ids.end();
 	  ++l_iter)
 	{
@@ -151,7 +151,7 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   template <class T,class T_RETURN>
-    const std::vector<T_RETURN *> * const osm_api::get(const osm_object::t_osm_id & p_id)
+    const std::vector<T_RETURN *> * const osm_api::get(const osm_api_data_types::osm_object::t_osm_id & p_id)
     {
       std::stringstream l_id_str;
       l_id_str << p_id;
@@ -162,8 +162,8 @@ namespace osm_diff_watcher
     }
 
   //----------------------------------------------------------------------------
-  const osm_way * const osm_api::get_full_way(const osm_object::t_osm_id & p_id,
-					      std::vector<osm_node*> & p_nodes)
+  const osm_api_data_types::osm_way * const osm_api::get_full_way(const osm_api_data_types::osm_object::t_osm_id & p_id,
+					      std::vector<osm_api_data_types::osm_node*> & p_nodes)
     {
       std::stringstream l_id_str;
       l_id_str << p_id;
@@ -174,9 +174,9 @@ namespace osm_diff_watcher
     }
 
   //----------------------------------------------------------------------------
-  const osm_relation * const osm_api::get_full_relation(const osm_object::t_osm_id & p_id,
-							std::vector<osm_node*> & p_nodes,
-							std::vector<osm_way*> & p_ways)
+  const osm_api_data_types::osm_relation * const osm_api::get_full_relation(const osm_api_data_types::osm_object::t_osm_id & p_id,
+							std::vector<osm_api_data_types::osm_node*> & p_nodes,
+							std::vector<osm_api_data_types::osm_way*> & p_ways)
     {
       std::stringstream l_id_str;
       l_id_str << p_id;
@@ -187,7 +187,7 @@ namespace osm_diff_watcher
     }
 
   //----------------------------------------------------------------------------
-  const std::vector<osm_change*> * const osm_api::get_changeset_content(const osm_object::t_osm_id & p_id)
+  const std::vector<osm_api_data_types::osm_change*> * const osm_api::get_changeset_content(const osm_api_data_types::osm_object::t_osm_id & p_id)
     {
       
       std::stringstream l_id_str;
@@ -203,8 +203,8 @@ namespace osm_diff_watcher
     }
 
   //----------------------------------------------------------------------------
-  const std::vector<osm_changeset* > * const osm_api::get_changesets(const osm_bounding_box & p_bounding_box,
-                                                                     const osm_object::t_osm_id & p_id,
+  const std::vector<osm_api_data_types::osm_changeset* > * const osm_api::get_changesets(const osm_api_data_types::osm_bounding_box & p_bounding_box,
+                                                                     const osm_api_data_types::osm_object::t_osm_id & p_id,
                                                                      const std::string & p_user_name,
                                                                      const std::string & p_time1,
                                                                      const std::string & p_time2,
@@ -226,7 +226,7 @@ namespace osm_diff_watcher
        // End of argument check
 
        // Building URL"
-       std::string l_url = m_ressources.get_api_url()+"/" + osm_changeset::get_type_str()+"s?";
+       std::string l_url = m_ressources.get_api_url()+"/" + osm_api_data_types::osm_changeset::get_type_str()+"s?";
        bool l_first = true;
        if(!p_bounding_box.is_empty())
          {
@@ -278,13 +278,13 @@ namespace osm_diff_watcher
       
        std::string l_result;
        dump_url(l_url,l_result);
-       return m_osm_parser.get_list<osm_changeset>(l_result);     
+       return m_osm_parser.get_list<osm_api_data_types::osm_changeset>(l_result);     
    }
   //----------------------------------------------------------------------------
-  void osm_api::get_map(const osm_bounding_box & p_bounding_box,
-                        std::vector<osm_node*> & p_nodes,
-                        std::vector<osm_way*> & p_ways,
-                        std::vector<osm_relation*> & p_relations)
+  void osm_api::get_map(const osm_api_data_types::osm_bounding_box & p_bounding_box,
+                        std::vector<osm_api_data_types::osm_node*> & p_nodes,
+                        std::vector<osm_api_data_types::osm_way*> & p_ways,
+                        std::vector<osm_api_data_types::osm_relation*> & p_relations)
   {
     // Building URL"
     std::string l_url = m_ressources.get_api_url()+"/map?bbox=";

@@ -22,16 +22,16 @@ namespace osm_diff_watcher
       static const T * const get(const std::string & p_xml_string);
     template <class T>
       static const std::vector<T*> * const get_list(const std::string & p_xml_string);
-    inline const osm_way * get_full_way(const std::string & p_xml_string,
-					std::vector<osm_node*> & p_nodes);
+    inline const osm_api_data_types::osm_way * get_full_way(const std::string & p_xml_string,
+                                                            std::vector<osm_api_data_types::osm_node*> & p_nodes);
 
-    inline const osm_relation * get_full_relation(const std::string & p_xml_string,
-                                                  std::vector<osm_node*> & p_nodes,
-                                                  std::vector<osm_way*> & p_ways);
+    inline const osm_api_data_types::osm_relation * get_full_relation(const std::string & p_xml_string,
+                                                                      std::vector<osm_api_data_types::osm_node*> & p_nodes,
+                                                                      std::vector<osm_api_data_types::osm_way*> & p_ways);
     inline const void get(const std::string & p_xml_string,
-                          std::vector<osm_node*> & p_nodes,
-                          std::vector<osm_way*> & p_ways,
-                          std::vector<osm_relation*> & p_relations);
+                          std::vector<osm_api_data_types::osm_node*> & p_nodes,
+                          std::vector<osm_api_data_types::osm_way*> & p_ways,
+                          std::vector<osm_api_data_types::osm_relation*> & p_relations);
 
     inline const osm_api_capabilities * get_capabilities(const std::string & p_xml_string);
   private:
@@ -51,7 +51,7 @@ namespace osm_diff_watcher
     }
 
   //----------------------------------------------------------------------------
-    const osm_api_capabilities * dom_osm_parser::get_capabilities(const std::string & p_xml_string)
+  const osm_api_capabilities * dom_osm_parser::get_capabilities(const std::string & p_xml_string)
     {
       dom_parser l_dom_parser("osm");
       dom_osm_api_capabilities_extractor l_extractor;
@@ -72,8 +72,8 @@ namespace osm_diff_watcher
     }
   
   //----------------------------------------------------------------------------
-  const osm_way * dom_osm_parser::get_full_way(const std::string & p_xml_string,
-					       std::vector<osm_node*> & p_nodes)
+  const osm_api_data_types::osm_way * dom_osm_parser::get_full_way(const std::string & p_xml_string,
+                                                                   std::vector<osm_api_data_types::osm_node*> & p_nodes)
     {
       dom_parser l_dom_parser("osm");
       dom_osm_full_way_extractor l_extractor(p_nodes);
@@ -83,9 +83,9 @@ namespace osm_diff_watcher
     }
 
   //----------------------------------------------------------------------------
-  const osm_relation * dom_osm_parser::get_full_relation(const std::string & p_xml_string,
-                                                         std::vector<osm_node*> & p_nodes,
-                                                         std::vector<osm_way*> & p_ways)
+  const osm_api_data_types::osm_relation * dom_osm_parser::get_full_relation(const std::string & p_xml_string,
+                                                                             std::vector<osm_api_data_types::osm_node*> & p_nodes,
+                                                                             std::vector<osm_api_data_types::osm_way*> & p_ways)
     {
       dom_parser l_dom_parser("osm");
       dom_osm_full_relation_extractor l_extractor(p_nodes,p_ways);
@@ -96,9 +96,9 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   const void dom_osm_parser::get(const std::string & p_xml_string,
-                                 std::vector<osm_node*> & p_nodes,
-                                 std::vector<osm_way*> & p_ways,
-                                 std::vector<osm_relation*> & p_relations)
+                                 std::vector<osm_api_data_types::osm_node*> & p_nodes,
+                                 std::vector<osm_api_data_types::osm_way*> & p_ways,
+                                 std::vector<osm_api_data_types::osm_relation*> & p_relations)
   {
     dom_parser l_dom_parser("osm");
     dom_osm_full_extractor l_extractor(p_nodes,p_ways,p_relations);

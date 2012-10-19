@@ -68,19 +68,19 @@ namespace osm_diff_watcher
             }
           else if(l_node_name == "tracepoints")
             {
-              l_tracepoints_per_page = generic_dom_utilities<XMLNode>::extract_attribute<osm_object::t_osm_id>(l_node,"per_page");
+              l_tracepoints_per_page = generic_dom_utilities<XMLNode>::extract_attribute<osm_api_data_types::osm_object::t_osm_id>(l_node,"per_page");
              }
           else if(l_node_name == "waynodes")
             {
-              l_waynodes_max = generic_dom_utilities<XMLNode>::extract_attribute<osm_object::t_osm_id>(l_node,"maximum");
+              l_waynodes_max = generic_dom_utilities<XMLNode>::extract_attribute<osm_api_data_types::osm_object::t_osm_id>(l_node,"maximum");
             }
           else if(l_node_name == "changesets")
             {
-              l_changeset_max_elements = generic_dom_utilities<XMLNode>::extract_attribute<osm_object::t_osm_id>(l_node,"maximum_elements");
+              l_changeset_max_elements = generic_dom_utilities<XMLNode>::extract_attribute<osm_api_data_types::osm_object::t_osm_id>(l_node,"maximum_elements");
             }
           else if(l_node_name == "timeout")
             {
-              l_timeout_max = generic_dom_utilities<XMLNode>::extract_attribute<osm_core_element::t_osm_version>(l_node,"seconds");
+              l_timeout_max = generic_dom_utilities<XMLNode>::extract_attribute<osm_api_data_types::osm_core_element::t_osm_version>(l_node,"seconds");
             }
           else
             {

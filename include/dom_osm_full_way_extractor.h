@@ -10,25 +10,25 @@ namespace osm_diff_watcher
   class dom_osm_full_way_extractor: public dom_extractor_base
   {
   public:
-    inline dom_osm_full_way_extractor(std::vector<osm_node*> & p_nodes);
+    inline dom_osm_full_way_extractor(std::vector<osm_api_data_types::osm_node*> & p_nodes);
     // Method inherited from dom_analyzer_if
     inline void analyze(const osm_diff_analyzer_if::t_dom_tree & p_tree);
     // end of Method inherited from dom_analyzer_if
-    inline osm_way * get_result(void);
+    inline osm_api_data_types::osm_way * get_result(void);
   private:
-    std::vector<osm_node*> & m_nodes;
-    osm_way * m_result;
+    std::vector<osm_api_data_types::osm_node*> & m_nodes;
+    osm_api_data_types::osm_way * m_result;
    
   };
 
   //----------------------------------------------------------------------------
-  osm_way * dom_osm_full_way_extractor::get_result(void)
+  osm_api_data_types::osm_way * dom_osm_full_way_extractor::get_result(void)
     {
       return m_result;
     }
 
   //----------------------------------------------------------------------------
-  dom_osm_full_way_extractor::dom_osm_full_way_extractor(std::vector<osm_node*> & p_nodes):
+  dom_osm_full_way_extractor::dom_osm_full_way_extractor(std::vector<osm_api_data_types::osm_node*> & p_nodes):
     dom_extractor_base("dom_osm_full_way_extractor"),
     m_nodes(p_nodes),
     m_result(NULL)
@@ -43,13 +43,13 @@ namespace osm_diff_watcher
       for(int l_index = 0; l_index < l_nb_version ; ++l_index)
 	{
 	  osm_diff_analyzer_if::t_dom_tree l_node = p_tree.getChildNode(l_index);
-	  if(osm_node::get_type_str() == l_node.getName())
+	  if(osm_api_data_types::osm_node::get_type_str() == l_node.getName())
 	    {
-	      m_nodes.push_back(generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<osm_node>(l_node,true));
+	      m_nodes.push_back(generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<osm_api_data_types::osm_node>(l_node,true));
 	    }
-	  else if(osm_way::get_type_str() == l_node.getName())
+	  else if(osm_api_data_types::osm_way::get_type_str() == l_node.getName())
 	    {
-	      m_result = generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<osm_way>(l_node,true);
+	      m_result = generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<osm_api_data_types::osm_way>(l_node,true);
 	    }
 	  else
 	    {

@@ -10,23 +10,23 @@ namespace osm_diff_watcher
   class dom_osm_full_extractor: public dom_extractor_base
   {
   public:
-    inline dom_osm_full_extractor(std::vector<osm_node*> & p_nodes,
-                                  std::vector<osm_way*> & p_ways,
-                                  std::vector<osm_relation*> & p_relations);
+    inline dom_osm_full_extractor(std::vector<osm_api_data_types::osm_node*> & p_nodes,
+                                  std::vector<osm_api_data_types::osm_way*> & p_ways,
+                                  std::vector<osm_api_data_types::osm_relation*> & p_relations);
     // Method inherited from dom_analyzer_if
     inline void analyze(const osm_diff_analyzer_if::t_dom_tree & p_tree);
     // end of Method inherited from dom_analyzer_if
   private:
-    std::vector<osm_node*> & m_nodes;
-    std::vector<osm_way*> & m_ways;
-    std::vector<osm_relation*> & m_relations;
+    std::vector<osm_api_data_types::osm_node*> & m_nodes;
+    std::vector<osm_api_data_types::osm_way*> & m_ways;
+    std::vector<osm_api_data_types::osm_relation*> & m_relations;
    
   };
 
   //----------------------------------------------------------------------------
-  dom_osm_full_extractor::dom_osm_full_extractor(std::vector<osm_node*> & p_nodes,
-                                                 std::vector<osm_way*> & p_ways,
-                                                 std::vector<osm_relation*> & p_relations):
+  dom_osm_full_extractor::dom_osm_full_extractor(std::vector<osm_api_data_types::osm_node*> & p_nodes,
+                                                 std::vector<osm_api_data_types::osm_way*> & p_ways,
+                                                 std::vector<osm_api_data_types::osm_relation*> & p_relations):
     dom_extractor_base("dom_osm_full_extractor"),
     m_nodes(p_nodes),
     m_ways(p_ways),
@@ -42,17 +42,17 @@ namespace osm_diff_watcher
       for(int l_index = 0; l_index < l_nb_version ; ++l_index)
 	{
 	  osm_diff_analyzer_if::t_dom_tree l_node = p_tree.getChildNode(l_index);
-	  if(osm_node::get_type_str() == l_node.getName())
+	  if(osm_api_data_types::osm_node::get_type_str() == l_node.getName())
 	    {
-	      m_nodes.push_back(generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<osm_node>(l_node,true));
+	      m_nodes.push_back(generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<osm_api_data_types::osm_node>(l_node,true));
 	    }
-	  else if(osm_way::get_type_str() == l_node.getName())
+	  else if(osm_api_data_types::osm_way::get_type_str() == l_node.getName())
 	    {
-	      m_ways.push_back(generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<osm_way>(l_node,true));
+	      m_ways.push_back(generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<osm_api_data_types::osm_way>(l_node,true));
 	    }
-	  else if(osm_relation::get_type_str() == l_node.getName())
+	  else if(osm_api_data_types::osm_relation::get_type_str() == l_node.getName())
 	    {
-	      m_relations.push_back(generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<osm_relation>(l_node,true));
+	      m_relations.push_back(generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<osm_api_data_types::osm_relation>(l_node,true));
 	    }
           else if(strcmp(l_node.getName(),"bounds"))
 	    {
