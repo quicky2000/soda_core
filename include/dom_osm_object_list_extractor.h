@@ -13,7 +13,7 @@ namespace osm_diff_watcher
   public:
     dom_osm_object_list_extractor(void);
     // Method inherited from dom_analyzer_if
-    void analyze(const osm_diff_analyzer_if::t_dom_tree & p_tree);
+    void analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree);
     // end of Method inherited from dom_analyzer_if
     std::vector<T*> * get_result(void);
   private:
@@ -38,16 +38,16 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
     template <class T>
-    void dom_osm_object_list_extractor<T>::analyze(const osm_diff_analyzer_if::t_dom_tree & p_tree)
+    void dom_osm_object_list_extractor<T>::analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree)
     {
       assert(!strcmp("osm",p_tree.getName()));
       int l_nb_version = p_tree.nChildNode();
       m_result = new std::vector<T*>();
       for(int l_index = 0; l_index < l_nb_version ; ++l_index)
 	{
-	  osm_diff_analyzer_if::t_dom_tree l_node = p_tree.getChildNode(l_index);
+	  osm_diff_analyzer_dom_if::t_dom_tree l_node = p_tree.getChildNode(l_index);
 	  assert(!strcmp(l_node.getName(),T::get_type_str().c_str()));
-	  m_result->push_back(generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<T>(l_node,true));
+	  m_result->push_back(generic_dom_utilities<osm_diff_analyzer_dom_if::t_dom_tree>::extract_info<T>(l_node,true));
 	}
     }
   

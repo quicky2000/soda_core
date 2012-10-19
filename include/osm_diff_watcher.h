@@ -24,8 +24,8 @@ namespace osm_diff_watcher
     uint64_t get_sequence_number(void)const;
 
     module_manager m_module_manager;
-    std::map<std::string,osm_diff_analyzer_if::dom_analyzer_if *> m_dom_analyzers;
-    std::map<std::string,osm_diff_analyzer_if::sax_analyzer_base *> m_sax_analyzers;
+    std::map<std::string,osm_diff_analyzer_dom_if::dom_analyzer_if *> m_dom_analyzers;
+    std::map<std::string,osm_diff_analyzer_sax_if::sax_analyzer_base *> m_sax_analyzers;
   };
 }
 #endif /* _OSM_DIFF_WATCHER_H_  */

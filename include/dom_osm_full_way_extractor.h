@@ -12,7 +12,7 @@ namespace osm_diff_watcher
   public:
     inline dom_osm_full_way_extractor(std::vector<osm_api_data_types::osm_node*> & p_nodes);
     // Method inherited from dom_analyzer_if
-    inline void analyze(const osm_diff_analyzer_if::t_dom_tree & p_tree);
+    inline void analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree);
     // end of Method inherited from dom_analyzer_if
     inline osm_api_data_types::osm_way * get_result(void);
   private:
@@ -36,20 +36,20 @@ namespace osm_diff_watcher
   }
 
   //----------------------------------------------------------------------------
-  void dom_osm_full_way_extractor::analyze(const osm_diff_analyzer_if::t_dom_tree & p_tree)
+  void dom_osm_full_way_extractor::analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree)
   {
       assert(!strcmp("osm",p_tree.getName()));
       int l_nb_version = p_tree.nChildNode();
       for(int l_index = 0; l_index < l_nb_version ; ++l_index)
 	{
-	  osm_diff_analyzer_if::t_dom_tree l_node = p_tree.getChildNode(l_index);
+	  osm_diff_analyzer_dom_if::t_dom_tree l_node = p_tree.getChildNode(l_index);
 	  if(osm_api_data_types::osm_node::get_type_str() == l_node.getName())
 	    {
-	      m_nodes.push_back(generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<osm_api_data_types::osm_node>(l_node,true));
+	      m_nodes.push_back(generic_dom_utilities<osm_diff_analyzer_dom_if::t_dom_tree>::extract_info<osm_api_data_types::osm_node>(l_node,true));
 	    }
 	  else if(osm_api_data_types::osm_way::get_type_str() == l_node.getName())
 	    {
-	      m_result = generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<osm_api_data_types::osm_way>(l_node,true);
+	      m_result = generic_dom_utilities<osm_diff_analyzer_dom_if::t_dom_tree>::extract_info<osm_api_data_types::osm_way>(l_node,true);
 	    }
 	  else
 	    {

@@ -5,7 +5,7 @@
 
 namespace osm_diff_watcher
 {
-  class dom2cpp_analyzer: public osm_diff_analyzer_if::dom_analyzer_if
+  class dom2cpp_analyzer: public osm_diff_analyzer_dom_if::dom_analyzer_if
   {
   public:
     dom2cpp_analyzer(const std::string & p_name);
@@ -14,7 +14,7 @@ namespace osm_diff_watcher
     inline const std::string & get_output_type(void)const;
     inline const std::string & get_type(void)const;
     inline const std::string & get_name(void)const;
-    void analyze(const osm_diff_analyzer_if::t_dom_tree & p_tree);
+    void analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree);
     // end of Method inherited from dom_analyzer_if
   private:
     static const std::string m_input_type;

@@ -13,7 +13,7 @@ namespace osm_diff_watcher
   public:
     dom_osm_extractor(void);
     // Method inherited from dom_analyzer_if
-    void analyze(const osm_diff_analyzer_if::t_dom_tree & p_tree);
+    void analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree);
     // end of Method inherited from dom_analyzer_if
     T * get_result(void);
   private:
@@ -38,13 +38,13 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
     template <class T>
-    void dom_osm_extractor<T>::analyze(const osm_diff_analyzer_if::t_dom_tree & p_tree)
+    void dom_osm_extractor<T>::analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree)
     {
       assert(!strcmp("osm",p_tree.getName()));
       assert(p_tree.nChildNode()==1);
-      osm_diff_analyzer_if::t_dom_tree l_node = p_tree.getChildNode(0);
+      osm_diff_analyzer_dom_if::t_dom_tree l_node = p_tree.getChildNode(0);
       assert(!strcmp(l_node.getName(),T::get_type_str().c_str()));
-      m_result = generic_dom_utilities<osm_diff_analyzer_if::t_dom_tree>::extract_info<T>(l_node,true);
+      m_result = generic_dom_utilities<osm_diff_analyzer_dom_if::t_dom_tree>::extract_info<T>(l_node,true);
     }
   
 }

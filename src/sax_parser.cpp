@@ -91,7 +91,7 @@ namespace osm_diff_watcher
     //TO DELETE  	}
     //TO DELETE       ++l_iter;
     //TO DELETE      }
-    this->perform_analyze(apply_element(p_element,&osm_diff_analyzer_if::sax_analyzer_if::start_element));
+    this->perform_analyze(apply_element(p_element,&osm_diff_analyzer_sax_if::sax_analyzer_if::start_element));
     for (uint32_t i = 0; p_attribute[i]; i += 2)
       {
 	this->perform_analyze(apply_attribute(p_attribute[i],p_attribute[i+1]));
@@ -108,7 +108,7 @@ namespace osm_diff_watcher
     //TO DELETE        (*l_iter)->end_element(p_element);
     //TO DELETE        ++l_iter;
     //TO DELETE      }
-    this->perform_analyze(apply_element(p_element,&osm_diff_analyzer_if::sax_analyzer_if::end_element));
+    this->perform_analyze(apply_element(p_element,&osm_diff_analyzer_sax_if::sax_analyzer_if::end_element));
   }
 }
 //EOF

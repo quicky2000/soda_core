@@ -5,20 +5,20 @@
 
 namespace osm_diff_watcher
 {
-  class dom_analyze_operation: public analyze_operation<osm_diff_analyzer_if::dom_analyzer_if>
+  class dom_analyze_operation: public analyze_operation<osm_diff_analyzer_dom_if::dom_analyzer_if>
   {
   public:
-    dom_analyze_operation(const osm_diff_analyzer_if::t_dom_tree & p_tree):
+    dom_analyze_operation(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree):
       m_tree(p_tree)
       {
       }
 
-      void operator()(osm_diff_analyzer_if::dom_analyzer_if * p_analyzer)const
+      void operator()(osm_diff_analyzer_dom_if::dom_analyzer_if * p_analyzer)const
       {
 	p_analyzer->analyze(m_tree);
       }
   private:
-      const osm_diff_analyzer_if::t_dom_tree & m_tree;
+      const osm_diff_analyzer_dom_if::t_dom_tree & m_tree;
   }
   ;
 }

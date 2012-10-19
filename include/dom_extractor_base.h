@@ -5,7 +5,7 @@
 
 namespace osm_diff_watcher
 {
-  class dom_extractor_base: public osm_diff_analyzer_if::dom_analyzer_if
+  class dom_extractor_base: public osm_diff_analyzer_dom_if::dom_analyzer_if
   {
   public:
     inline dom_extractor_base(const std::string & p_type);

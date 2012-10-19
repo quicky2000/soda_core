@@ -18,29 +18,47 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   osm_diff_watcher::osm_diff_watcher(void)
   {
-    //    m_module_manager.load_library("../osm_diff_analyzer_test_dom/bin/libosm_diff_analyzer_test_dom.so");
-    //    osm_diff_analyzer_if::dom_analyzer_if * l_dom_analyzer = m_module_manager.create_module<osm_diff_analyzer_if::dom_analyzer_if>("test_dom","test_dom_instance");
-    //    m_dom_analyzers.insert(make_pair(l_dom_analyzer->get_name(),l_dom_analyzer));
+    std::string l_config_file_name("osm.conf");
+    std::ifstream l_config_file(l_config_file_name.c_str());
+    if(l_config_file==NULL)
+      {
+	std::cout << "ERROR : unable to open configuration file \"" << l_config_file_name << "\"" << std::endl ;
+	exit(-1);
+      }
+    std::string l_line;
+    while(!getline(l_config_file,l_line).eof())
+      {
+	if(l_line.find("load_library(\"") != std::string::npos)
+	  {
+	    //	    std::cout << "line = \"" << l_line << "\"" << std::endl ;
+	    //	    size_t l_begin = l_line.find("=");
+	    //	    l_sequence_number = l_line.substr(l_begin+1);
+	  }
+      }
+
+    m_module_manager.load_library("../osm_diff_analyzer_test_dom/bin/libosm_diff_analyzer_test_dom.so");
+    osm_diff_analyzer_dom_if::dom_analyzer_if * l_dom_analyzer = m_module_manager.create_module<osm_diff_analyzer_dom_if::dom_analyzer_if>("test_dom","test_dom_instance");
+    m_dom_analyzers.insert(make_pair(l_dom_analyzer->get_name(),l_dom_analyzer));
 
     m_module_manager.load_library("../osm_diff_analyzer_new_user/bin/libosm_diff_analyzer_new_user.so");
-    osm_diff_analyzer_if::sax_analyzer_base * l_sax_analyzer = m_module_manager.create_module<osm_diff_analyzer_if::sax_analyzer_base>("new_user","new_user_instance");
+    osm_diff_analyzer_sax_if::sax_analyzer_base * l_sax_analyzer = m_module_manager.create_module<osm_diff_analyzer_sax_if::sax_analyzer_base>("new_user","new_user_instance");
      m_sax_analyzers.insert(make_pair(l_sax_analyzer->get_name(),l_sax_analyzer));
      m_module_manager.load_library("../osm_diff_analyzer_test_api/bin/libosm_diff_analyzer_test_api.so");
-     osm_diff_analyzer_if::sax_analyzer_base * l_sax_analyzer2 = m_module_manager.create_module<osm_diff_analyzer_if::sax_analyzer_base>("test_api","test_api_instance");
+     osm_diff_analyzer_sax_if::sax_analyzer_base * l_sax_analyzer2 = m_module_manager.create_module<osm_diff_analyzer_sax_if::sax_analyzer_base>("test_api","test_api_instance");
      m_sax_analyzers.insert(make_pair(l_sax_analyzer2->get_name(),l_sax_analyzer2));
   }
 
   //------------------------------------------------------------------------------
   osm_diff_watcher::~osm_diff_watcher(void)
   {
-    for(std::map<std::string,osm_diff_analyzer_if::dom_analyzer_if *>::iterator l_iter = m_dom_analyzers.begin();
+    for(std::map<std::string,osm_diff_analyzer_dom_if::dom_analyzer_if *>::iterator l_iter = m_dom_analyzers.begin();
         l_iter != m_dom_analyzers.end();
         ++l_iter)
       {
         delete l_iter->second;
       }
 
-    for(std::map<std::string,osm_diff_analyzer_if::sax_analyzer_base *>::iterator l_iter = m_sax_analyzers.begin();
+    for(std::map<std::string,osm_diff_analyzer_sax_if::sax_analyzer_base *>::iterator l_iter = m_sax_analyzers.begin();
         l_iter != m_sax_analyzers.end();
         ++l_iter)
       {
@@ -92,7 +110,7 @@ namespace osm_diff_watcher
     sax_parser l_sax_parser;
 
     // Add loaded SAX parsers
-    for(std::map<std::string,osm_diff_analyzer_if::sax_analyzer_base *>::iterator l_iter = m_sax_analyzers.begin();
+    for(std::map<std::string,osm_diff_analyzer_sax_if::sax_analyzer_base *>::iterator l_iter = m_sax_analyzers.begin();
         l_iter != m_sax_analyzers.end();
         ++l_iter)
       {
@@ -107,7 +125,7 @@ namespace osm_diff_watcher
     dom_parser l_dom_parser;
 
     // Add loaded DOM parsers
-    for(std::map<std::string,osm_diff_analyzer_if::dom_analyzer_if *>::iterator l_iter = m_dom_analyzers.begin();
+    for(std::map<std::string,osm_diff_analyzer_dom_if::dom_analyzer_if *>::iterator l_iter = m_dom_analyzers.begin();
         l_iter != m_dom_analyzers.end();
         ++l_iter)
       {

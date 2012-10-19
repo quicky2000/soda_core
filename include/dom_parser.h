@@ -9,7 +9,7 @@
 
 namespace osm_diff_watcher
 {
-  class dom_parser: public parser_base<osm_diff_analyzer_if::dom_analyzer_if>
+  class dom_parser: public parser_base<osm_diff_analyzer_dom_if::dom_analyzer_if>
   {
   public:
     dom_parser(const std::string & p_root="osmChange");
