@@ -18,13 +18,16 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   osm_diff_watcher::osm_diff_watcher(void)
   {
-    m_module_manager.load_library("../osm_diff_analyzer_test_dom/bin/libosm_diff_analyzer_test_dom.so");
-    osm_diff_analyzer_if::dom_analyzer_if * l_dom_analyzer = m_module_manager.create_module<osm_diff_analyzer_if::dom_analyzer_if>("test_dom","test_dom_instance");
-    m_dom_analyzers.insert(make_pair(l_dom_analyzer->get_name(),l_dom_analyzer));
+    //    m_module_manager.load_library("../osm_diff_analyzer_test_dom/bin/libosm_diff_analyzer_test_dom.so");
+    //    osm_diff_analyzer_if::dom_analyzer_if * l_dom_analyzer = m_module_manager.create_module<osm_diff_analyzer_if::dom_analyzer_if>("test_dom","test_dom_instance");
+    //    m_dom_analyzers.insert(make_pair(l_dom_analyzer->get_name(),l_dom_analyzer));
 
     m_module_manager.load_library("../osm_diff_analyzer_new_user/bin/libosm_diff_analyzer_new_user.so");
     osm_diff_analyzer_if::sax_analyzer_base * l_sax_analyzer = m_module_manager.create_module<osm_diff_analyzer_if::sax_analyzer_base>("new_user","new_user_instance");
      m_sax_analyzers.insert(make_pair(l_sax_analyzer->get_name(),l_sax_analyzer));
+     m_module_manager.load_library("../osm_diff_analyzer_test_api/bin/libosm_diff_analyzer_test_api.so");
+     osm_diff_analyzer_if::sax_analyzer_base * l_sax_analyzer2 = m_module_manager.create_module<osm_diff_analyzer_if::sax_analyzer_base>("test_api","test_api_instance");
+     m_sax_analyzers.insert(make_pair(l_sax_analyzer2->get_name(),l_sax_analyzer2));
   }
 
   //------------------------------------------------------------------------------
