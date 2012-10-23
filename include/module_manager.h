@@ -36,13 +36,13 @@ namespace osm_diff_watcher
         std::map<std::string,module_wrapper*>::iterator l_iter = m_module_wrappers.find(p_type);
         if(l_iter == m_module_wrappers.end())
           {
-            std::cout << "Unknown module type \"" << p_type << "\"" << std::endl ;
+            std::cout << "ERROR : Unknown module type \"" << p_type << "\"" << std::endl ;
             exit(-1);
           }
         T * l_result = dynamic_cast<T*>(l_iter->second->create_analyzer(p_name));
         if(l_result==NULL)
           {
-            std::cout << "Creation of module \"" << p_name << "\" with type \"" << p_type << "\" has failed" << std::endl ;
+            std::cout << "ERROR : Creation of module \"" << p_name << "\" with type \"" << p_type << "\" has failed" << std::endl ;
             exit(-1);
           }
         return l_result;
