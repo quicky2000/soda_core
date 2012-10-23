@@ -30,13 +30,6 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   void sax_parser::parse_stream(std::istream & p_stream)
   {
-    //TO DELETE std::set<sax_analyzer_if*>::iterator l_iter = m_analyzers.begin();
-    //TO DELETE  std::set<sax_analyzer_if*>::iterator l_iter_end = m_analyzers.end();
-    //TO DELETE   while(l_iter != l_iter_end)
-    //TO DELETE     {
-    //TO DELETE       (*l_iter)->init();
-    //TO DELETE       ++l_iter;
-    //TO DELETE     }
     this->perform_analyze(apply_init());
 
     const uint32_t l_size = 10000;
@@ -72,25 +65,8 @@ namespace osm_diff_watcher
   }
 
   //------------------------------------------------------------------------------
-  //TO DELETE void sax_parser::add_analyzer(sax_analyzer_if & p_analyzer)
-  //TO DELETE {
-  //TO DELETE   m_analyzers.insert(&p_analyzer);
-  //TO DELETE }
-
-  //------------------------------------------------------------------------------
   void sax_parser::analyze_start_element(const char *p_element, const char **p_attribute)
   {
-    //TO DELETE    std::set<sax_analyzer_if*>::iterator l_iter = m_analyzers.begin();
-    //TO DELETE    std::set<sax_analyzer_if*>::iterator l_iter_end = m_analyzers.end();
-    //TO DELETE    while(l_iter != l_iter_end)
-    //TO DELETE      {
-    //TO DELETE        (*l_iter)->start_element(p_element);
-    //TO DELETE        for (uint32_t i = 0; p_attribute[i]; i += 2)
-    //TO DELETE  	{
-    //TO DELETE  	  (*l_iter)->get_attribute(p_attribute[i],p_attribute[i+1]);
-    //TO DELETE  	}
-    //TO DELETE       ++l_iter;
-    //TO DELETE      }
     this->perform_analyze(apply_element(p_element,&osm_diff_analyzer_sax_if::sax_analyzer_if::start_element));
     for (uint32_t i = 0; p_attribute[i]; i += 2)
       {
@@ -101,13 +77,6 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   void sax_parser::analyze_end_element(const char *p_element)
   {
-    //TO DELETE    std::set<sax_analyzer_if*>::iterator l_iter = m_analyzers.begin();
-    //TO DELETE    std::set<sax_analyzer_if*>::iterator l_iter_end = m_analyzers.end();
-    //TO DELETE    while(l_iter != l_iter_end)
-    //TO DELETE      {
-    //TO DELETE        (*l_iter)->end_element(p_element);
-    //TO DELETE        ++l_iter;
-    //TO DELETE      }
     this->perform_analyze(apply_element(p_element,&osm_diff_analyzer_sax_if::sax_analyzer_if::end_element));
   }
 }
