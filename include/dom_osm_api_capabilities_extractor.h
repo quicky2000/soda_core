@@ -16,7 +16,7 @@ namespace osm_diff_watcher
     // Method inherited from dom_analyzer_if
     inline void analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree);
     // end of Method inherited from dom_analyzer_if
-    inline const osm_api_capabilities * get_result(void);
+    inline const osm_api_capabilities * get_result(void)const;
   private:
     osm_api_capabilities * m_result;
   };
@@ -29,7 +29,7 @@ namespace osm_diff_watcher
     }
  
   //----------------------------------------------------------------------------
-    const osm_api_capabilities * dom_osm_api_capabilities_extractor::get_result(void)
+    const osm_api_capabilities * dom_osm_api_capabilities_extractor::get_result(void)const
     {
       return m_result;
     }

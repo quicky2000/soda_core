@@ -14,7 +14,7 @@ namespace osm_diff_watcher
     // Method inherited from dom_analyzer_if
     inline void analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree);
     // end of Method inherited from dom_analyzer_if
-    inline std::vector<osm_api_data_types::osm_change*> * get_result(void);
+    inline std::vector<osm_api_data_types::osm_change*> * get_result(void)const;
  
   private:
     std::vector<osm_api_data_types::osm_change*> * m_result;
@@ -28,7 +28,7 @@ namespace osm_diff_watcher
     }
 
     //----------------------------------------------------------------------------
-    std::vector<osm_api_data_types::osm_change*> * dom_osm_change_extractor::get_result(void)
+    std::vector<osm_api_data_types::osm_change*> * dom_osm_change_extractor::get_result(void)const
       {
         return m_result;
       }

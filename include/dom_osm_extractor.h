@@ -15,7 +15,7 @@ namespace osm_diff_watcher
     // Method inherited from dom_analyzer_if
     void analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree);
     // end of Method inherited from dom_analyzer_if
-    T * get_result(void);
+    T * get_result(void)const;
   private:
     T * m_result;
   }
@@ -31,7 +31,7 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   template <class T>
-    T * dom_osm_extractor<T>::get_result(void)
+    T * dom_osm_extractor<T>::get_result(void)const
     {
       return m_result;
     }
