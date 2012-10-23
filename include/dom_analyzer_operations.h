@@ -5,7 +5,17 @@
 
 namespace osm_diff_watcher
 {
-  class dom_analyze_operation: public analyze_operation<osm_diff_analyzer_dom_if::dom_analyzer_if>
+  class apply_init: public analyze_operation<osm_diff_analyzer_dom_if::dom_analyzer_if>
+  {
+  public:
+    void operator()(osm_diff_analyzer_dom_if::dom_analyzer_if * p_analyzer)const
+    {
+      p_analyzer->init();
+    }
+  }
+  ;
+
+ class dom_analyze_operation: public analyze_operation<osm_diff_analyzer_dom_if::dom_analyzer_if>
   {
   public:
     dom_analyze_operation(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree):

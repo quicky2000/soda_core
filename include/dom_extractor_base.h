@@ -15,6 +15,7 @@ namespace osm_diff_watcher
     inline const std::string & get_output_type(void)const;
     inline const std::string & get_type(void)const;
     inline const std::string & get_name(void)const;
+    inline void init(void){}
     // end of Method inherited from dom_analyzer_if
   private:
     const std::string m_input_type;

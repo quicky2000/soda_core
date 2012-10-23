@@ -38,6 +38,7 @@ namespace osm_diff_watcher
       }
     std::cout << "DOM PARSE SUCCESSFULL" << std::endl ;
 
+    this->perform_analyze(apply_init());
     this->perform_analyze(dom_analyze_operation(l_node));
 
     std::cout << "End of DOM based analyzers" << std::endl ;
