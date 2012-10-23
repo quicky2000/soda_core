@@ -10,42 +10,61 @@
 #include "gzstream.h"
 #include "dom_parser.h"
 #include "dom2cpp_analyzer.h"
-
+#include "configuration_parser.h"
 using namespace quicky_url_reader;
 
 namespace osm_diff_watcher
 {
   //------------------------------------------------------------------------------
-  osm_diff_watcher::osm_diff_watcher(void)
+  osm_diff_watcher::osm_diff_watcher(const std::string & p_file_name)
   {
-    std::string l_config_file_name("osm.conf");
-    std::ifstream l_config_file(l_config_file_name.c_str());
-    if(l_config_file==NULL)
+    std::string l_file_name = (p_file_name == "" ?  "osm.conf" : p_file_name);
+    const configuration * l_configuration = configuration_parser::parse(l_file_name);
+    for(std::vector<std::string>::const_iterator l_iter = l_configuration->get_libraries().begin();
+        l_iter != l_configuration->get_libraries().end();
+        ++l_iter)
       {
-	std::cout << "ERROR : unable to open configuration file \"" << l_config_file_name << "\"" << std::endl ;
-	exit(-1);
+        m_module_manager.load_library(*l_iter);
       }
-    std::string l_line;
-    while(!getline(l_config_file,l_line).eof())
+    for(std::vector<std::pair<std::string,std::string> >::const_iterator l_iter = l_configuration->get_modules().begin();
+        l_iter != l_configuration->get_modules().end();
+        ++l_iter)
       {
-	if(l_line.find("load_library(\"") != std::string::npos)
+	osm_diff_analyzer_if::general_analyzer_if * l_analyzer = m_module_manager.create_module<osm_diff_analyzer_if::general_analyzer_if>(l_iter->second,l_iter->first);
+	std::string l_input_type = l_analyzer->get_input_type();
+	if(l_input_type=="dom")
 	  {
-	    //	    std::cout << "line = \"" << l_line << "\"" << std::endl ;
-	    //	    size_t l_begin = l_line.find("=");
-	    //	    l_sequence_number = l_line.substr(l_begin+1);
+	    osm_diff_analyzer_dom_if::dom_analyzer_if * l_dom_analyzer = dynamic_cast<osm_diff_analyzer_dom_if::dom_analyzer_if *>(l_analyzer);
+	    assert(l_dom_analyzer);
+	    m_dom_analyzers.insert(make_pair(l_dom_analyzer->get_name(),l_dom_analyzer));
+	  }
+	else if(l_input_type=="sax")
+	  {
+	    osm_diff_analyzer_sax_if::sax_analyzer_base * l_sax_analyzer = dynamic_cast<osm_diff_analyzer_sax_if::sax_analyzer_base *>(l_analyzer);
+	    assert(l_sax_analyzer);
+	    m_sax_analyzers.insert(make_pair(l_sax_analyzer->get_name(),l_sax_analyzer));	    
+	  }
+	else
+	  {
+	    std::cout << "Unknown input type \"" << l_input_type << "\"" << std::endl ;
+	    exit(-1);
 	  }
       }
 
-    m_module_manager.load_library("../osm_diff_analyzer_test_dom/bin/libosm_diff_analyzer_test_dom.so");
-    osm_diff_analyzer_dom_if::dom_analyzer_if * l_dom_analyzer = m_module_manager.create_module<osm_diff_analyzer_dom_if::dom_analyzer_if>("test_dom","test_dom_instance");
-    m_dom_analyzers.insert(make_pair(l_dom_analyzer->get_name(),l_dom_analyzer));
-
-    m_module_manager.load_library("../osm_diff_analyzer_new_user/bin/libosm_diff_analyzer_new_user.so");
-    osm_diff_analyzer_sax_if::sax_analyzer_base * l_sax_analyzer = m_module_manager.create_module<osm_diff_analyzer_sax_if::sax_analyzer_base>("new_user","new_user_instance");
-     m_sax_analyzers.insert(make_pair(l_sax_analyzer->get_name(),l_sax_analyzer));
-     m_module_manager.load_library("../osm_diff_analyzer_test_api/bin/libosm_diff_analyzer_test_api.so");
-     osm_diff_analyzer_sax_if::sax_analyzer_base * l_sax_analyzer2 = m_module_manager.create_module<osm_diff_analyzer_sax_if::sax_analyzer_base>("test_api","test_api_instance");
-     m_sax_analyzers.insert(make_pair(l_sax_analyzer2->get_name(),l_sax_analyzer2));
+    std::string l_proxy_name = l_configuration->get_variable("proxy_authentication.proxy_name");
+    std::string l_proxy_port = l_configuration->get_variable("proxy_authentication.proxy_port");
+    std::string l_proxy_login = l_configuration->get_variable("proxy_authentication.proxy_login");
+    std::string l_proxy_password = l_configuration->get_variable("proxy_authentication.proxy_password");
+    if(l_proxy_name != "" &&
+       l_proxy_port != "" &&
+       l_proxy_login != "" &&
+       l_proxy_password != "")
+      {
+	std::cout << "Configuring proxy authentication" << std::endl ;
+	url_reader l_url_reader;
+	l_url_reader.set_authentication(l_proxy_name,l_proxy_port,l_proxy_login,l_proxy_password);
+      }
+    delete l_configuration;
   }
 
   //------------------------------------------------------------------------------

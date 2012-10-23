@@ -13,7 +13,7 @@ namespace osm_diff_watcher
   class osm_diff_watcher
   {
   public:
-    osm_diff_watcher(void);
+    osm_diff_watcher(const std::string & p_file_name);
     ~osm_diff_watcher(void);
     void run(const uint64_t & p_start_seq_number);
 
