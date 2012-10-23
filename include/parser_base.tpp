@@ -12,12 +12,15 @@ void parser_base<T>::add_analyzer(T & p_analyzer)
 template <class T>
 void parser_base<T>::parse(const std::string & p_name)
 {
+
+  std::ifstream l_tmp_input_file(p_name.c_str());
+  if(l_tmp_input_file==NULL)
+    {
+      std::cout << "ERROR : Unable to open file \"" << p_name << "\"" << std::endl ;
+      exit(-1);
+    }
+  l_tmp_input_file.close();
   igzstream l_input_file(p_name.c_str());
-    if(l_input_file==NULL)
-      {
-	std::cout << "ERROR : Unable to open file \"" << p_name << "\"" ;
-	exit(-1);
-      }
     this->parse_stream(l_input_file);
     l_input_file.close();
 }
