@@ -20,9 +20,12 @@ namespace osm_diff_watcher
 
     sax_parser(void);
     ~sax_parser(void);
-    void parse_stream(std::istream & p_stream);
   
   private:
+    // Virtual method inherited from parser_base
+    void parse_stream(std::istream & p_stream);
+    // End of pure virtual methodes
+
     void analyze_start_element(const char *el, const char **attr);
     void analyze_end_element(const char *el);
 
