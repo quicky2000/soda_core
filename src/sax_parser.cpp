@@ -30,6 +30,8 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   void sax_parser::parse_stream(std::istream & p_stream)
   {
+    XML_ParserReset(m_parser,NULL);
+
     this->perform_analyze(apply_init());
 
     const uint32_t l_size = 10000;

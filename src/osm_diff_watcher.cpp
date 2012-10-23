@@ -1,22 +1,21 @@
 #include "osm_diff_watcher.h"
 #include "url_reader.h"
 #include "download_buffer.h"
-#include "sax_parser.h"
 #include <sstream>
 #include <iostream>
 #include <fstream>
 #include <assert.h>
 #include <stdlib.h>
 #include "gzstream.h"
-#include "dom_parser.h"
-#include "dom2cpp_analyzer.h"
 #include "configuration_parser.h"
+#include <signal.h>
 using namespace quicky_url_reader;
 
 namespace osm_diff_watcher
 {
   //------------------------------------------------------------------------------
-  osm_diff_watcher::osm_diff_watcher(const std::string & p_file_name)
+  osm_diff_watcher::osm_diff_watcher(const std::string & p_file_name):
+    m_dom2cpp_analyzer("dom2cpp_analyzer_instance")
   {
     std::string l_file_name = (p_file_name == "" ?  "osm.conf" : p_file_name);
     const configuration * l_configuration = configuration_parser::parse(l_file_name);
@@ -40,7 +39,7 @@ namespace osm_diff_watcher
 	  }
 	else if(l_input_type=="sax")
 	  {
-	    osm_diff_analyzer_sax_if::sax_analyzer_base * l_sax_analyzer = dynamic_cast<osm_diff_analyzer_sax_if::sax_analyzer_base *>(l_analyzer);
+	    osm_diff_analyzer_sax_if::sax_analyzer_if * l_sax_analyzer = dynamic_cast<osm_diff_analyzer_sax_if::sax_analyzer_if *>(l_analyzer);
 	    assert(l_sax_analyzer);
 	    m_sax_analyzers.insert(make_pair(l_sax_analyzer->get_name(),l_sax_analyzer));	    
 	  }
@@ -65,6 +64,42 @@ namespace osm_diff_watcher
 	l_url_reader.set_authentication(l_proxy_name,l_proxy_port,l_proxy_login,l_proxy_password);
       }
     delete l_configuration;
+
+    // Add loaded SAX parsers
+    for(std::map<std::string,osm_diff_analyzer_sax_if::sax_analyzer_if *>::iterator l_iter = m_sax_analyzers.begin();
+        l_iter != m_sax_analyzers.end();
+        ++l_iter)
+      {
+        m_sax_parser.add_analyzer(*(l_iter->second));
+      }
+
+    // Add built-in SAX parsers
+
+    // Add loaded DOM parsers
+    for(std::map<std::string,osm_diff_analyzer_dom_if::dom_analyzer_if *>::iterator l_iter = m_dom_analyzers.begin();
+        l_iter != m_dom_analyzers.end();
+        ++l_iter)
+      {
+        m_dom_parser.add_analyzer(*(l_iter->second));
+      }
+    // Add built-in DOM parsers
+    m_dom_parser.add_analyzer(m_dom2cpp_analyzer);
+
+
+    //Preparing signal handling to manage stop
+    /* Déclaration d'une structure pour la mise en place des gestionnaires */
+    struct sigaction l_signal_action;
+  
+    /* Remplissage de la structure pour la mise en place des gestionnaires */
+    /* adresse du gestionnaire */
+    l_signal_action.sa_handler=sig_handler;
+    // Mise a zero du champ sa_flags theoriquement ignoré
+    l_signal_action.sa_flags=0;
+    /* On ne bloque pas de signaux spécifiques */
+    sigemptyset(&l_signal_action.sa_mask);
+    
+    /* Mise en place du gestionnaire bidon pour trois signaux */
+    sigaction(SIGINT,&l_signal_action,0);
   }
 
   //------------------------------------------------------------------------------
@@ -77,7 +112,7 @@ namespace osm_diff_watcher
         delete l_iter->second;
       }
 
-    for(std::map<std::string,osm_diff_analyzer_sax_if::sax_analyzer_base *>::iterator l_iter = m_sax_analyzers.begin();
+    for(std::map<std::string,osm_diff_analyzer_sax_if::sax_analyzer_if *>::iterator l_iter = m_sax_analyzers.begin();
         l_iter != m_sax_analyzers.end();
         ++l_iter)
       {
@@ -86,6 +121,12 @@ namespace osm_diff_watcher
 
   }
 
+  //------------------------------------------------------------------------------
+  void osm_diff_watcher::sig_handler(int p_sig)
+  {
+    std::cout << "===================> Receive Control-C : execution will stop after this minute diff analyze will be finished" << std::endl ;
+    m_stop = true;
+  }
 
   //------------------------------------------------------------------------------
   void osm_diff_watcher::run(const uint64_t & p_start_seq_number)
@@ -93,7 +134,7 @@ namespace osm_diff_watcher
     uint64_t l_end_seq_number = get_sequence_number();
     uint64_t l_current_seq_number = ( p_start_seq_number ? p_start_seq_number : l_end_seq_number);
     uint32_t l_nb_iteration = 3;//00 ;
-    while(l_nb_iteration)
+    while(l_nb_iteration && !m_stop)
       {
 	std::cout << "--------------------------------------------------------" << std::endl ;
 	std::cout << l_nb_iteration << " remaining iterations" << std::endl ;
@@ -120,41 +161,20 @@ namespace osm_diff_watcher
 	++l_current_seq_number;
 	--l_nb_iteration;
       }
+    if(m_stop)
+      {
+        std::cout << "End of run requestedd by user" << std::endl ;
+      }
   }
 
   //------------------------------------------------------------------------------
   void osm_diff_watcher::parse_diff(void)
   {
     // Sax analyze
-    sax_parser l_sax_parser;
-
-    // Add loaded SAX parsers
-    for(std::map<std::string,osm_diff_analyzer_sax_if::sax_analyzer_base *>::iterator l_iter = m_sax_analyzers.begin();
-        l_iter != m_sax_analyzers.end();
-        ++l_iter)
-      {
-        l_sax_parser.add_analyzer(*(l_iter->second));
-      }
-
-    // Add built-in SAX parsers
-
-    l_sax_parser.parse("tmp_diff.gz");
+    m_sax_parser.parse("tmp_diff.gz");
 
     // DOM analyze
-    dom_parser l_dom_parser;
-
-    // Add loaded DOM parsers
-    for(std::map<std::string,osm_diff_analyzer_dom_if::dom_analyzer_if *>::iterator l_iter = m_dom_analyzers.begin();
-        l_iter != m_dom_analyzers.end();
-        ++l_iter)
-      {
-        l_dom_parser.add_analyzer(*(l_iter->second));
-      }
-    // Add built-in DOM parsers
-    dom2cpp_analyzer l_dom2cpp_analyzer("dom2cpp_analyzer_instance");
-    l_dom_parser.add_analyzer(l_dom2cpp_analyzer);
-
-    l_dom_parser.parse("tmp_diff.gz");  
+    m_dom_parser.parse("tmp_diff.gz");  
   }
 
   //------------------------------------------------------------------------------
@@ -213,6 +233,7 @@ namespace osm_diff_watcher
     return atoll(l_sequence_number.c_str());
   }
 
+  bool osm_diff_watcher::m_stop = false;
 }
 
 //EOF
