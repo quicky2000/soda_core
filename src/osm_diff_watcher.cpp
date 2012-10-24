@@ -34,14 +34,32 @@ namespace osm_diff_watcher
 	if(l_input_type=="dom")
 	  {
 	    osm_diff_analyzer_dom_if::dom_analyzer_if * l_dom_analyzer = dynamic_cast<osm_diff_analyzer_dom_if::dom_analyzer_if *>(l_analyzer);
-	    assert(l_dom_analyzer);
+	    if(l_dom_analyzer==NULL)
+              {
+                std::cout << "Invalid dom_analyzer \"" << l_iter->second << "\"" << std::endl ;
+                exit(-1);
+               }
 	    m_dom_analyzers.insert(make_pair(l_dom_analyzer->get_name(),l_dom_analyzer));
 	  }
 	else if(l_input_type=="sax")
 	  {
 	    osm_diff_analyzer_sax_if::sax_analyzer_if * l_sax_analyzer = dynamic_cast<osm_diff_analyzer_sax_if::sax_analyzer_if *>(l_analyzer);
-	    assert(l_sax_analyzer);
+            if(l_sax_analyzer==NULL)
+              {
+                std::cout << "Invalid sax_analyzer \"" << l_iter->second << "\"" << std::endl ;
+                exit(-1);
+              }
 	    m_sax_analyzers.insert(make_pair(l_sax_analyzer->get_name(),l_sax_analyzer));	    
+	  }
+	else if(l_input_type=="cpp")
+	  {
+	    osm_diff_analyzer_cpp_if::cpp_analyzer_if * l_cpp_analyzer = dynamic_cast<osm_diff_analyzer_cpp_if::cpp_analyzer_if *>(l_analyzer);
+	    if(l_cpp_analyzer==NULL)
+              {
+                std::cout << "Invalid cpp_analyzer \"" << l_iter->second << "\"" << std::endl ;
+                exit(-1);
+              }
+	    m_cpp_analyzers.insert(make_pair(l_cpp_analyzer->get_name(),l_cpp_analyzer));	    
 	  }
 	else
 	  {
@@ -74,6 +92,16 @@ namespace osm_diff_watcher
       }
 
     // Add built-in SAX parsers
+
+    // Add loaded CPP parsers
+    for(std::map<std::string,osm_diff_analyzer_cpp_if::cpp_analyzer_if *>::iterator l_iter = m_cpp_analyzers.begin();
+        l_iter != m_cpp_analyzers.end();
+        ++l_iter)
+      {
+        m_dom2cpp_analyzer.add_analyzer(*(l_iter->second));
+      }
+
+    // Add built-in CPP parsers
 
     // Add loaded DOM parsers
     for(std::map<std::string,osm_diff_analyzer_dom_if::dom_analyzer_if *>::iterator l_iter = m_dom_analyzers.begin();
@@ -119,6 +147,13 @@ namespace osm_diff_watcher
         delete l_iter->second;
       }
 
+    for(std::map<std::string,osm_diff_analyzer_cpp_if::cpp_analyzer_if *>::iterator l_iter = m_cpp_analyzers.begin();
+        l_iter != m_cpp_analyzers.end();
+        ++l_iter)
+      {
+        delete l_iter->second;
+      }
+
   }
 
   //------------------------------------------------------------------------------
@@ -142,20 +177,25 @@ namespace osm_diff_watcher
 	std::cout << "--> Sequence number = \"" << l_current_seq_number << "\"" << std::endl;
 	std::string l_url_diff = get_url_diff(l_current_seq_number);
 	std::cout << "Url of diff file \"" << l_url_diff << "\"" << std::endl ;
+        time_t l_begin_time = time(NULL);
 	dump_url(l_url_diff);
 	parse_diff();
-
 	if(l_current_seq_number == l_end_seq_number)
 	  {
+            time_t l_end_time = time(NULL);
+            double l_diff_time = difftime(l_end_time,l_begin_time);
+            double l_remaining_time = 60 - l_diff_time;
+            std::cout << "Elapsed time = " << l_diff_time << "s" << std::endl ;
 	    // Waiting for new end sequence number
-	    uint32_t l_delay = 1;
+	    uint32_t l_delay = (uint32_t) l_remaining_time;
 	    do
 	      {
 		std::cout << "Wait for " << l_delay << " seconds" << std::endl ;
 		sleep(l_delay);
-		l_end_seq_number = get_sequence_number();     
+		l_end_seq_number = get_sequence_number();   
+                if(l_delay == (uint32_t) l_remaining_time) l_delay = 1;
 		if(l_delay < 30 ) l_delay *= 2;
-	      }while(l_current_seq_number == l_end_seq_number);
+	      }while(l_current_seq_number == l_end_seq_number && !m_stop);
 	  }
       
 	++l_current_seq_number;
