@@ -61,7 +61,7 @@ namespace osm_diff_watcher
 	  }
 	else
 	  {
-	    std::cout << "ERROR : unable to open library \"" << p_name << "\"" << std::endl ;
+	    std::cout << "ERROR : unable to open library \"" << p_name << "\" : " << dlerror() << std::endl ;
 	    exit(-1);
 	  }
 
