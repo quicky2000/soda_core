@@ -17,8 +17,6 @@ namespace osm_diff_watcher
 	exit(-1);
       }
 
-    XML_SetUserData(m_parser,this);
-    XML_SetElementHandler(m_parser,start, end);
   }
 
   //------------------------------------------------------------------------------
@@ -31,6 +29,8 @@ namespace osm_diff_watcher
   void sax_parser::parse_stream(std::istream & p_stream)
   {
     XML_ParserReset(m_parser,NULL);
+    XML_SetUserData(m_parser,this);
+    XML_SetElementHandler(m_parser,start, end);
 
     this->perform_analyze(apply_init());
 
