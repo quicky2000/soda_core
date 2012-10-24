@@ -2,6 +2,7 @@
 #include "osm_change.h"
 #include "osm_node.h"
 #include "dom_generic_utilities.h"
+#include "cpp_analyzer_operations.h"
 #include <cassert>
 #include <iostream>
 #include <string.h>
@@ -17,6 +18,7 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   void dom2cpp_analyzer::analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree)
   {
+    this->perform_analyze(apply_init());
     assert(!strcmp(p_tree.getName(),"osmChange"));
     int l_nb_child_node = p_tree.nChildNode();
     std::cout << "Nb child " << l_nb_child_node << std::endl ;
@@ -49,6 +51,7 @@ namespace osm_diff_watcher
 	  }
       }
     
+    this->perform_analyze(apply_changes(l_changes));
 
     // Delete changes
     std::vector<osm_api_data_types::osm_change*>::iterator l_iter = l_changes.begin();

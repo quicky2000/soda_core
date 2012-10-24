@@ -3,7 +3,8 @@
 
 #include "module_manager.h"
 #include "dom_analyzer_if.h"
-#include "sax_analyzer_base.h"
+#include "sax_analyzer_if.h"
+#include "cpp_analyzer_if.h"
 #include "dom2cpp_analyzer.h"
 #include "dom_parser.h"
 #include "sax_parser.h"
@@ -34,6 +35,7 @@ namespace osm_diff_watcher
     dom2cpp_analyzer m_dom2cpp_analyzer;
     std::map<std::string,osm_diff_analyzer_dom_if::dom_analyzer_if *> m_dom_analyzers;
     std::map<std::string,osm_diff_analyzer_sax_if::sax_analyzer_if *> m_sax_analyzers;
+    std::map<std::string,osm_diff_analyzer_cpp_if::cpp_analyzer_if *> m_cpp_analyzers;
   };
 }
 #endif /* _OSM_DIFF_WATCHER_H_  */

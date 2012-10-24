@@ -2,10 +2,12 @@
 #define _DOM2CPP_ANALYZER_H_
 
 #include "dom_analyzer_if.h"
+#include "output_producer_if.h"
+#include "cpp_analyzer_if.h"
 
 namespace osm_diff_watcher
 {
-  class dom2cpp_analyzer: public osm_diff_analyzer_dom_if::dom_analyzer_if
+  class dom2cpp_analyzer: public osm_diff_analyzer_dom_if::dom_analyzer_if, public output_producer_if<osm_diff_analyzer_cpp_if::cpp_analyzer_if>
   {
   public:
     dom2cpp_analyzer(const std::string & p_name);

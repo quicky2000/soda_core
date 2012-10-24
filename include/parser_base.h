@@ -7,21 +7,18 @@
 #include "gzstream.h"
 #include "analyze_operation.h"
 #include "parser_if.h"
+#include "output_producer_if.h"
 
 namespace osm_diff_watcher
 {
   template <class T>
-    class parser_base:public parser_if
+    class parser_base:public output_producer_if<T>, public parser_if
   {
   public:
-    void add_analyzer(T & p_analyzer);
     void parse(const std::string & p_name);
-  protected:
-    void perform_analyze(const analyze_operation<T> & f);
   private:
     virtual void parse_stream(std::istream & p_stream)=0;
 
-    std::set<T*> m_analyzers;
   }
   ;
 
