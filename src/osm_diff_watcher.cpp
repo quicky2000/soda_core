@@ -25,18 +25,25 @@ namespace osm_diff_watcher
       {
         m_module_manager.load_library(*l_iter);
       }
-    for(std::vector<std::pair<std::string,std::string> >::const_iterator l_iter = l_configuration->get_modules().begin();
-        l_iter != l_configuration->get_modules().end();
+    for(std::vector<osm_diff_analyzer_if::module_configuration*>::const_iterator l_iter = l_configuration->get_module_configurations().begin();
+        l_iter != l_configuration->get_module_configurations().end();
         ++l_iter)
       {
-	osm_diff_analyzer_if::general_analyzer_if * l_analyzer = m_module_manager.create_module<osm_diff_analyzer_if::general_analyzer_if>(l_iter->second,l_iter->first);
+	const osm_diff_analyzer_if::module_configuration * const l_module_configuration = *l_iter;
+	std::string l_type = l_module_configuration->get_type();
+	osm_diff_analyzer_if::general_analyzer_if * l_analyzer = m_module_manager.create_module<osm_diff_analyzer_if::general_analyzer_if>(l_module_configuration);
 	std::string l_input_type = l_analyzer->get_input_type();
-	if(l_input_type=="dom")
+	if(!l_module_configuration->is_enabled())
+	  {
+	    std::cout << "Module \"" << l_analyzer->get_name() << "\" of type \"" << l_type << "\" has been disable" << std::endl ;
+	    m_disabled_analyzers.insert(make_pair(l_analyzer->get_name(),l_analyzer));
+	  }
+	else if(l_input_type=="dom")
 	  {
 	    osm_diff_analyzer_dom_if::dom_analyzer_if * l_dom_analyzer = dynamic_cast<osm_diff_analyzer_dom_if::dom_analyzer_if *>(l_analyzer);
 	    if(l_dom_analyzer==NULL)
               {
-                std::cout << "Invalid dom_analyzer \"" << l_iter->second << "\"" << std::endl ;
+                std::cout << "Invalid dom_analyzer \"" << l_type << "\"" << std::endl ;
                 exit(-1);
                }
 	    m_dom_analyzers.insert(make_pair(l_dom_analyzer->get_name(),l_dom_analyzer));
@@ -46,7 +53,7 @@ namespace osm_diff_watcher
 	    osm_diff_analyzer_sax_if::sax_analyzer_if * l_sax_analyzer = dynamic_cast<osm_diff_analyzer_sax_if::sax_analyzer_if *>(l_analyzer);
             if(l_sax_analyzer==NULL)
               {
-                std::cout << "Invalid sax_analyzer \"" << l_iter->second << "\"" << std::endl ;
+                std::cout << "Invalid sax_analyzer \"" << l_type << "\"" << std::endl ;
                 exit(-1);
               }
 	    m_sax_analyzers.insert(make_pair(l_sax_analyzer->get_name(),l_sax_analyzer));	    
@@ -56,7 +63,7 @@ namespace osm_diff_watcher
 	    osm_diff_analyzer_cpp_if::cpp_analyzer_if * l_cpp_analyzer = dynamic_cast<osm_diff_analyzer_cpp_if::cpp_analyzer_if *>(l_analyzer);
 	    if(l_cpp_analyzer==NULL)
               {
-                std::cout << "Invalid cpp_analyzer \"" << l_iter->second << "\"" << std::endl ;
+                std::cout << "Invalid cpp_analyzer \"" << l_type << "\"" << std::endl ;
                 exit(-1);
               }
 	    m_cpp_analyzers.insert(make_pair(l_cpp_analyzer->get_name(),l_cpp_analyzer));	    
@@ -154,6 +161,13 @@ namespace osm_diff_watcher
         delete l_iter->second;
       }
 
+    for(std::map<std::string,osm_diff_analyzer_if::general_analyzer_if *>::iterator l_iter = m_disabled_analyzers.begin();
+        l_iter != m_disabled_analyzers.end();
+        ++l_iter)
+      {
+        delete l_iter->second;
+      }
+
   }
 
   //------------------------------------------------------------------------------
@@ -168,7 +182,7 @@ namespace osm_diff_watcher
   {
     uint64_t l_end_seq_number = get_sequence_number();
     uint64_t l_current_seq_number = ( p_start_seq_number ? p_start_seq_number : l_end_seq_number);
-    uint32_t l_nb_iteration = 3;//00 ;
+    uint32_t l_nb_iteration = 1;//00 ;
     while(l_nb_iteration && !m_stop)
       {
 	std::cout << "--------------------------------------------------------" << std::endl ;
@@ -180,26 +194,29 @@ namespace osm_diff_watcher
         time_t l_begin_time = time(NULL);
 	dump_url(l_url_diff);
 	parse_diff();
-	if(l_current_seq_number == l_end_seq_number)
+	--l_nb_iteration;
+	if(l_current_seq_number == l_end_seq_number && !m_stop && l_nb_iteration)
 	  {
             time_t l_end_time = time(NULL);
             double l_diff_time = difftime(l_end_time,l_begin_time);
-            double l_remaining_time = 60 - l_diff_time;
-            std::cout << "Elapsed time = " << l_diff_time << "s" << std::endl ;
-	    // Waiting for new end sequence number
-	    uint32_t l_delay = (uint32_t) l_remaining_time;
-	    do
+	    if(l_diff_time < 60)
 	      {
-		std::cout << "Wait for " << l_delay << " seconds" << std::endl ;
-		sleep(l_delay);
-		l_end_seq_number = get_sequence_number();   
-                if(l_delay == (uint32_t) l_remaining_time) l_delay = 1;
-		if(l_delay < 30 ) l_delay *= 2;
-	      }while(l_current_seq_number == l_end_seq_number && !m_stop);
+		double l_remaining_time = 60 - l_diff_time;
+		std::cout << "Elapsed time = " << l_diff_time << "s" << std::endl ;
+		// Waiting for new end sequence number
+		uint32_t l_delay = (uint32_t) l_remaining_time;
+		do
+		  {
+		    std::cout << "Wait for " << l_delay << " seconds" << std::endl ;
+		    sleep(l_delay);
+		    l_end_seq_number = get_sequence_number();   
+		    if(l_delay == (uint32_t) l_remaining_time) l_delay = 1;
+		    if(l_delay < 30 ) l_delay *= 2;
+		  }while(l_current_seq_number == l_end_seq_number && !m_stop);
+	      }
 	  }
       
 	++l_current_seq_number;
-	--l_nb_iteration;
       }
     if(m_stop)
       {

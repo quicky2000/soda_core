@@ -22,6 +22,11 @@ namespace osm_diff_watcher
 
     osm_diff_analyzer_if::module_library_if::t_get_api_version l_get_api_version = (osm_diff_analyzer_if::module_library_if::t_get_api_version)l_api_ptr[osm_diff_analyzer_if::module_library_if::GET_API_VERSION];
     m_api_version = l_get_api_version();
+    if(m_api_version != MODULE_LIBRARY_IF_VERSION)
+      {
+	std::cout << "ERROR : osm_diff_watcher was compiled with module API " << MODULE_LIBRARY_IF_VERSION << " whereas module was compiled with version " << m_api_version << std::endl ;
+	exit(-1);
+      }
     osm_diff_analyzer_if::module_library_if::t_get_api_size l_get_api_size = (osm_diff_analyzer_if::module_library_if::t_get_api_size)l_api_ptr[osm_diff_analyzer_if::module_library_if::GET_API_SIZE];
     assert(MODULE_LIBRARY_IF_API_SIZE == l_get_api_size());
     osm_diff_analyzer_if::module_library_if::t_get_description l_get_description = (osm_diff_analyzer_if::module_library_if::t_get_description)l_api_ptr[osm_diff_analyzer_if::module_library_if::GET_DESCRIPTION];
@@ -46,9 +51,9 @@ namespace osm_diff_watcher
   }
 
   //----------------------------------------------------------------------------
-  osm_diff_analyzer_if::general_analyzer_if* module_wrapper::create_analyzer(const std::string & p_name)
+  osm_diff_analyzer_if::general_analyzer_if* module_wrapper::create_analyzer(const osm_diff_analyzer_if::module_configuration * p_conf)
   {
-    return m_create(p_name);
+    return m_create(p_conf);
   }
 
   //----------------------------------------------------------------------------

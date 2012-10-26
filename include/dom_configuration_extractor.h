@@ -51,7 +51,40 @@ namespace osm_diff_watcher
               assert(l_module_type);
 	      XMLCSTR l_module_name = l_node.getAttribute("name");
               assert(l_module_name);
-	      m_result->add_module(l_module_name,l_module_type);
+	      XMLCSTR l_module_enabled = l_node.getAttribute("enabled");
+	      bool l_enabled = true;
+	      if(l_module_enabled)
+		{
+		  if(!strcmp(l_module_enabled,"no"))
+		    {
+		      l_enabled = false;
+		    }
+		  else if(strcmp(l_module_enabled,"yes"))
+		    {
+		      std::cout << "ERROR : \"enabled\" analyzer attribute should have vaue yes or no instead of \"" << l_module_enabled << "\"" << std::endl ;
+		      exit(-1);
+		    }
+		}
+	      osm_diff_analyzer_if::module_configuration * l_configuration = new osm_diff_analyzer_if::module_configuration(l_module_name,l_module_type,l_enabled);
+	      int l_nb_param_nodes = l_node.nChildNode();
+	      for(int l_param_index = 0 ;
+		  l_param_index < l_nb_param_nodes;
+		  ++l_param_index)
+		{
+		  osm_diff_analyzer_dom_if::t_dom_tree l_param_node = l_node.getChildNode(l_param_index);
+		  std::cout << "node name \"" << l_param_node.getName() << "\"" << std::endl ;
+		  if(strcmp(l_param_node.getName(),"parameter"))
+		    {
+		      std::cout << "ERROR : waiting for \"parameter\" node in configuration of module \"" << l_module_name << "\" instead of \"" <<  l_param_node.getName() << "\"" << std::endl ;
+		      exit(-1);
+		    }
+		     XMLCSTR l_parameter_name = l_param_node.getAttribute("name");
+		     assert(l_parameter_name);
+		     XMLCSTR l_parameter_value = l_param_node.getAttribute("value");
+		     assert(l_parameter_value);
+		     l_configuration->add_parameter(l_parameter_name,l_parameter_value);
+		}
+	      m_result->add_module_configuration(l_configuration);
             }
 	  else if(!strcmp(l_node.getName(),"variable"))
             {

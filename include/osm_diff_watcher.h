@@ -36,6 +36,7 @@ namespace osm_diff_watcher
     std::map<std::string,osm_diff_analyzer_dom_if::dom_analyzer_if *> m_dom_analyzers;
     std::map<std::string,osm_diff_analyzer_sax_if::sax_analyzer_if *> m_sax_analyzers;
     std::map<std::string,osm_diff_analyzer_cpp_if::cpp_analyzer_if *> m_cpp_analyzers;
+    std::map<std::string,osm_diff_analyzer_if::general_analyzer_if *> m_disabled_analyzers;
   };
 }
 #endif /* _OSM_DIFF_WATCHER_H_  */

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "module_wrapper.h"
+#include "module_configuration.h"
 
 namespace osm_diff_watcher
 {
@@ -16,8 +17,7 @@ namespace osm_diff_watcher
   public:
     void load_library(const std::string & p_name);
     template <class T>
-      T * create_module(const std::string & p_type,
-                        const std::string & p_name);
+      T * create_module(const osm_diff_analyzer_if::module_configuration * p_conf);
     ~module_manager(void);
   private:
     typedef void* t_lib_handler;
@@ -30,19 +30,18 @@ namespace osm_diff_watcher
   };
 
     template <class T>
-      T * module_manager::create_module(const std::string & p_type,
-                                        const std::string & p_name)
+      T * module_manager::create_module(const osm_diff_analyzer_if::module_configuration * p_conf)
       {
-        std::map<std::string,module_wrapper*>::iterator l_iter = m_module_wrappers.find(p_type);
+        std::map<std::string,module_wrapper*>::iterator l_iter = m_module_wrappers.find(p_conf->get_type());
         if(l_iter == m_module_wrappers.end())
           {
-            std::cout << "ERROR : Unknown module type \"" << p_type << "\"" << std::endl ;
+            std::cout << "ERROR : Unknown module type \"" << p_conf->get_type() << "\"" << std::endl ;
             exit(-1);
           }
-        T * l_result = dynamic_cast<T*>(l_iter->second->create_analyzer(p_name));
+        T * l_result = dynamic_cast<T*>(l_iter->second->create_analyzer(p_conf));
         if(l_result==NULL)
           {
-            std::cout << "ERROR : Creation of module \"" << p_name << "\" with type \"" << p_type << "\" has failed" << std::endl ;
+            std::cout << "ERROR : Creation of module \"" << p_conf->get_name() << "\" with type \"" << p_conf->get_type() << "\" has failed" << std::endl ;
             exit(-1);
           }
         return l_result;
