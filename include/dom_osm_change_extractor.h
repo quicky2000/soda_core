@@ -1,18 +1,19 @@
 #ifndef _DOM_OSM_CHANGE_EXTRACTOR_H_
 #define _DOM_OSM_CHANGE_EXTRACTOR_H_
 
-#include "dom_extractor_base.h"
+#include "dom_simple_analyzer_if.h"
 #include "dom_generic_utilities.h"
 #include <cstring>
 
 namespace osm_diff_watcher
 {
-  class dom_osm_change_extractor: public dom_extractor_base
+  class dom_osm_change_extractor: public dom_simple_analyzer_if
   {
   public:
     inline dom_osm_change_extractor(void);
     // Method inherited from dom_analyzer_if
     inline void analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree);
+    inline void init(void){};
     // end of Method inherited from dom_analyzer_if
     inline std::vector<osm_api_data_types::osm_change*> * get_result(void)const;
  
@@ -22,7 +23,6 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   dom_osm_change_extractor::dom_osm_change_extractor(void):
-    dom_extractor_base("dom_osm_change_extractor"),
     m_result(NULL)
     {
     }

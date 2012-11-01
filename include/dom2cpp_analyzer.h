@@ -17,13 +17,15 @@ namespace osm_diff_watcher
     inline const std::string & get_type(void)const;
     inline const std::string & get_name(void)const;
     void analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree);
-    inline void init(void){}
+    inline void init(const osm_diff_analyzer_if::osm_diff_state * p_diff_state);
+    inline void check(void){};
     // end of Method inherited from dom_analyzer_if
   private:
     static const std::string m_input_type;
     static const std::string m_output_type;
     static const std::string m_type;
     const std::string m_name;
+    const osm_diff_analyzer_if::osm_diff_state * m_diff_state;
   };
 
   // Method inherited from dom_analyzer_if
@@ -47,7 +49,11 @@ namespace osm_diff_watcher
     {
       return m_name;
     }
-
+  //----------------------------------------------------------------------------
+  void dom2cpp_analyzer::init(const osm_diff_analyzer_if::osm_diff_state * p_diff_state)
+  {
+    m_diff_state = p_diff_state;
+  }
 
 }
 #endif

@@ -2,19 +2,20 @@
 #ifndef _DOM_OSM_API_CAPABILITIES_EXTRACTOR_H
 #define _DOM_OSM_API_CAPABILITIES_EXTRACTOR_H
 
-#include "dom_extractor_base.h"
+#include "dom_simple_analyzer_if.h"
 #include "dom_generic_utilities.h"
 #include "osm_api_capabilities.h"
 #include <cstring>
 
 namespace osm_diff_watcher
 {
-  class dom_osm_api_capabilities_extractor: public dom_extractor_base
+  class dom_osm_api_capabilities_extractor: public dom_simple_analyzer_if
   {
   public:
     inline dom_osm_api_capabilities_extractor(void);
-    // Method inherited from dom_analyzer_if
+    // Method inherited from dom_simple_analyzer_if
     inline void analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree);
+    inline void init(void){}
     // end of Method inherited from dom_analyzer_if
     inline const osm_api_capabilities * get_result(void)const;
   private:
@@ -23,7 +24,6 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   dom_osm_api_capabilities_extractor::dom_osm_api_capabilities_extractor(void):
-    dom_extractor_base("dom_osm_api_capabilities_extractor"),
     m_result(NULL)
     {
     }

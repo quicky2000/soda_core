@@ -1,18 +1,19 @@
 #ifndef _DOM_OSM_FULL_WAY_EXTRACTOR_H_
 #define _DOM_OSM_FULL_WAY_EXTRACTOR_H_
 
-#include "dom_extractor_base.h"
+#include "dom_simple_analyzer_if.h"
 #include "dom_generic_utilities.h"
 #include <cstring>
 
 namespace osm_diff_watcher
 {
-  class dom_osm_full_way_extractor: public dom_extractor_base
+  class dom_osm_full_way_extractor: public dom_simple_analyzer_if
   {
   public:
     inline dom_osm_full_way_extractor(std::vector<osm_api_data_types::osm_node*> & p_nodes);
     // Method inherited from dom_analyzer_if
     inline void analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree);
+    inline void init(void){}
     // end of Method inherited from dom_analyzer_if
     inline osm_api_data_types::osm_way * get_result(void)const;
   private:
@@ -29,7 +30,6 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   dom_osm_full_way_extractor::dom_osm_full_way_extractor(std::vector<osm_api_data_types::osm_node*> & p_nodes):
-    dom_extractor_base("dom_osm_full_way_extractor"),
     m_nodes(p_nodes),
     m_result(NULL)
   {

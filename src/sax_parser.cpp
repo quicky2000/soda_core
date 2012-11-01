@@ -32,7 +32,7 @@ namespace osm_diff_watcher
     XML_SetUserData(m_parser,this);
     XML_SetElementHandler(m_parser,start, end);
 
-    this->perform_analyze(apply_init());
+    this->perform_analyze(apply_sax_init(get_diff_state()));
 
     const uint32_t l_size = 10000;
     char l_buf[l_size];

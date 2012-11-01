@@ -11,14 +11,16 @@ namespace osm_diff_watcher
 {
   //------------------------------------------------------------------------------
   dom2cpp_analyzer::dom2cpp_analyzer(const std::string & p_name):
-    m_name(p_name)
+    m_name(p_name),
+    m_diff_state(NULL)
   {
   }
 
   //------------------------------------------------------------------------------
   void dom2cpp_analyzer::analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree)
   {
-    this->perform_analyze(apply_init());
+    std::cout << m_diff_state << std::endl ;
+    this->perform_analyze(apply_init(m_diff_state));
     assert(!strcmp(p_tree.getName(),"osmChange"));
     int l_nb_child_node = p_tree.nChildNode();
     std::cout << "Nb child " << l_nb_child_node << std::endl ;

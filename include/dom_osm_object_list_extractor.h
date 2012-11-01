@@ -1,20 +1,21 @@
 #ifndef _DOM_OSM_OBJECT_LIST_EXTRACTOR_H_
 #define _DOM_OSM_OBJECT_LIST_EXTRACTOR_H_
 
-#include "dom_extractor_base.h"
+#include "dom_simple_analyzer_if.h"
 #include "dom_generic_utilities.h"
 #include <cstring>
 
 namespace osm_diff_watcher
 {
   template <class T>
-  class dom_osm_object_list_extractor: public dom_extractor_base
+  class dom_osm_object_list_extractor: public dom_simple_analyzer_if
   {
   public:
     dom_osm_object_list_extractor(void);
     // Method inherited from dom_analyzer_if
     void analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree);
-    // end of Method inherited from dom_analyzer_if
+   inline void init(void){}
+     // end of Method inherited from dom_analyzer_if
     std::vector<T*> * get_result(void)const;
   private:
     std::vector<T*> * m_result;
@@ -24,7 +25,6 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   template <class T>
     dom_osm_object_list_extractor<T>::dom_osm_object_list_extractor(void):
-    dom_extractor_base("dom_osm_object_list_extractor<"+T::get_type_str()+">"),
     m_result(NULL)
     {
     }

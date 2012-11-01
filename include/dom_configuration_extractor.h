@@ -1,19 +1,20 @@
 #ifndef _DOM_CONFIGURATION_EXTRACTOR_H_
 #define _DOM_CONFIGURATION_EXTRACTOR_H_
 
-#include "dom_extractor_base.h"
+#include "dom_simple_analyzer_if.h"
 #include "configuration.h"
 #include "xmlParser.h"
 #include <cstring>
 
 namespace osm_diff_watcher
 {
-  class dom_configuration_extractor:public dom_extractor_base
+  class dom_configuration_extractor: public dom_simple_analyzer_if
   {
   public:
     inline dom_configuration_extractor(void);
     // Method inherited from dom_analyzer_if
     inline void analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree);
+    inline void init(void){}
     // end of Method inherited from dom_analyzer_if
     inline const configuration * get_result(void)const;
   private:
@@ -21,7 +22,6 @@ namespace osm_diff_watcher
   };
   //----------------------------------------------------------------------------
   dom_configuration_extractor::dom_configuration_extractor(void):
-    dom_extractor_base("configuration_extractor"),
     m_result(NULL)
     {
     }
