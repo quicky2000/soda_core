@@ -1,0 +1,163 @@
+#ifndef _OSM_CACHE_
+#define _OSM_CACHE_
+
+// Sql table types
+#include "osm_cache_named_table.h"
+#include "osm_cache_versionned_table.h"
+#include "osm_cache_ordered_table.h"
+#include "osm_cache_tag_table.h"
+
+// Elements to be stored in table
+#include "osm_cache_named_item.h"
+
+#include "osm_cache_user.h"
+
+#include "osm_cache_node.h"
+#include "osm_cache_core_element.h"
+
+#include "osm_cache_object_tag.h"
+#include "osm_cache_way_member.h"
+#include "osm_cache_relation_member.h"
+
+// Tables descriptions
+#include "osm_cache_named_item_table_description.h"
+#include "osm_cache_user_table_description.h"
+#include "osm_cache_node_table_description.h"
+
+#include "osm_cache_core_element_table_description.h"
+
+#include "osm_cache_object_tag_table_description.h"
+
+#include "osm_cache_way_member_table_description.h"
+#include "osm_cache_relation_member_table_description.h"
+
+#include <vector>
+
+class sqlite3;
+class sqlite3_stmt;
+
+
+namespace osm_diff_watcher
+{
+  class osm_cache
+  {
+  public:
+    osm_cache(const std::string & p_name = "osm_cache.sqlite3");
+    void store(const osm_api_data_types::osm_object::t_osm_id & p_id,
+               const std::string & p_user_name,
+               const std::string & p_date);
+    void store(const osm_api_data_types::osm_node & p_node);
+    void store(const osm_api_data_types::osm_way & p_way);
+    void store(const osm_api_data_types::osm_relation & p_relation);
+    const osm_api_data_types::osm_node * const load_node(const osm_api_data_types::osm_object::t_osm_id & p_id,
+							 const osm_api_data_types::osm_core_element::t_osm_version & p_version);
+    const osm_api_data_types::osm_way * const load_way(const osm_api_data_types::osm_object::t_osm_id & p_id,
+                                                        const osm_api_data_types::osm_core_element::t_osm_version & p_version);
+    const osm_api_data_types::osm_relation * const load_relation(const osm_api_data_types::osm_object::t_osm_id & p_id,
+                                                             const osm_api_data_types::osm_core_element::t_osm_version & p_version);
+    bool load_user(const osm_api_data_types::osm_object::t_osm_id & p_id,
+                   std::string & p_name,
+                   std::string & p_date);
+
+    ~osm_cache(void);
+  private:
+    void store_tags(osm_cache_tag_table<osm_cache_object_tag> & p_table,
+                    const osm_api_data_types::osm_core_element & p_element);
+
+    void prepare_get_tags_statement(const std::string & p_table_name,sqlite3_stmt * & p_stmt_ptr);
+    template <class T>
+      void get_tags(sqlite3_stmt * p_stmt,
+                    const osm_api_data_types::osm_object::t_osm_id & p_id,
+                    const osm_api_data_types::osm_core_element::t_osm_version & p_version,
+                    std::vector<std::pair<std::string,std::string> > & p_result);
+    void get_relation_members(const osm_api_data_types::osm_object::t_osm_id & p_id,
+			      const osm_api_data_types::osm_core_element::t_osm_version & p_version,
+			      std::vector<osm_api_data_types::osm_relation_member *> & p_result);
+    sqlite3 * m_db;
+    sqlite3_stmt * m_get_node_tags_stmt;
+    sqlite3_stmt * m_get_way_tags_stmt;
+    sqlite3_stmt * m_get_relation_tags_stmt;
+    sqlite3_stmt * m_get_relation_members_stmt;
+
+    // Simple key tables
+    osm_cache_named_table<osm_cache_named_item> m_tag_name_table;
+    osm_cache_named_table<osm_cache_named_item> m_tag_value_table;
+    osm_cache_named_table<osm_cache_named_item> m_relation_role_table;
+
+    // Element tables
+    osm_cache_named_table<osm_cache_user> m_user_table;
+
+    osm_cache_versionned_table<osm_cache_node> m_node_table;
+    osm_cache_versionned_table<osm_cache_core_element> m_way_table;
+    osm_cache_versionned_table<osm_cache_core_element> m_relation_table;
+
+    // Tag tables
+    osm_cache_tag_table<osm_cache_object_tag> m_node_tag_table;
+    osm_cache_tag_table<osm_cache_object_tag> m_way_tag_table;
+    osm_cache_tag_table<osm_cache_object_tag> m_relation_tag_table;
+
+    // member tables
+    osm_cache_ordered_table<osm_cache_way_member> m_way_member_table;
+    osm_cache_ordered_table<osm_cache_relation_member> m_relation_member_table;
+
+  };
+
+  //----------------------------------------------------------------------------
+  template <class T>
+    void osm_cache::get_tags(sqlite3_stmt * p_stmt,
+                             const osm_api_data_types::osm_object::t_osm_id & p_id,
+                             const osm_api_data_types::osm_core_element::t_osm_version & p_version,
+                             std::vector<std::pair<std::string,std::string> > & p_result)
+    {
+  
+      // Binding values to statement
+      //----------------------------
+      int l_status = sqlite3_bind_int64(p_stmt,sqlite3_bind_parameter_index(p_stmt,"$id"),p_id);
+      if(l_status != SQLITE_OK)
+        {
+          std::cout << "ERROR during binding of id parameter for get_by_id_version statement of " << osm_cache_base_table_description<T>::get_class_type() << " : " << sqlite3_errmsg(m_db) << std::endl ;     
+          exit(-1);
+        }
+    
+      l_status = sqlite3_bind_int(p_stmt,sqlite3_bind_parameter_index(p_stmt,"$version"),p_version);
+      if(l_status != SQLITE_OK)
+        {
+          std::cout << "ERROR during binding of version parameter for get_by_id_version statement of " << osm_cache_base_table_description<T>::get_class_type() << " : " << sqlite3_errmsg(m_db) << std::endl ;     
+          exit(-1);
+        }
+    
+      // Executing statement
+      //---------------------
+      while((l_status = sqlite3_step(p_stmt)) == SQLITE_ROW)
+        {
+          p_result.push_back(std::pair<std::string,std::string>((const char*)sqlite3_column_text(p_stmt,0),(const char*)sqlite3_column_text(p_stmt,1)));
+        }
+      if(l_status != SQLITE_DONE)
+        {
+          std::cout << "ERROR during selection of tags : " << sqlite3_errmsg(m_db) << std::endl ;
+          exit(-1);
+        }
+
+      // Reset the statement for the next use
+      //--------------------------------------
+      l_status = sqlite3_reset(p_stmt);  
+      if(l_status != SQLITE_OK)
+        {
+          std::cout << "ERROR during reset of get_node_tags statement : " << sqlite3_errmsg(m_db) << std::endl ;     
+          exit(-1);
+        }
+
+      // Reset bindings because they are now useless
+      //--------------------------------------------
+#if SQLITE_VERSION_NUMBER > 3006000
+      l_status = sqlite3_clear_bindings(p_stmt);
+      if(l_status != SQLITE_OK)
+        {
+          std::cout << "ERROR during reset of bindings of get_node_tags statement : " << sqlite3_errmsg(m_db) << std::endl ;     
+          exit(-1);
+        }
+#endif
+        
+    }
+}
+#endif // _OSM_CACHE_
