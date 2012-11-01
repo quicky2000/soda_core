@@ -8,10 +8,16 @@ namespace osm_diff_watcher
   class apply_init: public analyze_operation<osm_diff_analyzer_cpp_if::cpp_analyzer_if>
   {
   public:
+    apply_init(const osm_diff_analyzer_if::osm_diff_state * p_state):
+      m_state(p_state)
+      {
+      }
     void operator()(osm_diff_analyzer_cpp_if::cpp_analyzer_if * p_analyzer)const
     {
-      p_analyzer->init();
+      p_analyzer->init(m_state);
     }
+  private:
+    const osm_diff_analyzer_if::osm_diff_state * m_state;
   }
   ;
 

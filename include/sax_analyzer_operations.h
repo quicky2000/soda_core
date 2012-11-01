@@ -6,13 +6,20 @@
 
 namespace osm_diff_watcher
 {
-  class apply_init: public analyze_operation<osm_diff_analyzer_sax_if::sax_analyzer_if>
+  class apply_sax_init: public analyze_operation<osm_diff_analyzer_sax_if::sax_analyzer_if>
   {
   public:
-    void operator()(osm_diff_analyzer_sax_if::sax_analyzer_if * p_analyzer)const
+    inline apply_sax_init(const osm_diff_analyzer_if::osm_diff_state * p_diff_state):
+      m_state(p_diff_state)
+      {
+      }
+
+    inline void operator()(osm_diff_analyzer_sax_if::sax_analyzer_if * p_analyzer)const
     {
-      p_analyzer->init();
+      p_analyzer->init(m_state);
     }
+  private:
+    const osm_diff_analyzer_if::osm_diff_state * m_state;
   }
   ;
 
@@ -21,12 +28,12 @@ namespace osm_diff_watcher
   private:
     typedef void (osm_diff_analyzer_sax_if::sax_analyzer_if::* t_method_ptr)(const std::string &);
   public:
-    apply_element(const char * p_element, t_method_ptr p_method_ptr):
+    inline apply_element(const char * p_element, t_method_ptr p_method_ptr):
       m_element(p_element),
       m_method_ptr(p_method_ptr)
 	{
 	}
-      void operator()(osm_diff_analyzer_sax_if::sax_analyzer_if * p_analyzer)const
+      inline void operator()(osm_diff_analyzer_sax_if::sax_analyzer_if * p_analyzer)const
       {
 	(p_analyzer->*m_method_ptr)(m_element);
       }
@@ -39,12 +46,12 @@ namespace osm_diff_watcher
   class apply_attribute: public analyze_operation<osm_diff_analyzer_sax_if::sax_analyzer_if>
   {
   public:
-    apply_attribute(const char * p_name,const char * p_value):
+    inline apply_attribute(const char * p_name,const char * p_value):
       m_name(p_name),
       m_value(p_value)
 	{
 	}
-      void operator()(osm_diff_analyzer_sax_if::sax_analyzer_if * p_analyzer)const
+      inline void operator()(osm_diff_analyzer_sax_if::sax_analyzer_if * p_analyzer)const
       {
 	p_analyzer->get_attribute(m_name,m_value);
       }
