@@ -32,6 +32,10 @@ namespace osm_diff_watcher
     p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_CHANGESET_CONTENT] = (void*) common_api_wrapper::get_changeset_content;
     p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_CHANGESETS] = (void*) common_api_wrapper::get_changesets;
     p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_MAP] = (void*) common_api_wrapper::get_map;
+    p_api_ptr[osm_diff_analyzer_if::common_api_if::CACHE_NODE] = (void*) common_api_wrapper::cache_node;
+    p_api_ptr[osm_diff_analyzer_if::common_api_if::CACHE_WAY] = (void*) common_api_wrapper::cache_way;
+    p_api_ptr[osm_diff_analyzer_if::common_api_if::CACHE_RELATION] = (void*) common_api_wrapper::cache_relation;
+    p_api_ptr[osm_diff_analyzer_if::common_api_if::CACHE_USER] = (void*) common_api_wrapper::cache_user;
   }
 
   //----------------------------------------------------------------------------
@@ -40,7 +44,28 @@ namespace osm_diff_watcher
     return COMMON_API_IF_VERSION;
   }
 
-  osm_ressources common_api_wrapper::m_ressources;
-  osm_api common_api_wrapper::m_api;
+  //----------------------------------------------------------------------------
+  common_api_wrapper::common_api_wrapper(osm_ressources & p_ressources):
+    m_ressources(p_ressources),
+    m_api(p_ressources)
+  {
+  }
+
+  //----------------------------------------------------------------------------
+  common_api_wrapper & common_api_wrapper::instance(osm_ressources & p_ressources)
+  {
+    if(m_instance == NULL)
+      {
+        m_instance = new common_api_wrapper(p_ressources);
+      }
+    return *m_instance;
+  }
+   //----------------------------------------------------------------------------
+  void common_api_wrapper::remove_instance(void)
+  {
+    delete m_instance;
+  }
+
+  common_api_wrapper * common_api_wrapper::m_instance = NULL;
 }
 //EOF

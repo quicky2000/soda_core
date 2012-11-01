@@ -35,7 +35,12 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   configuration::~configuration(void)
   {
-    // No deletion of module configuration. They will delete by module themselves
+    for(std::vector<osm_diff_analyzer_if::module_configuration * >::iterator l_iter = m_module_configurations.begin();
+        l_iter != m_module_configurations.end();
+        ++l_iter)
+      {
+        delete *l_iter;
+      }
   }
 
   //----------------------------------------------------------------------------

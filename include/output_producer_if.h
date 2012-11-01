@@ -3,6 +3,7 @@
 
 #include "analyze_operation.h"
 #include <set>
+#include <iostream>
 
 namespace osm_diff_watcher
 {

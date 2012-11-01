@@ -6,6 +6,7 @@
 #include "url_reader.h"
 #include "osm_api_capabilities.h"
 #include "dom_osm_parser.h"
+#include "osm_diff_dom_parser.h"
 #include "osm_change.h"
 #include "dom_osm_change_extractor.h"
 #include <string>
@@ -48,7 +49,7 @@ namespace osm_diff_watcher
   class osm_api
   {
   public:
-    osm_api(void);
+    osm_api(osm_ressources & p_ressources);
 
     template <class T>
       const T * const get(const osm_api_data_types::osm_object::t_osm_id & p_id,
@@ -63,21 +64,21 @@ namespace osm_diff_watcher
       const std::vector<T*> * const get(const std::vector<osm_api_data_types::osm_object::t_osm_id> & p_ids);
 
     inline const osm_api_data_types::osm_way * const get_full_way(const osm_api_data_types::osm_object::t_osm_id & p_id,
-					      std::vector<osm_api_data_types::osm_node*> & p_nodes);
+                                                                  std::vector<osm_api_data_types::osm_node*> & p_nodes);
 
     inline const osm_api_data_types::osm_relation * const get_full_relation(const osm_api_data_types::osm_object::t_osm_id & p_id,
-							std::vector<osm_api_data_types::osm_node*> & p_nodes,
-							std::vector<osm_api_data_types::osm_way*> & p_ways);
+                                                                            std::vector<osm_api_data_types::osm_node*> & p_nodes,
+                                                                            std::vector<osm_api_data_types::osm_way*> & p_ways);
 
     inline const std::vector<osm_api_data_types::osm_change*> * const get_changeset_content(const osm_api_data_types::osm_object::t_osm_id & p_id);
 
     inline const std::vector<osm_api_data_types::osm_changeset* > * const get_changesets(const osm_api_data_types::osm_bounding_box & p_bounding_box,
-                                                                     const osm_api_data_types::osm_object::t_osm_id & p_id,
-                                                                     const std::string & p_user_name,
-                                                                     const std::string & p_time1,
-                                                                     const std::string & p_time2,
-                                                                     bool p_open,
-                                                                     bool p_close);
+                                                                                         const osm_api_data_types::osm_object::t_osm_id & p_id,
+                                                                                         const std::string & p_user_name,
+                                                                                         const std::string & p_time1,
+                                                                                         const std::string & p_time2,
+                                                                                         bool p_open,
+                                                                                         bool p_close);
 
     inline void get_map(const osm_api_data_types::osm_bounding_box & p_bounding_box,
                         std::vector<osm_api_data_types::osm_node*> & p_nodes,
@@ -87,12 +88,12 @@ namespace osm_diff_watcher
     inline const osm_api_capabilities * get_capabilities(void);
 
     // Some utilities
-    void dump_url(const std::string & p_url,std::string & p_result);
-    void dump_url(const std::string & p_url, const std::string & p_file_name);
+    //TO DELETE    void dump_url(const std::string & p_url,std::string & p_result);
+    //TO DELETE    void dump_url(const std::string & p_url, const std::string & p_file_name);
 
   private:
     dom_osm_parser m_osm_parser;
-    osm_ressources m_ressources;
+    osm_ressources & m_ressources;
     quicky_url_reader::url_reader m_url_reader;
   };
 
@@ -111,8 +112,8 @@ namespace osm_diff_watcher
           l_url += "/"+l_version_str.str();
         }
       std::string l_result;
-      dump_url(l_url,l_result);
-    return m_osm_parser.get<T>(l_result);     
+      m_url_reader.dump_url(l_url,l_result);
+      return m_osm_parser.get<T>(l_result);     
     }
 
   //----------------------------------------------------------------------------
@@ -123,7 +124,7 @@ namespace osm_diff_watcher
       l_id_str << p_id;
       std::string l_url = m_ressources.get_api_url()+"/"+T::get_type_str()+"/" + l_id_str.str() + "/history";
       std::string l_result;
-      dump_url(l_url,l_result);
+      m_url_reader.dump_url(l_url,l_result);
       return m_osm_parser.get_list<T>(l_result);     
     }
 
@@ -145,44 +146,44 @@ namespace osm_diff_watcher
 	  l_url += l_id_str.str();
 	}
       std::string l_result;
-      dump_url(l_url,l_result);
+      m_url_reader.dump_url(l_url,l_result);
       return m_osm_parser.get_list<T>(l_result);     
     }
 
   //----------------------------------------------------------------------------
   template <class T,class T_RETURN>
     const std::vector<T_RETURN *> * const osm_api::get(const osm_api_data_types::osm_object::t_osm_id & p_id)
-    {
-      std::stringstream l_id_str;
-      l_id_str << p_id;
-      std::string l_url = m_ressources.get_api_url()+"/"+T::get_type_str()+"/" + l_id_str.str() + "/" + T_RETURN::get_type_str() + "s";
-      std::string l_result;
-      dump_url(l_url,l_result);
-      return m_osm_parser.get_list<T_RETURN>(l_result);     
-    }
+  {
+    std::stringstream l_id_str;
+    l_id_str << p_id;
+    std::string l_url = m_ressources.get_api_url()+"/"+T::get_type_str()+"/" + l_id_str.str() + "/" + T_RETURN::get_type_str() + "s";
+    std::string l_result;
+    m_url_reader.dump_url(l_url,l_result);
+    return m_osm_parser.get_list<T_RETURN>(l_result);     
+  }
 
   //----------------------------------------------------------------------------
   const osm_api_data_types::osm_way * const osm_api::get_full_way(const osm_api_data_types::osm_object::t_osm_id & p_id,
-					      std::vector<osm_api_data_types::osm_node*> & p_nodes)
+                                                                  std::vector<osm_api_data_types::osm_node*> & p_nodes)
     {
       std::stringstream l_id_str;
       l_id_str << p_id;
       std::string l_url = m_ressources.get_api_url()+"/way/" + l_id_str.str() + "/full";
       std::string l_result;
-      dump_url(l_url,l_result);
+      m_url_reader.dump_url(l_url,l_result);
       return m_osm_parser.get_full_way(l_result,p_nodes);           
     }
 
   //----------------------------------------------------------------------------
   const osm_api_data_types::osm_relation * const osm_api::get_full_relation(const osm_api_data_types::osm_object::t_osm_id & p_id,
-							std::vector<osm_api_data_types::osm_node*> & p_nodes,
-							std::vector<osm_api_data_types::osm_way*> & p_ways)
+                                                                            std::vector<osm_api_data_types::osm_node*> & p_nodes,
+                                                                            std::vector<osm_api_data_types::osm_way*> & p_ways)
     {
       std::stringstream l_id_str;
       l_id_str << p_id;
       std::string l_url = m_ressources.get_api_url()+"/relation/" + l_id_str.str() + "/full";
       std::string l_result;
-      dump_url(l_url,l_result);
+      m_url_reader.dump_url(l_url,l_result);
       return m_osm_parser.get_full_relation(l_result,p_nodes,p_ways);           
     }
 
@@ -194,8 +195,8 @@ namespace osm_diff_watcher
       l_id_str << p_id;
       std::string l_url = m_ressources.get_api_url()+"/changeset/" + l_id_str.str() + "/download";
       std::string l_result;
-      dump_url(l_url,l_result);
-      dom_parser l_osm_change_parser;
+      m_url_reader.dump_url(l_url,l_result);
+      dom_parser l_osm_change_parser("osmChange");
       dom_osm_change_extractor l_extractor;
       l_osm_change_parser.add_analyzer(l_extractor);
       l_osm_change_parser.parse_string(l_result);
@@ -204,12 +205,12 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   const std::vector<osm_api_data_types::osm_changeset* > * const osm_api::get_changesets(const osm_api_data_types::osm_bounding_box & p_bounding_box,
-                                                                     const osm_api_data_types::osm_object::t_osm_id & p_id,
-                                                                     const std::string & p_user_name,
-                                                                     const std::string & p_time1,
-                                                                     const std::string & p_time2,
-                                                                     bool p_open,
-                                                                     bool p_close)
+                                                                                         const osm_api_data_types::osm_object::t_osm_id & p_id,
+                                                                                         const std::string & p_user_name,
+                                                                                         const std::string & p_time1,
+                                                                                         const std::string & p_time2,
+                                                                                         bool p_open,
+                                                                                         bool p_close)
     {
       // Check arguments
       if(p_id != 0 && p_user_name != "")
@@ -217,69 +218,69 @@ namespace osm_diff_watcher
           std::cout << "ERROR : it is forbidden to provide both user id (" << p_id << " and user name (\"" << p_user_name << "\"" << std::endl ;
           exit(-1);
         }
-       if(p_time1 == "" && p_time2 != "")
+      if(p_time1 == "" && p_time2 != "")
         {
           std::cout << "ERROR : time1 empty whereas time2 is not empty" << std::endl ;
           exit(-1);
         }
        
-       // End of argument check
+      // End of argument check
 
-       // Building URL"
-       std::string l_url = m_ressources.get_api_url()+"/" + osm_api_data_types::osm_changeset::get_type_str()+"s?";
-       bool l_first = true;
-       if(!p_bounding_box.is_empty())
-         {
-           l_url += "bbox=";
-           std::stringstream l_stream ;
-           l_stream << p_bounding_box.get_min_lat() << ",";
-           l_stream << p_bounding_box.get_min_lon() << ",";
-           l_stream << p_bounding_box.get_max_lat() << ",";
-           l_stream << p_bounding_box.get_max_lon();
-           l_url += l_stream.str();
-           l_first = false;
-         }
-       if(p_id)
-         {
-           if(!l_first) l_url +="&";
-           std::stringstream l_stream;
-           l_stream << p_id;
-           l_url += "user=" + l_stream.str();
-           l_first = false;          
-         }
-       if(p_user_name!= "")
-         {
-           if(!l_first) l_url +="&";
-           l_url += "display_name=" + p_user_name;
+      // Building URL"
+      std::string l_url = m_ressources.get_api_url()+"/" + osm_api_data_types::osm_changeset::get_type_str()+"s?";
+      bool l_first = true;
+      if(!p_bounding_box.is_empty())
+        {
+          l_url += "bbox=";
+          std::stringstream l_stream ;
+          l_stream << p_bounding_box.get_min_lat() << ",";
+          l_stream << p_bounding_box.get_min_lon() << ",";
+          l_stream << p_bounding_box.get_max_lat() << ",";
+          l_stream << p_bounding_box.get_max_lon();
+          l_url += l_stream.str();
           l_first = false;
-         }
-       if(p_time1 != "")
-         {
-           if(!l_first) l_url +="&";
-           l_url += "time=" + p_time1;
+        }
+      if(p_id)
+        {
+          if(!l_first) l_url +="&";
+          std::stringstream l_stream;
+          l_stream << p_id;
+          l_url += "user=" + l_stream.str();
+          l_first = false;          
+        }
+      if(p_user_name!= "")
+        {
+          if(!l_first) l_url +="&";
+          l_url += "display_name=" + p_user_name;
           l_first = false;
-           if(p_time2 != "")
-             {
-               l_url += "," + p_time2;
-             }
-         }
-       if(p_open)
-         {
-           if(!l_first) l_url +="&";
-           l_url +="open";
+        }
+      if(p_time1 != "")
+        {
+          if(!l_first) l_url +="&";
+          l_url += "time=" + p_time1;
           l_first = false;
-         }
-       if(p_close)
-         {
-           if(!l_first) l_url +="&";
-           l_url +="close";
-           l_first = false;
+          if(p_time2 != "")
+            {
+              l_url += "," + p_time2;
+            }
+        }
+      if(p_open)
+        {
+          if(!l_first) l_url +="&";
+          l_url +="open";
+          l_first = false;
+        }
+      if(p_close)
+        {
+          if(!l_first) l_url +="&";
+          l_url +="close";
+          l_first = false;
         }
       
-       std::string l_result;
-       dump_url(l_url,l_result);
-       return m_osm_parser.get_list<osm_api_data_types::osm_changeset>(l_result);     
-   }
+      std::string l_result;
+      m_url_reader.dump_url(l_url,l_result);
+      return m_osm_parser.get_list<osm_api_data_types::osm_changeset>(l_result);     
+    }
   //----------------------------------------------------------------------------
   void osm_api::get_map(const osm_api_data_types::osm_bounding_box & p_bounding_box,
                         std::vector<osm_api_data_types::osm_node*> & p_nodes,
@@ -295,7 +296,7 @@ namespace osm_diff_watcher
     l_stream << p_bounding_box.get_max_lon();
     l_url += l_stream.str();
     std::string l_result;
-    dump_url(l_url,l_result);
+    m_url_reader.dump_url(l_url,l_result);
     m_osm_parser.get(l_result,p_nodes,p_ways,p_relations); 
   }
 
@@ -304,7 +305,7 @@ namespace osm_diff_watcher
     {
       std::string l_url = m_ressources.get_api_url()+"/capabilities";
       std::string l_result;
-      dump_url(l_url,l_result);
+      m_url_reader.dump_url(l_url,l_result);
       return m_osm_parser.get_capabilities(l_result);
     }
 }
