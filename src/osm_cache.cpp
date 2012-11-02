@@ -40,7 +40,8 @@ namespace osm_diff_watcher
     // Tag tables
     m_node_tag_table("node_tags"),
     m_way_tag_table("way_tags"),
-    m_relation_tag_table("relation_tags")
+    m_relation_tag_table("relation_tags"),
+    m_informations("information_table")
   {
     // Opening the database
     int l_status = sqlite3_open(p_name.c_str(), &m_db);
@@ -58,7 +59,14 @@ namespace osm_diff_watcher
 	m_relation_tag_table.set_db(m_db);
 	m_way_member_table.set_db(m_db);
 	m_relation_member_table.set_db(m_db);
+	m_informations.set_db(m_db);
 
+	std::pair<std::string,std::string> l_version_info;
+	bool l_result = m_informations.get("schema_version",l_version_info);
+	if(!l_result)
+	  {
+	    m_informations.create("schema_version","0.1");
+	  }
 
         prepare_get_tags_statement(m_node_tag_table.get_name(),m_get_node_tags_stmt);
         prepare_get_tags_statement(m_way_tag_table.get_name(),m_get_way_tags_stmt);
@@ -78,7 +86,6 @@ namespace osm_diff_watcher
 	  "AND "+ m_relation_role_table.get_name() + ".Id = Role_id "+
 	  "ORDER BY Position ASC"+
 	  ";";
-	std::cout << l_stmt_str << std::endl ;
 	l_status = sqlite3_prepare_v2(m_db,(l_stmt_str
 					    ).c_str(),
                                       -1,

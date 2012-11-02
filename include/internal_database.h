@@ -21,10 +21,16 @@
 #ifndef _INTERNAL_DATABASE_H_
 #define _INTERNAL_DATABASE_H_
 
+#include "information_table.h"
 #include <string>
 
 class sqlite3;
 class sqlite3_stmt;
+
+namespace osm_diff_analyzer_if
+{
+  class osm_diff_state;
+}
 
 namespace osm_diff_watcher
 {
@@ -32,8 +38,12 @@ namespace osm_diff_watcher
   {
   public:
     internal_database(const std::string & p_name="osm_diff_watcher.sqlite3");
+    ~internal_database(void);
+    void store(const osm_diff_analyzer_if::osm_diff_state & p_diff_state);
+    const uint64_t get_latest_sequence_number(void);
   private:
     sqlite3 * m_db;
+    information_table m_table;
   };
 }
 #endif // _INTERNAL_DATABASE_H_

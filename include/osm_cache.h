@@ -26,6 +26,7 @@
 #include "osm_cache_versionned_table.h"
 #include "osm_cache_ordered_table.h"
 #include "osm_cache_tag_table.h"
+#include "information_table.h"
 
 // Elements to be stored in table
 #include "osm_cache_named_item.h"
@@ -120,6 +121,7 @@ namespace osm_diff_watcher
     osm_cache_ordered_table<osm_cache_way_member> m_way_member_table;
     osm_cache_ordered_table<osm_cache_relation_member> m_relation_member_table;
 
+    information_table m_informations;
   };
 
   //----------------------------------------------------------------------------

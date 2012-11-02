@@ -29,7 +29,6 @@
 int main(int p_argc,char ** p_argv)
 {
   std::cout << "Nb arguments : " << p_argc << std::endl ;
-  uint64_t l_start_seq_number = 0;
   std::string l_file_name("");
   if(p_argc > 2)
     {
@@ -42,7 +41,7 @@ int main(int p_argc,char ** p_argv)
     }
 
   osm_diff_watcher::osm_diff_watcher l_watcher(l_file_name);
-  l_watcher.run(l_start_seq_number);
+  l_watcher.run();
 
 }
 //EOF

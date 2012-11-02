@@ -28,6 +28,7 @@
 #include "dom2cpp_analyzer.h"
 #include "osm_diff_dom_parser.h"
 #include "sax_parser.h"
+#include "internal_database.h"
 #include <string>
 #include <map>
 
@@ -47,15 +48,12 @@ namespace osm_diff_watcher
   public:
     osm_diff_watcher(const std::string & p_file_name);
     ~osm_diff_watcher(void);
-    void run(const uint64_t & p_start_seq_number);
+    void run(void);
 
   private:
     static void sig_handler(int p_sig);
-    //TO DELETE    void dump_url(const std::string & p_url);
     void parse_diff(const osm_diff_analyzer_if::osm_diff_state * p_diff_state);
-    //TO DELETE    std::string get_url_diff(const uint64_t & p_seq_number);
-    //TO DELETE    uint64_t get_sequence_number(void)const;
-
+    const uint64_t get_start_sequence_number(const osm_diff_analyzer_if::osm_diff_state &p_diff_state);
     static bool m_stop;
 
     osm_ressources & m_ressources;
@@ -71,6 +69,7 @@ namespace osm_diff_watcher
     std::map<std::string,osm_diff_analyzer_cpp_if::cpp_analyzer_if *> m_cpp_analyzers;
     std::map<std::string,osm_diff_analyzer_if::diff_analyzer_if *> m_disabled_analyzers;
     quicky_url_reader::url_reader & m_url_reader;
+    internal_database m_informations;
   };
 }
 #endif /* _OSM_DIFF_WATCHER_H_  */

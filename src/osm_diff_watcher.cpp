@@ -32,6 +32,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <signal.h>
+#include <limits>
 using namespace quicky_url_reader;
 
 namespace osm_diff_watcher
@@ -212,25 +213,85 @@ namespace osm_diff_watcher
   }
 
   //------------------------------------------------------------------------------
-  void osm_diff_watcher::run(const uint64_t & p_start_seq_number)
+  const uint64_t osm_diff_watcher::get_start_sequence_number(const osm_diff_analyzer_if::osm_diff_state &p_diff_state)
   {
-    //TO DELETE    uint64_t l_end_seq_number = get_sequence_number();
+    std::string l_start_policy = m_configuration->get_variable("start_policy");
+    uint64_t l_result;
+    if(l_start_policy=="current" || l_start_policy == "")
+      {
+	std::cout << "Start Policy : Using current sequence number" << std::endl ;
+	l_result = p_diff_state.get_sequence_number();
+      }
+    else if(l_start_policy == "stored")
+      {
+	std::cout << "Start Policy : Using stored sequence number" << std::endl ;
+	l_result = m_informations.get_latest_sequence_number() +1;
+	if(!l_result)
+	  {
+	    std::cout << "ERROR : Using Start policy \"stored\" whereas no sequence number has been stored" << std::endl;
+	    exit(EXIT_FAILURE);
+	  }
+      }
+    else if(l_start_policy == "user_defined")
+      {
+	std::string l_start_value = m_configuration->get_variable("start_sequence_number");
+	if(l_start_value=="")
+	  {
+	    std::cout << "Start Policy : Using user defined sequence number" << std::endl ;
+	    std::cout << "ERROR : \"start_sequence_number\" should be defined when using start_policy \"user_defined\"" << std::endl ;
+	    exit(EXIT_FAILURE);
+	  }
+	l_result = strtoull(l_start_value.c_str(),NULL,10);
+      }
+    else if(l_start_policy != "")
+      {
+	std::cout << "ERROR : unexpected value for start_policy : \"" << l_start_policy << "\"" << std::endl ;
+	std::cout << "\t Value should be \"current\",\"stored\" or \"user_defined\"" << std::endl ;
+	exit(EXIT_FAILURE);
+      }
+
+    return l_result;
+  }
+
+  //------------------------------------------------------------------------------
+  void osm_diff_watcher::run(void)
+  {
     const osm_diff_analyzer_if::osm_diff_state * l_diff_state = m_ressources.get_minute_diff_state();
     uint64_t l_end_seq_number = l_diff_state->get_sequence_number();
-    uint64_t l_current_seq_number = ( p_start_seq_number ? p_start_seq_number : l_end_seq_number);
-    uint32_t l_nb_iteration = 1;//00 ;
+
+    // Get start sequence number
+    //TO DELETE    uint64_t l_current_seq_number = ( p_start_seq_number ? p_start_seq_number : l_end_seq_number);
+    uint64_t l_current_seq_number = get_start_sequence_number(*l_diff_state);
+
+    // Managing iteration number
+    uint64_t l_nb_iteration = std::numeric_limits<uint64_t>::max();
+    if(m_configuration->get_variable("iteration_number") != "")
+      {
+	l_nb_iteration = strtoull(m_configuration->get_variable("iteration_number").c_str(),NULL,10);
+      }
+
     while(l_nb_iteration && !m_stop)
       {
 	std::cout << "--------------------------------------------------------" << std::endl ;
 	std::cout << l_nb_iteration << " remaining iterations" << std::endl ;
 	std::cout << "Latest seq number available = " << l_end_seq_number << std::endl ;
 	std::cout << "--> Sequence number = \"" << l_current_seq_number << "\"" << std::endl;
-        //TO DELETE	std::string l_url_diff = get_url_diff(l_current_seq_number);
+	if(l_current_seq_number != l_end_seq_number)
+	  {
+	    delete l_diff_state;
+	    l_diff_state = new osm_diff_analyzer_if::osm_diff_state(l_current_seq_number,"");
+	  }
+	else if(l_diff_state == NULL)
+	  {
+	    l_diff_state = new osm_diff_analyzer_if::osm_diff_state(l_current_seq_number,"");
+	  }
+
 	std::string l_url_diff = m_ressources.get_url_minute_diff(l_current_seq_number);
 	std::cout << "Url of diff file \"" << l_url_diff << "\"" << std::endl ;
         time_t l_begin_time = time(NULL);
 	m_url_reader.dump_url_binary(l_url_diff,m_diff_file_name);
 	parse_diff(l_diff_state);
+	m_informations.store(*l_diff_state);
         delete l_diff_state;
         l_diff_state = NULL;
 	--l_nb_iteration;
@@ -248,7 +309,6 @@ namespace osm_diff_watcher
 		  {
 		    std::cout << "Wait for " << l_delay << " seconds" << std::endl ;
 		    sleep(l_delay);
-                    //TO DELETE		    l_end_seq_number = get_sequence_number(); 
                     delete l_diff_state;
                     l_diff_state = m_ressources.get_minute_diff_state();
                     l_end_seq_number = l_diff_state->get_sequence_number();
@@ -278,74 +338,6 @@ namespace osm_diff_watcher
     m_dom_parser.set_diff_state(p_diff_state);
     m_dom_parser.parse(m_diff_file_name);  
   }
-
-  //------------------------------------------------------------------------------
-  //TO DELETE  void osm_diff_watcher::dump_url(const std::string & p_url)
-  //TO DELETE  {
-  //TO DELETE    url_reader l_url_reader;
-  //TO DELETE    download_buffer l_buffer;
-  //TO DELETE    l_url_reader.read_url(p_url.c_str(),l_buffer);
-  //TO DELETE    std::ofstream l_output_file(m_diff_file_name,std::ios::out | std::ios::binary);
-  //TO DELETE    if(l_output_file==NULL)
-  //TO DELETE      {
-  //TO DELETE	std::cout << "ERROR : Unable to open output file \"tmp_diff.gz\"" << std::endl ;
-  //TO DELETE	exit(EXIT_FAILURE);
-  //TO DELETE      }
-  //TO DELETE    l_output_file.write(l_buffer.get_data(),l_buffer.get_size());
-  //TO DELETE    l_output_file.close();
-  //TO DELETE  }
-
-  //------------------------------------------------------------------------------
-  //TO DELETE  std::string osm_diff_watcher::get_url_diff(const uint64_t & p_seq_number)
-  //TO DELETE  {
-  //TO DELETE    std::stringstream l_stream;
-  //TO DELETE    l_stream << p_seq_number;
-  //TO DELETE    std::string l_seq_number = l_stream.str();
-  //TO DELETE    std::string l_complete_seq_number = (l_seq_number.size() < 9 ? std::string(9 - l_seq_number.size(),'0') + l_seq_number : l_seq_number);
-  //TO DELETE    // For more information refer to OSM wiki page
-  //TO DELETE    // http://wiki.openstreetmap.org/wiki/Planet.osm/diffs
-  //TO DELETE    //  std::string l_url_diff("http://planet.openstreetmap.org/minute-replicate/");
-  //TO DELETE    //std::string l_url_diff("http://planet.openstreetmap.org/redaction-period/minute-replicate/");
-  //TO DELETE    std::string l_url_diff("http://planet.openstreetmap.org/replication/minute/");
-  //TO DELETE    l_url_diff += l_complete_seq_number.substr(0,3) + "/" + l_complete_seq_number.substr(3,3) + "/" + l_complete_seq_number.substr(6,3) + ".osc.gz";
-  //TO DELETE    return l_url_diff;
-  //TO DELETE  }
-
-  //------------------------------------------------------------------------------
-  //TO DELETE  uint64_t osm_diff_watcher::get_sequence_number(void)const
-  //TO DELETE  {
-  //TO DELETE    std::string l_sequence_number;
-  //TO DELETE    std::string l_timestamp;
-  //TO DELETE    url_reader l_url_reader;
-  //TO DELETE    download_buffer l_buffer;
-  //TO DELETE    l_url_reader.read_url("http://planet.openstreetmap.org/replication/minute/state.txt",l_buffer);
-  //TO DELETE    //  l_url_reader.read_url("http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt",l_buffer);
-  //TO DELETE    std::stringstream l_stream;
-  //TO DELETE    l_stream << l_buffer.get_data();
-  //TO DELETE    std::string l_line;
-  //TO DELETE    while(!getline(l_stream,l_line).eof())
-  //TO DELETE      {
-  //TO DELETE	if(l_line.find("sequenceNumber") != std::string::npos)
-  //TO DELETE	  {
-  //TO DELETE	    size_t l_begin = l_line.find("=");
-  //TO DELETE	    l_sequence_number = l_line.substr(l_begin+1);
-  //TO DELETE	  }
-  //TO DELETE	if(l_line.find("timestamp=") != std::string::npos)
-  //TO DELETE	  {
-  //TO DELETE	    size_t l_begin = l_line.find("=");
-  //TO DELETE	    l_timestamp = l_line.substr(l_begin+1);
-  //TO DELETE            while((l_begin = l_timestamp.find("\\")) != std::string::npos)
-  //TO DELETE              {
-  //TO DELETE                std::string l_suffix = l_timestamp.substr(l_begin+1);
-  //TO DELETE                std::string l_prefix = l_timestamp.substr(0,l_begin);
-  //TO DELETE                l_timestamp = l_prefix+l_suffix;
-  //TO DELETE              }
-  //TO DELETE            std::cout << "timestamp=\"" << l_timestamp << "\"" << std::endl ;
-  //TO DELETE	  }
-  //TO DELETE      }
-  //TO DELETE    assert(l_sequence_number != "");
-  //TO DELETE    return atoll(l_sequence_number.c_str());
-  //TO DELETE  }
 
   bool osm_diff_watcher::m_stop = false;
 }
