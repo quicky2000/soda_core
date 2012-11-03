@@ -120,8 +120,13 @@ namespace osm_diff_watcher
 	url_reader l_url_reader;
 	l_url_reader.set_authentication(l_proxy_name,l_proxy_port,l_proxy_login,l_proxy_password);
       }
-    // Number of iteration configuration
-    
+
+    // Manage replication dommain
+    std::string l_replication_domain = m_configuration->get_variable("replication_domain");
+    if(l_replication_domain != "")
+      {
+	m_ressources.set_replication_domain(l_replication_domain);
+      }
 
     // Add loaded SAX parsers
     for(std::map<std::string,osm_diff_analyzer_sax_if::sax_analyzer_if *>::iterator l_iter = m_sax_analyzers.begin();
