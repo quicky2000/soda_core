@@ -230,11 +230,15 @@ namespace osm_diff_watcher
     else if(l_start_policy == "stored")
       {
 	std::cout << "Start Policy : Using stored sequence number" << std::endl ;
-	l_result = m_informations.get_latest_sequence_number() +1;
+	l_result = m_informations.get_latest_sequence_number();
 	if(!l_result)
 	  {
-	    std::cout << "ERROR : Using Start policy \"stored\" whereas no sequence number has been stored" << std::endl;
-	    exit(EXIT_FAILURE);
+	    std::cout << "WARNING : Using Start policy \"stored\" whereas no sequence number has been stored, start with current sequence" << std::endl;
+	    l_result = p_diff_state.get_sequence_number();
+	  }
+	else
+	  {
+	    ++l_result;
 	  }
       }
     else if(l_start_policy == "user_defined")
