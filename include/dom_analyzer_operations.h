@@ -31,11 +31,9 @@ namespace osm_diff_watcher
     apply_init(const osm_diff_analyzer_if::osm_diff_state * p_state):
       m_state(p_state)
       {
-        std::cout << "Apply init constructor " << m_state << std::endl ;
       }
     void operator()(osm_diff_analyzer_dom_if::dom_analyzer_if * p_analyzer)const
     {
-      std::cout << "apply_init:operator() " << m_state << std::endl ;
       p_analyzer->init(m_state);
     }
   private:
