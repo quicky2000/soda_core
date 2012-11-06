@@ -33,6 +33,9 @@
 #include <cstdlib>
 #include <signal.h>
 #include <limits>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 using namespace quicky_url_reader;
 
 namespace osm_diff_watcher
@@ -159,6 +162,8 @@ namespace osm_diff_watcher
     m_dom_parser.add_analyzer(m_dom2cpp_analyzer);
 
 
+
+#ifndef _WIN32
     //Preparing signal handling to manage stop
     /* Déclaration d'une structure pour la mise en place des gestionnaires */
     struct sigaction l_signal_action;
@@ -173,6 +178,9 @@ namespace osm_diff_watcher
     
     /* Mise en place du gestionnaire bidon pour trois signaux */
     sigaction(SIGINT,&l_signal_action,0);
+#else
+    signal(SIGINT,sig_handler);
+#endif
   }
 
   //------------------------------------------------------------------------------
@@ -317,7 +325,11 @@ namespace osm_diff_watcher
 		do
 		  {
 		    std::cout << "Wait for " << l_delay << " seconds" << std::endl ;
-		    sleep(l_delay);
+#ifndef _WIN32
+                    sleep(l_delay);
+#else
+                    Sleep(1000*l_delay);
+#endif
                     delete l_diff_state;
                     l_diff_state = m_ressources.get_minute_diff_state();
                     l_end_seq_number = l_diff_state->get_sequence_number();
@@ -332,7 +344,7 @@ namespace osm_diff_watcher
     delete l_diff_state;
     if(m_stop)
       {
-        std::cout << "End of run requestedd by user" << std::endl ;
+        std::cout << "End of run requested by user" << std::endl ;
       }
   }
 

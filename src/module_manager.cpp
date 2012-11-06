@@ -81,7 +81,11 @@ namespace osm_diff_watcher
 	  }
 	else
 	  {
-	    std::cout << "ERROR : unable to open library \"" << p_name << "\" : " << dlerror() << std::endl ;
+	    std::cout << "ERROR : unable to open library \"" << p_name << "\"";
+#ifndef _WIN32
+            std::cout << " : " << dlerror() ;
+#endif
+            std::cout << std::endl ;
 	    exit(-1);
 	  }
 
@@ -114,7 +118,7 @@ namespace osm_diff_watcher
           #ifndef _WIN32
           dlclose(l_iter->second);
           #else // _WIN32
-          FreeLibrary((HMODULE)l_library_handle)
+          FreeLibrary((HMODULE)l_iter->second);
           #endif
 	++l_iter;
       }
