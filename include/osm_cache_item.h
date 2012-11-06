@@ -40,7 +40,7 @@ namespace osm_diff_watcher
     inline const osm_api_data_types::osm_object::t_osm_id & get_id(void)const;
     inline void set_id(const osm_api_data_types::osm_object::t_osm_id & p_id);
     virtual const std::string & get_type(void)const=0;
-  
+    inline virtual ~osm_cache_item(void){}
   private:
     osm_api_data_types::osm_object::t_osm_id m_id;
   
