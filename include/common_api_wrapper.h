@@ -1,22 +1,22 @@
 /*
-    This file is part of osm_diff_watcher, Openstreetmap diff analyze framework
-    The aim of this software is to provided generic facilities for diff analyzis
-    to allow developers to concentrate on analyze rather than diff management 
-    infrastructure
-    Copyright (C) 2012  Julien Thevenon ( julien_thevenon at yahoo.fr )
+  This file is part of osm_diff_watcher, Openstreetmap diff analyze framework
+  The aim of this software is to provided generic facilities for diff analyzis
+  to allow developers to concentrate on analyze rather than diff management 
+  infrastructure
+  Copyright (C) 2012  Julien Thevenon ( julien_thevenon at yahoo.fr )
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 #ifndef _COMMON_API_WRAPPER_H_
 #define _COMMON_API_WRAPPER_H_
@@ -50,7 +50,7 @@ namespace osm_diff_watcher
 									void * p_user_data=NULL);
 
     inline static const std::vector<osm_api_data_types::osm_node*> * const get_node_history(const osm_api_data_types::osm_object::t_osm_id & p_id,
-										     void * p_user_data = NULL);
+											    void * p_user_data = NULL);
 
     inline static const std::vector<osm_api_data_types::osm_way*> * const get_node_ways(const osm_api_data_types::osm_object::t_osm_id & p_id,
                                                                                         void * p_user_data = NULL);
@@ -65,34 +65,34 @@ namespace osm_diff_watcher
 							      void * p_user_data=NULL);
 
     inline static const osm_api_data_types::osm_way * get_way_version(const osm_api_data_types::osm_object::t_osm_id & p_id,
-							      const osm_api_data_types::osm_core_element::t_osm_version & p_version,
-							      void * p_user_data=NULL);
+								      const osm_api_data_types::osm_core_element::t_osm_version & p_version,
+								      void * p_user_data=NULL);
 
     inline static const std::vector<osm_api_data_types::osm_way*> * const get_way_history(const osm_api_data_types::osm_object::t_osm_id & p_id,
 											  void * p_user_data = NULL);
 
     inline static const std::vector<osm_api_data_types::osm_relation*> * const get_way_relations(const osm_api_data_types::osm_object::t_osm_id & p_id,
-                                                                                                  void * p_user_data = NULL);
+												 void * p_user_data = NULL);
 
     inline static const osm_api_data_types::osm_way * const get_way_full(const osm_api_data_types::osm_object::t_osm_id & p_id,
-                                                                  std::vector<osm_api_data_types::osm_node*> & p_nodes,
-                                                                  void * p_user_data=NULL);
+									 std::vector<osm_api_data_types::osm_node*> & p_nodes,
+									 void * p_user_data=NULL);
 
     inline static const std::vector<osm_api_data_types::osm_way*> * const get_ways(const std::vector<osm_api_data_types::osm_object::t_osm_id> & p_ids,
-										     void * p_user_data=NULL);
+										   void * p_user_data=NULL);
 
     inline static const osm_api_data_types::osm_relation * get_relation(const osm_api_data_types::osm_object::t_osm_id & p_id,
-							      void * p_user_data=NULL);
+									void * p_user_data=NULL);
 
     inline static const osm_api_data_types::osm_relation * get_relation_version(const osm_api_data_types::osm_object::t_osm_id & p_id,
-							      const osm_api_data_types::osm_core_element::t_osm_version & p_version,
-							      void * p_user_data=NULL);
+										const osm_api_data_types::osm_core_element::t_osm_version & p_version,
+										void * p_user_data=NULL);
 
     inline static const std::vector<osm_api_data_types::osm_relation*> * const get_relation_history(const osm_api_data_types::osm_object::t_osm_id & p_id,
-											  void * p_user_data = NULL);
+												    void * p_user_data = NULL);
 
     inline static const std::vector<osm_api_data_types::osm_relation*> * const get_relation_relations(const osm_api_data_types::osm_object::t_osm_id & p_id,
-                                                                                                  void * p_user_data = NULL);
+												      void * p_user_data = NULL);
 
     inline static const osm_api_data_types::osm_relation * const get_relation_full(const osm_api_data_types::osm_object::t_osm_id & p_id,
                                                                                    std::vector<osm_api_data_types::osm_node*> & p_nodes,
@@ -100,7 +100,7 @@ namespace osm_diff_watcher
                                                                                    void * p_user_data=NULL);
 
     inline static const std::vector<osm_api_data_types::osm_relation*> * const get_relations(const std::vector<osm_api_data_types::osm_object::t_osm_id> & p_ids,
-										     void * p_user_data=NULL);
+											     void * p_user_data=NULL);
     inline static const osm_api_data_types::osm_changeset * get_changeset(const osm_api_data_types::osm_object::t_osm_id & p_id,
                                                                           void * p_user_data=NULL);
     inline static const std::vector<osm_api_data_types::osm_change*> * const get_changeset_content(const osm_api_data_types::osm_object::t_osm_id & p_id,
@@ -127,6 +127,22 @@ namespace osm_diff_watcher
     inline static void cache_user(const osm_api_data_types::osm_object::t_osm_id & p_id,
                                   const std::string & p_user_name,
                                   const std::string & p_date);
+    inline static const std::vector<osm_api_data_types::osm_change*> * const get_osm_change_file_content(const std::string & p_file_name);
+    inline static  void get_osm_file_content(const std::string & p_file_name,
+					     std::vector<osm_api_data_types::osm_node*> & p_nodes,
+					     std::vector<osm_api_data_types::osm_way*> & p_ways,
+					     std::vector<osm_api_data_types::osm_relation*> & p_relations);
+
+    inline static void get_user_browse_url(std::string & p_result,
+                                           const osm_api_data_types::osm_object::t_osm_id & p_id,
+                                           const std::string & p_user_name);
+    inline static void get_object_browse_url(std::string & p_result,
+                                             const std::string & p_type,
+                                             const osm_api_data_types::osm_object::t_osm_id & p_id);
+    inline static void get_api_object_url(std::string & p_result,
+                                          const std::string & p_type,
+                                          const osm_api_data_types::osm_object::t_osm_id & p_id,
+                                          const osm_api_data_types::osm_core_element::t_osm_version & p_version);
 
     common_api_wrapper(osm_ressources & p_ressources);
     static common_api_wrapper * m_instance;
@@ -141,14 +157,14 @@ namespace osm_diff_watcher
                                                       const std::string & p_name,
                                                       std::string & p_date,
                                                       void * p_user_data)
-    {
-      std::string l_name;
-      m_instance->m_cache.load_user(p_id,l_name,p_date);
-      if(p_date == "")
-        {
-          m_instance->m_ressources.get_user_subscription_date(p_name,p_date);
-        }
-    }
+  {
+    std::string l_name;
+    m_instance->m_cache.load_user(p_id,l_name,p_date);
+    if(p_date == "")
+      {
+	m_instance->m_ressources.get_user_subscription_date(p_name,p_date);
+      }
+  }
   //----------------------------------------------------------------------------
   const osm_api_data_types::osm_node * common_api_wrapper::get_node(const osm_api_data_types::osm_object::t_osm_id & p_id,
 								    void * p_user_data)
@@ -157,8 +173,8 @@ namespace osm_diff_watcher
     }
   //----------------------------------------------------------------------------
   const osm_api_data_types::osm_node * common_api_wrapper::get_node_version(const osm_api_data_types::osm_object::t_osm_id & p_id,
-								    const osm_api_data_types::osm_core_element::t_osm_version & p_version,
-								    void * p_user_data)
+									    const osm_api_data_types::osm_core_element::t_osm_version & p_version,
+									    void * p_user_data)
     {
       const osm_api_data_types::osm_node * l_result = m_instance->m_cache.load_node(p_id,p_version);
       return (l_result != NULL ? l_result : m_instance->m_api.get<osm_api_data_types::osm_node>(p_id,p_version));
@@ -179,7 +195,7 @@ namespace osm_diff_watcher
 
   //----------------------------------------------------------------------------
   const std::vector<osm_api_data_types::osm_relation*> * const common_api_wrapper::get_node_relations(const osm_api_data_types::osm_object::t_osm_id & p_id,
-                                                                                            void * p_user_data)
+												      void * p_user_data)
     {
       return m_instance->m_api.get<osm_api_data_types::osm_node,osm_api_data_types::osm_relation>(p_id);
     }
@@ -198,21 +214,21 @@ namespace osm_diff_watcher
     }
   //----------------------------------------------------------------------------
   const osm_api_data_types::osm_way * common_api_wrapper::get_way_version(const osm_api_data_types::osm_object::t_osm_id & p_id,
-								  const osm_api_data_types::osm_core_element::t_osm_version & p_version,
-								  void * p_user_data)
+									  const osm_api_data_types::osm_core_element::t_osm_version & p_version,
+									  void * p_user_data)
     {
       const osm_api_data_types::osm_way * l_result = m_instance->m_cache.load_way(p_id,p_version);
       return (l_result != NULL ? l_result : m_instance->m_api.get<osm_api_data_types::osm_way>(p_id,p_version));
     }
   //----------------------------------------------------------------------------
   const std::vector<osm_api_data_types::osm_way*> * const common_api_wrapper::get_way_history(const osm_api_data_types::osm_object::t_osm_id & p_id,
-												void * p_user_data)
+											      void * p_user_data)
     {
       return m_instance->m_api.get_history<osm_api_data_types::osm_way>(p_id);
     }
   //----------------------------------------------------------------------------
   const std::vector<osm_api_data_types::osm_relation*> * const common_api_wrapper::get_way_relations(const osm_api_data_types::osm_object::t_osm_id & p_id,
-                                                                                            void * p_user_data)
+												     void * p_user_data)
     {
       return m_instance->m_api.get<osm_api_data_types::osm_way,osm_api_data_types::osm_relation>(p_id);
     }
@@ -226,20 +242,20 @@ namespace osm_diff_watcher
     }
   //----------------------------------------------------------------------------
   const std::vector<osm_api_data_types::osm_way*> * const common_api_wrapper::get_ways(const std::vector<osm_api_data_types::osm_object::t_osm_id> & p_ids,
-											 void * p_user_data)
+										       void * p_user_data)
     {
       return m_instance->m_api.get<osm_api_data_types::osm_way>(p_ids);
     }
   //----------------------------------------------------------------------------
   const osm_api_data_types::osm_relation * common_api_wrapper::get_relation(const osm_api_data_types::osm_object::t_osm_id & p_id,
-								  void * p_user_data)
+									    void * p_user_data)
     {
       return m_instance->m_api.get<osm_api_data_types::osm_relation>(p_id);
     }
   //----------------------------------------------------------------------------
   const osm_api_data_types::osm_relation * common_api_wrapper::get_relation_version(const osm_api_data_types::osm_object::t_osm_id & p_id,
-								  const osm_api_data_types::osm_core_element::t_osm_version & p_version,
-								  void * p_user_data)
+										    const osm_api_data_types::osm_core_element::t_osm_version & p_version,
+										    void * p_user_data)
     {
       const osm_api_data_types::osm_relation * l_result = m_instance->m_cache.load_relation(p_id,p_version);
       return (l_result != NULL ? l_result : m_instance->m_api.get<osm_api_data_types::osm_relation>(p_id,p_version));
@@ -252,7 +268,7 @@ namespace osm_diff_watcher
     }
   //----------------------------------------------------------------------------
   const std::vector<osm_api_data_types::osm_relation*> * const common_api_wrapper::get_relation_relations(const osm_api_data_types::osm_object::t_osm_id & p_id,
-                                                                                            void * p_user_data)
+													  void * p_user_data)
     {
       return m_instance->m_api.get<osm_api_data_types::osm_relation,osm_api_data_types::osm_relation>(p_id);
     }
@@ -267,7 +283,7 @@ namespace osm_diff_watcher
     }
   //----------------------------------------------------------------------------
   const std::vector<osm_api_data_types::osm_relation*> * const common_api_wrapper::get_relations(const std::vector<osm_api_data_types::osm_object::t_osm_id> & p_ids,
-											 void * p_user_data)
+												 void * p_user_data)
     {
       return m_instance->m_api.get<osm_api_data_types::osm_relation>(p_ids);
     }
@@ -299,39 +315,79 @@ namespace osm_diff_watcher
     }
 
   //----------------------------------------------------------------------------
-    void common_api_wrapper::get_map(const osm_api_data_types::osm_bounding_box & p_bounding_box,
-                                     std::vector<osm_api_data_types::osm_node*> & p_nodes,
-                                     std::vector<osm_api_data_types::osm_way*> & p_ways,
-                                     std::vector<osm_api_data_types::osm_relation*> & p_relations,
-                                     void *p_user_data)
+  void common_api_wrapper::get_map(const osm_api_data_types::osm_bounding_box & p_bounding_box,
+				   std::vector<osm_api_data_types::osm_node*> & p_nodes,
+				   std::vector<osm_api_data_types::osm_way*> & p_ways,
+				   std::vector<osm_api_data_types::osm_relation*> & p_relations,
+				   void *p_user_data)
+  {
+    return m_instance->m_api.get_map(p_bounding_box,p_nodes,p_ways,p_relations);
+  }
+
+  //----------------------------------------------------------------------------
+  void common_api_wrapper::cache_node(const osm_api_data_types::osm_node & p_node)
+  {
+    m_instance->m_cache.store(p_node);
+  }
+
+  //----------------------------------------------------------------------------
+  void common_api_wrapper::cache_way(const osm_api_data_types::osm_way & p_way)
+  {
+    m_instance->m_cache.store(p_way);
+  }
+
+  //----------------------------------------------------------------------------
+  void common_api_wrapper::cache_relation(const osm_api_data_types::osm_relation & p_relation)
+  {
+    m_instance->m_cache.store(p_relation);
+  }
+  //----------------------------------------------------------------------------
+  void common_api_wrapper::cache_user(const osm_api_data_types::osm_object::t_osm_id & p_id,
+				      const std::string & p_user_name,
+				      const std::string & p_date)
+  {
+    m_instance->m_cache.store(p_id,p_user_name,p_date);
+  }
+  //----------------------------------------------------------------------------
+  const std::vector<osm_api_data_types::osm_change*> * const common_api_wrapper::get_osm_change_file_content(const std::string & p_file_name)
     {
-      return m_instance->m_api.get_map(p_bounding_box,p_nodes,p_ways,p_relations);
+      return osm_ressources::get_osm_change_file_content(p_file_name);
     }
 
-    //----------------------------------------------------------------------------
-    void common_api_wrapper::cache_node(const osm_api_data_types::osm_node & p_node)
-    {
-      m_instance->m_cache.store(p_node);
-    }
+  //----------------------------------------------------------------------------
+  void common_api_wrapper::get_osm_file_content(const std::string & p_file_name,
+						std::vector<osm_api_data_types::osm_node*> & p_nodes,
+						std::vector<osm_api_data_types::osm_way*> & p_ways,
+						std::vector<osm_api_data_types::osm_relation*> & p_relations)
+  {
+    osm_ressources::get_osm_file_content(p_file_name,p_nodes,p_ways,p_relations);
+  }
+ 
+  //----------------------------------------------------------------------------
+  void common_api_wrapper::get_user_browse_url(std::string & p_result,
+                                               const osm_api_data_types::osm_object::t_osm_id & p_id,
+                                               const std::string & p_user_name)
+  {
+    m_instance->m_ressources.get_user_browse_url(p_result,p_user_name);
+  }
 
-    //----------------------------------------------------------------------------
-    void common_api_wrapper::cache_way(const osm_api_data_types::osm_way & p_way)
-    {
-      m_instance->m_cache.store(p_way);
-    }
+  //----------------------------------------------------------------------------
+  void common_api_wrapper::get_object_browse_url(std::string & p_result,
+                                                 const std::string & p_type,
+                                                 const osm_api_data_types::osm_object::t_osm_id & p_id)
+  {
+    m_instance->m_ressources.get_object_browse_url(p_result,p_type,p_id);
+  }
 
-    //----------------------------------------------------------------------------
-    void common_api_wrapper::cache_relation(const osm_api_data_types::osm_relation & p_relation)
-    {
-      m_instance->m_cache.store(p_relation);
-    }
-    //----------------------------------------------------------------------------
-    void common_api_wrapper::cache_user(const osm_api_data_types::osm_object::t_osm_id & p_id,
-                                        const std::string & p_user_name,
-                                        const std::string & p_date)
-    {
-      m_instance->m_cache.store(p_id,p_user_name,p_date);
-    }
+  //----------------------------------------------------------------------------
+  void common_api_wrapper::get_api_object_url(std::string & p_result,
+                                              const std::string & p_type,
+                                              const osm_api_data_types::osm_object::t_osm_id & p_id,
+                                              const osm_api_data_types::osm_core_element::t_osm_version & p_version)
+  {
+    m_instance->m_ressources.get_api_object_url(p_result,p_type,p_id,p_version);
+  }
+  
 }
 #endif // _COMMON_API_WRAPPER_H_
 //EOF

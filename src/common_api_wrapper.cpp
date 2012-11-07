@@ -56,6 +56,11 @@ namespace osm_diff_watcher
     p_api_ptr[osm_diff_analyzer_if::common_api_if::CACHE_WAY] = (void*) common_api_wrapper::cache_way;
     p_api_ptr[osm_diff_analyzer_if::common_api_if::CACHE_RELATION] = (void*) common_api_wrapper::cache_relation;
     p_api_ptr[osm_diff_analyzer_if::common_api_if::CACHE_USER] = (void*) common_api_wrapper::cache_user;
+    p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_OSM_CHANGE_FILE_CONTENT] = (void*) common_api_wrapper::get_osm_change_file_content;
+    p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_OSM_FILE_CONTENT] = (void*) common_api_wrapper::get_osm_file_content;
+    p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_USER_BROWSE_URL] = (void*) common_api_wrapper::get_user_browse_url;
+    p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_OBJECT_BROWSE_URL] = (void*) common_api_wrapper::get_object_browse_url;
+    p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_API_OBJECT_URL] = (void*) common_api_wrapper::get_api_object_url;
   }
 
   //----------------------------------------------------------------------------
