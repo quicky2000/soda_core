@@ -66,10 +66,10 @@ namespace osm_diff_watcher
   
 	// Preparing get_by_name statements
 	//--------------------------------------------
-	int l_status = sqlite3_prepare_v2(osm_cache_base_table<T>::get_db(),("SELECT Id,"+osm_cache_base_table_description<T>::get_table_fields()+" FROM " + this->get_name() + " WHERE Name LIKE @name").c_str(),-1,&m_get_by_name_stmt,NULL);
+	int l_status = sqlite3_prepare_v2(osm_cache_base_table<T>::get_db(),("SELECT Id,"+osm_cache_base_table_description<T>::get_table_fields()+" FROM " + this->get_name() + " WHERE Name == @name").c_str(),-1,&m_get_by_name_stmt,NULL);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during preparation of statement to get "+osm_cache_base_table_description<T>::get_table_fields()+" item by name : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
+	    std::cout << "ERROR during preparation of statement to get "+osm_cache_base_table_description<T>::get_table_fields()+" item by name : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << " in " << __FILE__ << ":" << __LINE__   << std::endl ;     
 	    exit(-1);
 	  }
 
@@ -87,7 +87,7 @@ namespace osm_diff_watcher
 				      NULL);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during preparation of statement to get_all_order_by_name " << this->get_name() << " items : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
+	    std::cout << "ERROR during preparation of statement to get_all_order_by_name " << this->get_name() << " items : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << " in " << __FILE__ << ":" << __LINE__   << std::endl ;     
 	    exit(-1);
 	  }
 
@@ -105,7 +105,7 @@ namespace osm_diff_watcher
 	int l_status = sqlite3_bind_text(m_get_by_name_stmt,sqlite3_bind_parameter_index(m_get_by_name_stmt,"@name"),p_name.c_str(),-1,SQLITE_STATIC);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of name parameter for get_by_name statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
+	    std::cout << "ERROR during binding of name parameter for get_by_name statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << " in " << __FILE__ << ":" << __LINE__   << std::endl ;     
 	    exit(-1);
 	  }
     
@@ -130,13 +130,13 @@ namespace osm_diff_watcher
 	      }
 	    else
 	      {
-		std::cout << "ERROR during selection of " << this->get_name() << " : Name \"" << p_name << "\" is not unique " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;
+		std::cout << "ERROR during selection of " << this->get_name() << " : Name \"" << p_name << "\" is not unique : in " << __FILE__ << ":" << __LINE__  << std::endl ;
 		exit(-1);
 	      }
 	  }
 	else if(l_status != SQLITE_DONE)
 	  {
-	    std::cout << "ERROR during selection of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;
+	    std::cout << "ERROR during selection of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << " in " << __FILE__ << ":" << __LINE__   << std::endl ;
 	    exit(-1);
 	  }
 
@@ -145,7 +145,7 @@ namespace osm_diff_watcher
 	l_status = sqlite3_reset(m_get_by_name_stmt);  
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of " << this->get_name() << " get_by_id statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
+	    std::cout << "ERROR during reset of " << this->get_name() << " get_by_id statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << " in " << __FILE__ << ":" << __LINE__   << std::endl ;     
 	    exit(-1);
 	  }
 
@@ -155,7 +155,7 @@ namespace osm_diff_watcher
 	l_status = sqlite3_clear_bindings(m_get_by_name_stmt);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of bindings of " << this->get_name() << " get_by_id statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
+	    std::cout << "ERROR during reset of bindings of " << this->get_name() << " get_by_id statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << " in " << __FILE__ << ":" << __LINE__   << std::endl ;     
 	    exit(-1);
 	  }
 #endif
@@ -177,7 +177,7 @@ namespace osm_diff_watcher
 	int l_status = sqlite3_bind_text(m_get_by_name_stmt,sqlite3_bind_parameter_index(m_get_by_name_stmt,"@name"),l_param_value.c_str(),-1,SQLITE_STATIC);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of name parameter for get_by_name statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
+	    std::cout << "ERROR during binding of name parameter for get_by_name statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << " in " << __FILE__ << ":" << __LINE__   << std::endl ;     
 	    exit(-1);
 	  }
     
@@ -189,7 +189,7 @@ namespace osm_diff_watcher
 	  }
 	if(l_status != SQLITE_DONE)
 	  {
-	    std::cout << "ERROR during selection of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;
+	    std::cout << "ERROR during selection of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << " in " << __FILE__ << ":" << __LINE__   << std::endl ;
 	    exit(-1);
 	  }
 
@@ -201,7 +201,7 @@ namespace osm_diff_watcher
 	l_status = sqlite3_reset(m_get_by_name_stmt);  
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of " << this->get_name() << " get_by_name statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
+	    std::cout << "ERROR during reset of " << this->get_name() << " get_by_name statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << " in " << __FILE__ << ":" << __LINE__   << std::endl ;     
 	    exit(-1);
 	  }
 
@@ -210,7 +210,7 @@ namespace osm_diff_watcher
 	l_status = sqlite3_clear_bindings(m_get_by_name_stmt);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of bindings of " << this->get_name() << " get_by_name statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
+	    std::cout << "ERROR during reset of bindings of " << this->get_name() << " get_by_name statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << " in " << __FILE__ << ":" << __LINE__   << std::endl ;     
 	    exit(-1);
 	  }
 
@@ -229,7 +229,7 @@ namespace osm_diff_watcher
 	  }
 	if(l_status != SQLITE_DONE)
 	  {
-	    std::cout << "ERROR during selection of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;
+	    std::cout << "ERROR during selection of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << " in " << __FILE__ << ":" << __LINE__   << std::endl ;
 	    exit(-1);
 	  }
 
@@ -242,7 +242,7 @@ namespace osm_diff_watcher
 	l_status = sqlite3_reset(m_get_all_ordered_by_name_stmt);  
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of " << this->get_name() << " get_all_ordered_by_name statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
+	    std::cout << "ERROR during reset of " << this->get_name() << " get_all_ordered_by_name statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << " in " << __FILE__ << ":" << __LINE__   << std::endl ;     
 	    exit(-1);
 	  }
 

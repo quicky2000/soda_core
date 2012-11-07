@@ -22,9 +22,10 @@
 #define _CONFIGURATION_H_
 
 #include "module_configuration.h"
+#include "replication_domain_jump.h"
 #include <string>
 #include <vector>
-#include <map>
+#include <map> 
 
 namespace osm_diff_watcher
 {
@@ -35,21 +36,34 @@ namespace osm_diff_watcher
     inline void add_library(const std::string & p_name);
     inline void add_module_configuration(osm_diff_analyzer_if::module_configuration * p_configuration);
     inline void add_variable(const std::string & p_name,const std::string & p_value);
+    inline void add_replication_domain_jump(const std::string & p_last_sequence_number,
+					    const std::string & p_old_domain,
+					    const std::string & p_first_sequence_number,
+					    const std::string & p_new_domain);
     inline const std::vector<std::string> & get_libraries(void)const;
     inline const std::vector<osm_diff_analyzer_if::module_configuration*> & get_module_configurations(void)const;
     inline const std::map<std::string,std::string> & get_variables(void)const;
-    bool is_variable_defined(const std::string & p_name)const;
-    const std::string get_variable(const std::string & p_name)const;
-    ~configuration(void);
+    inline bool is_variable_defined(const std::string & p_name)const;
+    inline const std::string get_variable(const std::string & p_name)const;
+    inline ~configuration(void);
+    inline const std::map<uint64_t,replication_domain_jump> & get_domain_jumps(void)const;
   private:
     std::vector<std::string> m_libraries;
     std::vector<osm_diff_analyzer_if::module_configuration * > m_module_configurations;
     std::map<std::string,std::string> m_variables;
+    std::map<uint64_t,replication_domain_jump> m_domain_jumps;
+
   };
 
   //----------------------------------------------------------------------------
   configuration::configuration(void)
     {
+    }
+
+  //----------------------------------------------------------------------------
+  const std::map<uint64_t,replication_domain_jump> & configuration::get_domain_jumps(void)const
+    {
+      return m_domain_jumps;
     }
 
   //----------------------------------------------------------------------------
@@ -111,6 +125,16 @@ namespace osm_diff_watcher
     {
       return m_libraries;
     }
+  //----------------------------------------------------------------------------
+  void configuration::add_replication_domain_jump(const std::string & p_last_sequence_number,
+						  const std::string & p_old_domain,
+						  const std::string & p_first_sequence_number,
+						  const std::string & p_new_domain)
+  {
+    uint64_t l_last_sequence_number = strtoull(p_last_sequence_number.c_str(),NULL,10);
+    uint64_t l_first_sequence_number = strtoull(p_first_sequence_number.c_str(),NULL,10);
+    m_domain_jumps.insert(std::map<uint64_t,replication_domain_jump>::value_type(l_last_sequence_number,replication_domain_jump(l_last_sequence_number,p_old_domain,l_first_sequence_number,p_new_domain)));
+  }
 }
 #endif // _CONFIGURATION_H_
 //EOF

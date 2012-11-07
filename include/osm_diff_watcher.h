@@ -29,6 +29,8 @@
 #include "osm_diff_dom_parser.h"
 #include "sax_parser.h"
 #include "internal_database.h"
+#include "osm_ressources.h"
+#include "configuration.h"
 #include <string>
 #include <map>
 
@@ -39,8 +41,6 @@ namespace quicky_url_reader
 
 namespace osm_diff_watcher
 {
-  class configuration;
-  class osm_ressources;
   class common_api_wrapper;
 
   class osm_diff_watcher
@@ -55,6 +55,7 @@ namespace osm_diff_watcher
     void parse_diff(const osm_diff_analyzer_if::osm_diff_state * p_diff_state);
     const uint64_t get_start_sequence_number(const osm_diff_analyzer_if::osm_diff_state &p_diff_state);
     static bool m_stop;
+    inline const uint64_t get_next_sequence_number(const uint64_t & p_seq_number);
 
     osm_ressources & m_ressources;
     common_api_wrapper & m_api_wrapper;
@@ -70,7 +71,22 @@ namespace osm_diff_watcher
     std::map<std::string,osm_diff_analyzer_if::diff_analyzer_if *> m_disabled_analyzers;
     quicky_url_reader::url_reader & m_url_reader;
     internal_database m_informations;
+
   };
+
+  //----------------------------------------------------------------------------
+  const uint64_t osm_diff_watcher::get_next_sequence_number(const uint64_t & p_seq_number)
+  {
+    uint64_t l_result = p_seq_number +1 ;
+    // Check if we are at replication domain boundary
+    std::map<uint64_t,replication_domain_jump>::const_iterator l_domain_jump_iter = m_configuration->get_domain_jumps().find(p_seq_number); 
+    if(l_domain_jump_iter != m_configuration->get_domain_jumps().end() && l_domain_jump_iter->second.get_old_domain() == m_ressources.get_replication_domain())
+      {
+        m_ressources.set_replication_domain(l_domain_jump_iter->second.get_new_domain());
+        l_result = l_domain_jump_iter->second.get_new_id();
+      }
+    return l_result;
+  }
 }
 #endif /* _OSM_DIFF_WATCHER_H_  */
 //EOF

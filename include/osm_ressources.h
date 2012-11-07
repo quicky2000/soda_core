@@ -24,7 +24,8 @@
 #include <string>
 #include "url_reader.h"
 #include "download_buffer.h"
-
+#include "osm_api_data_types.h"
+#include <sstream>
 
 namespace osm_diff_analyzer_if
 {
@@ -45,6 +46,17 @@ namespace osm_diff_watcher
     static void remove_instance(void);
     inline void set_replication_domain(const std::string & p_replication_domain);
     inline const std::string & get_replication_domain(void)const;
+    inline void get_user_browse_url(std::string & p_result,
+                                                 const std::string & p_user_name)const;
+    inline void get_object_browse_url(std::string & p_result,
+                                                   const std::string & p_type,const osm_api_data_types::osm_object::t_osm_id & p_id);
+    inline void get_api_object_url(std::string & p_result,
+                                                const std::string & p_type,const osm_api_data_types::osm_object::t_osm_id & p_id, const osm_api_data_types::osm_core_element::t_osm_version & p_version=0);
+    static const std::vector<osm_api_data_types::osm_change*> * const get_osm_change_file_content(const std::string & p_file_name);
+    static void get_osm_file_content(const std::string & p_file_name,
+                                     std::vector<osm_api_data_types::osm_node*> & p_nodes,
+                                     std::vector<osm_api_data_types::osm_way*> & p_ways,
+                                     std::vector<osm_api_data_types::osm_relation*> & p_relations);
   private:
     osm_ressources(void);
 
@@ -53,6 +65,8 @@ namespace osm_diff_watcher
     const std::string m_redaction_domain;
     std::string m_replication_domain;
     const std::string m_cc_by_sa_domain;
+    const std::string m_browse_domain;
+    const std::string m_user_url;
     const std::string m_api;
     const std::string m_current_api_version;
     const std::string m_current_api;
@@ -76,6 +90,42 @@ namespace osm_diff_watcher
     {
       return m_replication_domain;
     }
+  //----------------------------------------------------------------------------
+  void osm_ressources::get_user_browse_url(std::string & p_result,
+                                           const std::string & p_user_name)const
+    {
+      std::string l_user = p_user_name;
+      char * l_escaped_user = quicky_url_reader::url_reader::escape_string(l_user.c_str());
+      p_result = m_user_url +"/"+l_escaped_user;
+   }
+
+  //----------------------------------------------------------------------------
+  void osm_ressources::get_object_browse_url(std::string & p_result,
+                                             const std::string & p_type,
+                                             const osm_api_data_types::osm_object::t_osm_id & p_id)
+    {
+      std::stringstream l_id;
+      l_id << p_id;
+      p_result =  m_browse_domain + "/" + p_type + "/" + l_id.str();
+    }
+  //----------------------------------------------------------------------------
+  void osm_ressources::get_api_object_url(std::string & p_result,
+                                          const std::string & p_type,
+                                          const osm_api_data_types::osm_object::t_osm_id & p_id,
+                                          const osm_api_data_types::osm_core_element::t_osm_version & p_version)
+    {
+      
+      std::stringstream l_id;
+      l_id << p_id;
+      p_result = m_current_api+"/"+p_type+"/"+l_id.str();
+      if(p_version)
+	{
+	  std::stringstream l_version;
+	  l_version << p_version;
+	  p_result += "/" + l_version.str();
+	}
+    }
+
 }
 #endif // _OSM_RESSOURCES_H_
 //EOF

@@ -114,6 +114,18 @@ namespace osm_diff_watcher
               assert(l_variable_value);
 	      m_result->add_variable(l_variable_name,l_variable_value);
             }
+	  else if(!strcmp(l_node.getName(),"replication_domain_jump"))
+            {
+	      XMLCSTR l_last_sequence_number = l_node.getAttribute("last_sequence_number");
+              assert(l_last_sequence_number);
+	      XMLCSTR l_old_domain = l_node.getAttribute("old_domain");
+              assert(l_old_domain);
+	      XMLCSTR l_first_sequence_number = l_node.getAttribute("first_sequence_number");
+              assert(l_first_sequence_number);
+	      XMLCSTR l_new_domain = l_node.getAttribute("new_domain");
+              assert(l_new_domain);
+	      m_result->add_replication_domain_jump(l_last_sequence_number,l_old_domain,l_first_sequence_number,l_new_domain);
+            }
           else
 	    {
 	      std::cout << "ERROR : unknown configuration item \"" << l_node.getName() << "\"" << std::endl ;

@@ -81,7 +81,24 @@ namespace osm_diff_watcher
       {
 	m_table.create("latest_sequence_timestamp",p_diff_state.get_timestamp());
       }
+    // Store sequence replication domain
+    if(m_table.get("latest_sequence_replication_domain",l_information))
+      {
+	m_table.update("latest_sequence_replication_domain",p_diff_state.get_replication_domain());
+      }
+    else
+      {
+	m_table.create("latest_sequence_replication_domain",p_diff_state.get_replication_domain());
+      }
   }
+
+  //----------------------------------------------------------------------------
+  void internal_database::get_latest_replication_domain(std::string & p_result)
+    {
+      std::pair<std::string,std::string> l_information;
+      m_table.get("latest_sequence_replication_domain",l_information);
+      p_result = l_information.second;
+    }
 
   //----------------------------------------------------------------------------
   const uint64_t internal_database::get_latest_sequence_number(void)

@@ -22,6 +22,9 @@
 #include "url_reader.h"
 #include "download_buffer.h"
 #include "osm_diff_state.h"
+#include "dom_parser.h"
+#include "dom_osm_change_extractor.h"
+#include "dom_osm_full_extractor.h"
 #include <sstream>
 #include <cassert>
 #include <iostream>
@@ -34,11 +37,13 @@ namespace osm_diff_watcher
 
   osm_ressources::osm_ressources(void):
     m_domain("openstreetmap.org"),
-    m_data_domain("planet."+m_domain),
+    m_data_domain("http://planet."+m_domain),
     m_redaction_domain(m_data_domain+"/redaction_period"), //Latest sequence number 229907
-    m_replication_domain(m_data_domain+"/replication"),
+    m_replication_domain(m_data_domain+"/replication/minute"),
     m_cc_by_sa_domain(m_data_domain+"cc-by-sa"), // Latest minute sequence number 1268792
-    m_api("www."+m_domain+"/api"),
+    m_browse_domain("http://www."+m_domain+"/browse"),
+    m_user_url("http://www."+m_domain+"/user"),
+    m_api("http://www."+m_domain+"/api"),
     m_current_api_version("0.6"),
     m_current_api(m_api+"/"+m_current_api_version)
   {
@@ -53,12 +58,10 @@ namespace osm_diff_watcher
   {
     std::string l_user = p_user_name;
     std::string l_user_date;
-    std::string l_user_url("www."+m_domain+"/user/");
     url_reader l_url_reader;
     char * l_escaped_user = l_url_reader.escape_string(l_user.c_str());
-    l_user_url += l_escaped_user;
     download_buffer l_buffer;
-    l_url_reader.read_url(l_user_url.c_str(),l_buffer);
+    l_url_reader.read_url((m_user_url +"/"+l_escaped_user).c_str(),l_buffer);
     curl_free(l_escaped_user);
     
     std::stringstream l_stream;
@@ -95,8 +98,7 @@ namespace osm_diff_watcher
     // http://wiki.openstreetmap.org/wiki/Planet.osm/diffs
     //  std::string l_url_diff("http://planet.openstreetmap.org/minute-replicate/");
     //std::string l_url_diff("http://planet.openstreetmap.org/redaction-period/minute-replicate/");
-    std::string l_url_diff(m_replication_domain+"/minute/");
-    l_url_diff += l_complete_seq_number.substr(0,3) + "/" + l_complete_seq_number.substr(3,3) + "/" + l_complete_seq_number.substr(6,3) + ".osc.gz";
+    std::string l_url_diff = m_replication_domain + "/" + l_complete_seq_number.substr(0,3) + "/" + l_complete_seq_number.substr(3,3) + "/" + l_complete_seq_number.substr(6,3) + ".osc.gz";
     return l_url_diff;
   }
 
@@ -107,7 +109,7 @@ namespace osm_diff_watcher
     std::string l_timestamp;
     url_reader l_url_reader;
     download_buffer l_buffer;
-    l_url_reader.read_url((m_replication_domain+"/minute/state.txt").c_str(),l_buffer);
+    l_url_reader.read_url((m_replication_domain+"/state.txt").c_str(),l_buffer);
     //  l_url_reader.read_url("http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt",l_buffer);
     std::stringstream l_stream;
     l_stream << l_buffer.get_data();
@@ -135,7 +137,7 @@ namespace osm_diff_watcher
     assert(l_sequence_number_str != "");
     assert(l_timestamp != "");
     uint64_t l_sequence_number = atoll(l_sequence_number_str.c_str());
-    return new osm_diff_analyzer_if::osm_diff_state(l_sequence_number,l_timestamp);
+    return new osm_diff_analyzer_if::osm_diff_state(l_sequence_number,l_timestamp,m_replication_domain);
   }
 
   //------------------------------------------------------------------------------
@@ -154,6 +156,28 @@ namespace osm_diff_watcher
     delete m_instance;
   }
 
+  //------------------------------------------------------------------------------
+  const std::vector<osm_api_data_types::osm_change*> * const osm_ressources::get_osm_change_file_content(const std::string & p_file_name)
+  {
+    dom_parser l_osm_change_parser("osmChange");
+    dom_osm_change_extractor l_extractor;
+    l_osm_change_parser.add_analyzer(l_extractor);
+    l_osm_change_parser.parse(p_file_name);
+    return l_extractor.get_result();           
+  }
+
+  //------------------------------------------------------------------------------
+  void osm_ressources::get_osm_file_content(const std::string & p_file_name,
+					    std::vector<osm_api_data_types::osm_node*> & p_nodes,
+					    std::vector<osm_api_data_types::osm_way*> & p_ways,
+					    std::vector<osm_api_data_types::osm_relation*> & p_relations)
+  {
+    dom_parser l_dom_parser("osm");
+    dom_osm_full_extractor l_extractor(p_nodes,p_ways,p_relations);
+    l_dom_parser.add_analyzer(l_extractor);
+    l_dom_parser.parse(p_file_name);
+  }
+  
   osm_ressources * osm_ressources::m_instance = NULL;
   
 }

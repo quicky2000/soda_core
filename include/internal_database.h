@@ -40,6 +40,7 @@ namespace osm_diff_watcher
     internal_database(const std::string & p_name="osm_diff_watcher.sqlite3");
     ~internal_database(void);
     void store(const osm_diff_analyzer_if::osm_diff_state & p_diff_state);
+    void get_latest_replication_domain(std::string & p_result);
     const uint64_t get_latest_sequence_number(void);
   private:
     sqlite3 * m_db;
