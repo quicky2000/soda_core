@@ -343,7 +343,7 @@ namespace osm_diff_watcher
     // Get node changeset
     p_changeset = extract_attribute<osm_api_data_types::osm_core_element::t_osm_id>(p_node,"changeset");
 
-    if(p_search_visible)
+    if(p_search_visible && p_node.isAttributeSet("visible"))
       {
         p_visible = extract_attribute<bool>(p_node,"visible");
       }
