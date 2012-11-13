@@ -90,26 +90,38 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   const std::string osm_ressources::get_url_minute_diff(const uint64_t & p_seq_number)const
   {
-    std::stringstream l_stream;
-    l_stream << p_seq_number;
-    std::string l_seq_number = l_stream.str();
-    std::string l_complete_seq_number = (l_seq_number.size() < 9 ? std::string(9 - l_seq_number.size(),'0') + l_seq_number : l_seq_number);
-    // For more information refer to OSM wiki page
-    // http://wiki.openstreetmap.org/wiki/Planet.osm/diffs
-    //  std::string l_url_diff("http://planet.openstreetmap.org/minute-replicate/");
-    //std::string l_url_diff("http://planet.openstreetmap.org/redaction-period/minute-replicate/");
-    std::string l_url_diff = m_replication_domain + "/" + l_complete_seq_number.substr(0,3) + "/" + l_complete_seq_number.substr(3,3) + "/" + l_complete_seq_number.substr(6,3) + ".osc.gz";
+    std::string l_url_diff ;
+    get_root_url_diff(l_url_diff,p_seq_number);
+    l_url_diff += ".osc.gz";
     return l_url_diff;
   }
 
   //------------------------------------------------------------------------------
-  const osm_diff_analyzer_if::osm_diff_state * osm_ressources::get_minute_diff_state(void)const
+  void osm_ressources::get_root_url_diff(std::string & p_result,const uint64_t & p_seq_number)const
+  {
+    std::stringstream l_stream;
+    l_stream << p_seq_number;
+    std::string l_seq_number = l_stream.str();
+    std::string l_complete_seq_number = (l_seq_number.size() < 9 ? std::string(9 - l_seq_number.size(),'0') + l_seq_number : l_seq_number);
+    p_result = m_replication_domain + "/" + l_complete_seq_number.substr(0,3) + "/" + l_complete_seq_number.substr(3,3) + "/" + l_complete_seq_number.substr(6,3);
+  }
+
+  //------------------------------------------------------------------------------
+  void osm_ressources::get_state_url_diff(std::string & p_result,const uint64_t & p_seq_number)const
+  {
+    get_root_url_diff(p_result,p_seq_number);
+    p_result += ".state.txt";    
+  }
+
+  //------------------------------------------------------------------------------
+  const osm_diff_analyzer_if::osm_diff_state * osm_ressources::get_minute_diff_state(const std::string & p_url)const
   {
     std::string l_sequence_number_str;
     std::string l_timestamp;
     url_reader l_url_reader;
     download_buffer l_buffer;
-    l_url_reader.read_url((m_replication_domain+"/state.txt").c_str(),l_buffer);
+    std::string l_url = (p_url != "" ? p_url : (m_replication_domain+"/state.txt")); 
+    l_url_reader.read_url(l_url.c_str(),l_buffer);
     //  l_url_reader.read_url("http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt",l_buffer);
     std::stringstream l_stream;
     l_stream << l_buffer.get_data();

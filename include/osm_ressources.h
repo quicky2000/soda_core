@@ -41,7 +41,9 @@ namespace osm_diff_watcher
     inline const std::string & get_api_url(void)const;
     void get_user_subscription_date(const std::string & p_user_name,std::string & p_date)const;
     const std::string get_url_minute_diff(const uint64_t & p_seq_number)const;
-    const osm_diff_analyzer_if::osm_diff_state * get_minute_diff_state(void)const;
+    void get_root_url_diff(std::string & p_result,const uint64_t & p_seq_number)const;
+    void get_state_url_diff(std::string & p_result,const uint64_t & p_seq_number)const;
+    const osm_diff_analyzer_if::osm_diff_state * get_minute_diff_state(const std::string & p_url="")const;
     static osm_ressources & instance(void);
     static void remove_instance(void);
     inline void set_replication_domain(const std::string & p_replication_domain);

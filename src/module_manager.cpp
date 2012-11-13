@@ -59,7 +59,7 @@ namespace osm_diff_watcher
 	    // Search for registering function
 	    osm_diff_analyzer_if::module_library_if::t_register_function l_register_function ;
 #ifndef _WIN32
-	    l_register_function = (osm_diff_analyzer_if::module_library_if::t_register_function)dlsym(l_library_handle, m_register_function_name.c_str());
+	    l_register_function = (osm_diff_analyzer_if::module_library_if::t_register_function)(uintptr_t)dlsym(l_library_handle, m_register_function_name.c_str());
 #else // _WIN32
 	    l_register_function =  (osm_diff_analyzer_if::module_library_if::t_register_function)GetProcAddress((HMODULE)l_library_handle, m_register_function_name.c_str());
 #endif

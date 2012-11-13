@@ -281,60 +281,10 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   void osm_diff_watcher::run(void)
   {
-
-    // Initialising domain jump
-    // Domain jumps for minute diffs world
-    //TO DELETE    m_domain_jumps.insert(std::map<uint64_t,replication_domain_jump>::value_type(1268792,
-    //TO DELETE                                                                                 replication_domain_jump(1268792,
-    //TO DELETE                                                                                                         "http://planet.openstreetmap.org/cc-by-sa/minute-replicate",
-    //TO DELETE                                                                                                         1,
-    //TO DELETE                                                                                                         "http://planet.openstreetmap.org/redaction-period/minute-replicate"
-    //TO DELETE                                                                                                         )
-    //TO DELETE                                                                                 )
-    //TO DELETE                          );
-    //TO DELETE    m_domain_jumps.insert(std::map<uint64_t,replication_domain_jump>::value_type(229907,
-    //TO DELETE                                                                                 replication_domain_jump(229907,
-    //TO DELETE                                                                                                         "http://planet.openstreetmap.org/redaction-period/minute-replicate",
-    //TO DELETE                                                                                                         1,
-    //TO DELETE                                                                                                         "http://planet.openstreetmap.org/replication/minute")
-    //TO DELETE                                                                                 )
-    //TO DELETE                          );
-    // Domain jumps for hourly diffs world
-    //TO DELETE    m_domain_jumps.insert(std::map<uint64_t,replication_domain_jump>::value_type(20722,replication_domain_jump(20722,
-    //TO DELETE                                                                                                               "http://planet.openstreetmap.org/cc-by-sa/hour-replicate",
-    //TO DELETE                                                                                                               1,
-    //TO DELETE                                                                                                               "http://planet.openstreetmap.org/redaction-period/hour-replicate"
-    //TO DELETE                                                                                                               )
-    //TO DELETE                                                                                 )
-    //TO DELETE                          );
-    //TO DELETE    m_domain_jumps.insert(std::map<uint64_t,replication_domain_jump>::value_type(3862,replication_domain_jump(3862,
-    //TO DELETE                                                                                                              "http://planet.openstreetmap.org/redaction-period/hour-replicate",
-    //TO DELETE                                                                                                              1,
-    //TO DELETE                                                                                                              "http://planet.openstreetmap.org/replication/hour"
-    //TO DELETE                                                                                                              )
-    //TO DELETE                                                                                 )
-    //TO DELETE                          );
-  // Domain jumps for daily diffs world
-    //TO DELETE    m_domain_jumps.insert(std::map<uint64_t,replication_domain_jump>::value_type(124,replication_domain_jump(124,
-    //TO DELETE                                                                                                             "http://planet.openstreetmap.org/cc-by-sa/day-replicate",
-    //TO DELETE                                                                                                             1,
-    //TO DELETE                                                                                                             "http://planet.openstreetmap.org/redaction-period/day-replicate"
-    //TO DELETE                                                                                                             )
-    //TO DELETE                                                                                 )
-    //TO DELETE                          );
-    //TO DELETE    m_domain_jumps.insert(std::map<uint64_t,replication_domain_jump>::value_type(161,replication_domain_jump(161,
-    //TO DELETE                                                                                                             "http://planet.openstreetmap.org/redaction-period/day-replicate",
-    //TO DELETE                                                                                                             1,
-    //TO DELETE                                                                                                             "http://planet.openstreetmap.org/replication/day"
-    //TO DELETE                                                                                                             )
-    //TO DELETE                                                                                 )
-    //TO DELETE                          );
-
     const osm_diff_analyzer_if::osm_diff_state * l_diff_state = m_ressources.get_minute_diff_state();
     uint64_t l_end_seq_number = l_diff_state->get_sequence_number();
 
     // Get start sequence number
-    //TO DELETE    uint64_t l_current_seq_number = ( p_start_seq_number ? p_start_seq_number : l_end_seq_number);
     uint64_t l_current_seq_number = get_start_sequence_number(*l_diff_state);
 
     // Managing iteration number
@@ -350,20 +300,27 @@ namespace osm_diff_watcher
 	std::cout << l_nb_iteration << " remaining iterations" << std::endl ;
 	std::cout << "Latest seq number available = " << l_end_seq_number << std::endl ;
 	std::cout << "--> Sequence number = \"" << l_current_seq_number << "\"" << std::endl;
+
+	std::string l_state_url;
+	m_ressources.get_state_url_diff(l_state_url,l_current_seq_number);
+
 	if(l_current_seq_number != l_end_seq_number)
 	  {
 	    delete l_diff_state;
-	    l_diff_state = new osm_diff_analyzer_if::osm_diff_state(l_current_seq_number,"",m_ressources.get_replication_domain());
+            //TO DELETE	    l_diff_state = new osm_diff_analyzer_if::osm_diff_state(l_current_seq_number,"",m_ressources.get_replication_domain());
+            l_diff_state = m_ressources.get_minute_diff_state(l_state_url);
 	  }
 	else if(l_diff_state == NULL)
 	  {
-	    l_diff_state = new osm_diff_analyzer_if::osm_diff_state(l_current_seq_number,"",m_ressources.get_replication_domain());
+            //TO DELETE	    l_diff_state = new osm_diff_analyzer_if::osm_diff_state(l_current_seq_number,"",m_ressources.get_replication_domain());
+            l_diff_state = m_ressources.get_minute_diff_state(l_state_url);
 	  }
-
+        std::cout << "Timestamp of diff file : " << l_diff_state->get_timestamp() << std::endl ;
 	std::string l_url_diff = m_ressources.get_url_minute_diff(l_current_seq_number);
 	std::cout << "Url of diff file \"" << l_url_diff << "\"" << std::endl ;
         time_t l_begin_time = time(NULL);
 	m_url_reader.dump_url_binary(l_url_diff,m_diff_file_name);
+
 	parse_diff(l_diff_state);
 	m_informations.store(*l_diff_state);
         delete l_diff_state;
