@@ -20,56 +20,53 @@
 */
 #include "osm_cache_compatibility_db.h"
 #include <cassert>
+#include <iostream>
+#include <fstream>
 
 namespace osm_diff_watcher
 {
   //----------------------------------------------------------------------------
   osm_cache_compatibility_db::osm_cache_compatibility_db(const std::string & p_name,const std::string & p_current_version):
     m_db(NULL),
-    // Simple key tables
-    m_tag_name_table("tag_names"),
-    m_tag_value_table("tag_values"),
-    m_relation_role_table("relation_roles"),
-    // Element tables
-    m_way_table("ways"),
-    m_relation_table("relations"),
-    // Tag tables
-    m_node_tag_table("node_tags"),
-    m_way_tag_table("way_tags"),
-    m_relation_tag_table("relation_tags"),
     m_informations("information_table")
   {
-    // Opening the database
-    int l_status = sqlite3_open(p_name.c_str(), &m_db);
-    if(l_status == SQLITE_OK)
+
+    std::ifstream l_check_file(p_name.c_str());
+    if(l_check_file != NULL)
       {
-     	m_informations.set_db(m_db);
+        l_check_file.close();
+        // Opening the database
+        int l_status = sqlite3_open_v2(p_name.c_str(), &m_db,SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,NULL);
+        if(l_status == SQLITE_OK)
+          {
+            m_informations.set_db(m_db);
+          }
+        else
+          {
+            std::cerr << "Can't open database \"" << p_name << "\" : " << sqlite3_errmsg(m_db) << std::endl ;
+          }
+        bool l_updated = false;
+        do
+          {
+            std::pair<std::string,std::string> l_info;
+            bool l_success = m_informations.get("schema_version",l_info);
+            if(l_success)
+              {
+                if(l_info.second != p_current_version)
+                  {
+                    upgrade(l_info.second);
+                  }
+                else
+                  {
+                    l_updated = true;
+                  }
+              }
+            else
+              {
+                m_informations.create("schema_version","0.1");
+              }
+          } while(!l_updated);
       }
-    else
-      {
-        std::cerr << "Can't open database \"" << p_name << "\" : " << sqlite3_errmsg(m_db) << std::endl ;
-      }
-    bool l_updated = false;
-    do
-      {
-	std::pair<std::string,std::string> l_info;
-	bool l_success = m_informations.get("schema_version",l_info);
-	if(l_success)
-	  {
-	    if(l_info.second != p_current_version)
-	      {
-		upgrade(l_info.second);
-	      }
-	    else
-	      {
-		l_updated = true;
-	      }
-	  }
-	else
-	  {
-	    l_updated = true;
-	  }
-      } while(!l_updated);
 
   }
 
@@ -77,7 +74,7 @@ namespace osm_diff_watcher
   void osm_cache_compatibility_db::upgrade(const std::string & p_from_version)
   {
     std::cout << "Upgrading from version \"" << p_from_version << "\"" << std::endl ;
-    if(p_from_version == "0.1")
+    if(p_from_version == "0.1" || p_from_version == "")
       {
 	upgrade_from_0_1();
       }
@@ -119,7 +116,7 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   osm_cache_compatibility_db::~osm_cache_compatibility_db(void)
   {
-    sqlite3_close(m_db);
+    sqlite3_close_v2(m_db);
   }
 
 }

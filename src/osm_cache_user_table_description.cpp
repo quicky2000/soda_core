@@ -23,7 +23,7 @@
 namespace osm_diff_watcher
 {
   const std::string osm_cache_base_table_description<osm_cache_user>::m_class_type = "user";
-  const std::string osm_cache_base_table_description<osm_cache_user>::m_table_fields_declaration = "Name TEXT, Date TEXT, Integer Latest_changeset";
+  const std::string osm_cache_base_table_description<osm_cache_user>::m_table_fields_declaration = "Name TEXT, Date TEXT, Latest_changeset INTEGER";
   const std::string osm_cache_base_table_description<osm_cache_user>::m_table_fields = "Name, Date, Latest_changeset";
   const std::string osm_cache_base_table_description<osm_cache_user>::m_update_fields = "Name = $name ,Date = $date, Latest_changeset = $latest_changeset";
   const std::string osm_cache_base_table_description<osm_cache_user>::m_field_values = "$name, $date, $latest_changeset";

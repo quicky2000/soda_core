@@ -23,34 +23,12 @@
 
 // Sql table types
 #include "osm_cache_named_table.h"
-#include "osm_cache_versionned_table.h"
-#include "osm_cache_ordered_table.h"
-#include "osm_cache_tag_table.h"
 #include "information_table.h"
 
 // Elements to be stored in table
-#include "osm_cache_named_item.h"
-
 #include "osm_cache_user.h"
-
-#include "osm_cache_node.h"
-#include "osm_cache_core_element.h"
-
-#include "osm_cache_object_tag.h"
-#include "osm_cache_way_member.h"
-#include "osm_cache_relation_member.h"
-
 // Tables descriptions
-#include "osm_cache_named_item_table_description.h"
 #include "osm_cache_user_table_description.h"
-#include "osm_cache_node_table_description.h"
-
-#include "osm_cache_core_element_table_description.h"
-
-#include "osm_cache_object_tag_table_description.h"
-
-#include "osm_cache_way_member_table_description.h"
-#include "osm_cache_relation_member_table_description.h"
 
 class sqlite3;
 
@@ -68,27 +46,8 @@ namespace osm_diff_watcher
 
     sqlite3 * m_db;
 
-    // Simple key tables
-    osm_cache_named_table<osm_cache_named_item> m_tag_name_table;
-    osm_cache_named_table<osm_cache_named_item> m_tag_value_table;
-    osm_cache_named_table<osm_cache_named_item> m_relation_role_table;
-
     // Element tables
     osm_cache_named_table<osm_cache_user> m_user_table;
-
-    osm_cache_versionned_table<osm_cache_node> m_node_table;
-    osm_cache_versionned_table<osm_cache_core_element> m_way_table;
-    osm_cache_versionned_table<osm_cache_core_element> m_relation_table;
-
-    // Tag tables
-    osm_cache_tag_table<osm_cache_object_tag> m_node_tag_table;
-    osm_cache_tag_table<osm_cache_object_tag> m_way_tag_table;
-    osm_cache_tag_table<osm_cache_object_tag> m_relation_tag_table;
-
-    // member tables
-    osm_cache_ordered_table<osm_cache_way_member> m_way_member_table;
-    osm_cache_ordered_table<osm_cache_relation_member> m_relation_member_table;
-
     information_table m_informations;
   };
 
