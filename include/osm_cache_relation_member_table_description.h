@@ -24,7 +24,7 @@
 #include "osm_cache_base_table_description.h"
 #include "osm_cache_way_member_table_description.h"
 #include "osm_cache_relation_member.h"
-#include <sqlite3.h>
+#include "my_sqlite3.h"
 #include <iostream>
 #include <cstdlib>
 

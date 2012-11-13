@@ -175,14 +175,12 @@ namespace osm_diff_watcher
 
       // Reset bindings because they are now useless
       //--------------------------------------------
-#if SQLITE_VERSION_NUMBER > 3006000
       l_status = sqlite3_clear_bindings(p_stmt);
       if(l_status != SQLITE_OK)
         {
           std::cout << "ERROR during reset of bindings of get_node_tags statement : " << sqlite3_errmsg(m_db) << std::endl ;     
           exit(-1);
         }
-#endif
         
     }
 }

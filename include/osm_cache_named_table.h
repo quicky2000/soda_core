@@ -151,14 +151,12 @@ namespace osm_diff_watcher
 
 	// Reset bindings because they are now useless
 	//--------------------------------------------
-#if SQLITE_VERSION_NUMBER > 3006000
 	l_status = sqlite3_clear_bindings(m_get_by_name_stmt);
 	if(l_status != SQLITE_OK)
 	  {
 	    std::cout << "ERROR during reset of bindings of " << this->get_name() << " get_by_id statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << " in " << __FILE__ << ":" << __LINE__   << std::endl ;     
 	    exit(-1);
 	  }
-#endif
 	return l_result;
 
       }

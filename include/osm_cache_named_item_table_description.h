@@ -23,7 +23,7 @@
 
 #include "osm_cache_base_table_description.h"
 #include "osm_cache_named_item.h"
-#include <sqlite3.h>
+#include "my_sqlite3.h"
 #include <iostream>
 #include <cstdlib>
 
