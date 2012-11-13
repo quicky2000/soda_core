@@ -126,6 +126,7 @@ namespace osm_diff_watcher
     inline static void cache_relation(const osm_api_data_types::osm_relation & p_relation);
     inline static void cache_user(const osm_api_data_types::osm_object::t_osm_id & p_id,
                                   const std::string & p_user_name,
+				  const osm_api_data_types::osm_object::t_osm_id & p_latest_changeset,
                                   const std::string & p_date);
     inline static const std::vector<osm_api_data_types::osm_change*> * const get_osm_change_file_content(const std::string & p_file_name);
     inline static  void get_osm_file_content(const std::string & p_file_name,
@@ -344,9 +345,10 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   void common_api_wrapper::cache_user(const osm_api_data_types::osm_object::t_osm_id & p_id,
 				      const std::string & p_user_name,
+				      const osm_api_data_types::osm_object::t_osm_id & p_latest_changeset,
 				      const std::string & p_date)
   {
-    m_instance->m_cache.store(p_id,p_user_name,p_date);
+    m_instance->m_cache.store(p_id,p_user_name,p_latest_changeset,p_date);
   }
   //----------------------------------------------------------------------------
   const std::vector<osm_api_data_types::osm_change*> * const common_api_wrapper::get_osm_change_file_content(const std::string & p_file_name)

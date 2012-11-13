@@ -18,14 +18,29 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-#include "osm_cache_user_table_description.h"
+#ifndef _STRING_UTILITIES_H_
+#define _STRING_UTILITIES_H_
+
+#include <locale>
+#include <string>
 
 namespace osm_diff_watcher
 {
-  const std::string osm_cache_base_table_description<osm_cache_user>::m_class_type = "user";
-  const std::string osm_cache_base_table_description<osm_cache_user>::m_table_fields_declaration = "Name TEXT, Date TEXT, Integer Latest_changeset";
-  const std::string osm_cache_base_table_description<osm_cache_user>::m_table_fields = "Name, Date, Latest_changeset";
-  const std::string osm_cache_base_table_description<osm_cache_user>::m_update_fields = "Name = $name ,Date = $date, Latest_changeset = $latest_changeset";
-  const std::string osm_cache_base_table_description<osm_cache_user>::m_field_values = "$name, $date, $latest_changeset";
+  class string_utilities
+  {
+  public:
+    inline static void narrow(const std::wstring & p_wstring, std::string & p_string);
+  private:
+  };
+
+  void string_utilities::narrow(const std::wstring & p_wstring, std::string & p_string)
+  {
+    std::locale l_loc;
+    int length = p_wstring.length();
+    char * l_converted = new char [length+1];
+    std::use_facet<std::ctype<wchar_t> >(l_loc).narrow ( p_wstring.c_str(), p_wstring.c_str()+length+1, '?', l_converted);
+    p_string = l_converted;
+  }
 }
+#endif // _STRING_UTILITIES_H_
 //EOF

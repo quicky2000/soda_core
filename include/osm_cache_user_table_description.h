@@ -95,6 +95,12 @@ namespace osm_diff_watcher
       std::cout << "ERROR during binding of date parameter for update statement of " << get_class_type() << " : " << sqlite3_errmsg(p_db) << std::endl ;     
       exit(-1);
     }  
+  l_status = sqlite3_bind_int64(p_stmt,sqlite3_bind_parameter_index(p_stmt,"$latest_changeset"),p_user.get_latest_changeset());
+  if(l_status != SQLITE_OK)
+    {
+      std::cout << "ERROR during binding of latest_changeset parameter for update statement of " << get_class_type() << " : " << sqlite3_errmsg(p_db) << std::endl ;     
+      exit(-1);
+    }  
 
   }
 
@@ -103,7 +109,8 @@ namespace osm_diff_watcher
     {
       return osm_cache_user(sqlite3_column_int64(p_stmt,0),// Id
                             (const char*)sqlite3_column_text(p_stmt,1), // Name
-                            (const char*)sqlite3_column_text(p_stmt,2) //Data
+                            (const char*)sqlite3_column_text(p_stmt,2), //Data
+			    sqlite3_column_int64(p_stmt,3)
                             );
     }
 }

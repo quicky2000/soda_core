@@ -66,7 +66,8 @@ namespace osm_diff_watcher
     osm_cache(const std::string & p_name = "osm_cache.sqlite3");
     void store(const osm_api_data_types::osm_object::t_osm_id & p_id,
                const std::string & p_user_name,
-               const std::string & p_date);
+	       const osm_api_data_types::osm_object::t_osm_id & p_latest_changeset,
+	       const std::string & p_date);
     void store(const osm_api_data_types::osm_node & p_node);
     void store(const osm_api_data_types::osm_way & p_way);
     void store(const osm_api_data_types::osm_relation & p_relation);
@@ -122,6 +123,9 @@ namespace osm_diff_watcher
     osm_cache_ordered_table<osm_cache_relation_member> m_relation_member_table;
 
     information_table m_informations;
+
+    static const std::string m_schema_version;
+
   };
 
   //----------------------------------------------------------------------------

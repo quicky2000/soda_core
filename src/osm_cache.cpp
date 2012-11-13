@@ -19,6 +19,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 #include "osm_cache.h"
+#include "osm_cache_compatibility_db.h"
 #include <cassert>
 
 namespace osm_diff_watcher
@@ -43,6 +44,10 @@ namespace osm_diff_watcher
     m_relation_tag_table("relation_tags"),
     m_informations("information_table")
   {
+    // Opening the database in compatibility mode
+    osm_cache_compatibility_db * l_compatibility_db = new osm_cache_compatibility_db(p_name,m_schema_version);
+    delete l_compatibility_db;
+
     // Opening the database
     int l_status = sqlite3_open(p_name.c_str(), &m_db);
     if(l_status == SQLITE_OK)
@@ -65,7 +70,11 @@ namespace osm_diff_watcher
 	bool l_result = m_informations.get("schema_version",l_version_info);
 	if(!l_result)
 	  {
-	    m_informations.create("schema_version","0.1");
+	    m_informations.create("schema_version",m_schema_version);
+	  }
+	else
+	  {
+	    assert(l_version_info.second == m_schema_version);
 	  }
 
         prepare_get_tags_statement(m_node_tag_table.get_name(),m_get_node_tags_stmt);
@@ -161,7 +170,7 @@ namespace osm_diff_watcher
 						       p_node.get_version(),
 						       l_cache_node);
 
-    store(p_node.get_user_id(),p_node.get_user(),"");
+    store(p_node.get_user_id(),p_node.get_user(),p_node.get_changeset(),"");
 
     if(!l_result)
       {
@@ -186,7 +195,7 @@ namespace osm_diff_watcher
                                                       p_way.get_version(),
                                                       l_cache_way);
 
-    store(p_way.get_user_id(),p_way.get_user(),"");
+    store(p_way.get_user_id(),p_way.get_user(),p_way.get_changeset(),"");
 
     if(!l_result)
       {
@@ -230,7 +239,7 @@ namespace osm_diff_watcher
 							   p_relation.get_version(),
 							   l_cache_relation);
 
-    store(p_relation.get_user_id(),p_relation.get_user(),"");
+    store(p_relation.get_user_id(),p_relation.get_user(),p_relation.get_changeset(),"");
 
     if(!l_result)
       {
@@ -274,19 +283,48 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   void osm_cache::store(const osm_api_data_types::osm_object::t_osm_id & p_id,
 			const std::string & p_user_name,
+			const osm_api_data_types::osm_object::t_osm_id & p_latest_changeset,
 			const std::string & p_date)
   {
     osm_cache_user l_empty_user;
     uint32_t l_user_result = m_user_table.get(p_id,l_empty_user);
+    // Not in cache so need to create it with the information we have
     if(!l_user_result)
       {
-        osm_cache_user l_cache_user(p_id,p_user_name,p_date);
+        osm_cache_user l_cache_user(p_id,p_user_name,p_date,p_latest_changeset);
         m_user_table.force_create(l_cache_user);
       }
-    else if(l_empty_user.get_date() == "" && p_date != "")
+    else // User already exists in cache, we need to determine if he need to be updated
       {
-        osm_cache_user l_cache_user(p_id,p_user_name,p_date);
-        m_user_table.update(l_cache_user);
+	bool l_need_update = false;
+	std::string l_updated_date;
+	osm_api_data_types::osm_object::t_osm_id l_updated_changeset = l_empty_user.get_latest_changeset();
+	// Check if the subscription date is now known 
+	if(l_empty_user.get_date() == "" && p_date != "")
+	  {
+	    l_updated_date = p_date;
+	    l_need_update = true;
+	  }
+	else
+	  {
+	    l_updated_date = l_empty_user.get_date();
+	  }
+	std::string l_updated_name(l_empty_user.get_name());
+
+	// Check if display name has been updated since latest changeset recorded in cache
+	// Changeset number is only significant to determine if display_name received in parameter
+	// is more recent than the one stored in cache. The exact value of changeset id doesn't matter
+	if(l_empty_user.get_name() != p_user_name && l_empty_user.get_latest_changeset() < p_latest_changeset)
+	  {
+	    l_need_update = true;
+	    l_updated_name = p_user_name;
+	    l_updated_changeset = p_latest_changeset;
+	  }
+	if(l_need_update)
+	  {
+	    osm_cache_user l_cache_user(p_id,l_updated_name,l_updated_date,l_updated_changeset);
+	    m_user_table.update(l_cache_user);
+	  }
       }
 
    
@@ -535,8 +573,10 @@ namespace osm_diff_watcher
 	std::cout << "ERROR during reset of bindings of get_relation_members statement : " << sqlite3_errmsg(m_db) << std::endl ;     
 	exit(-1);
       }
-#endif
-  
+#endif  
   }
+
+  const std::string osm_cache::m_schema_version = "0.2";
+
 }
 //EOF
