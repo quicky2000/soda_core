@@ -49,7 +49,7 @@ namespace osm_diff_watcher
     delete l_compatibility_db;
 
     // Opening the database
-    int l_status = sqlite3_open(p_name.c_str(), &m_db);
+    int l_status = sqlite3_open_v2(p_name.c_str(), &m_db,SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,NULL);
     if(l_status == SQLITE_OK)
       {
 	m_tag_name_table.set_db(m_db);
@@ -151,7 +151,7 @@ namespace osm_diff_watcher
     sqlite3_finalize(m_get_node_tags_stmt);
     sqlite3_finalize(m_get_way_tags_stmt);
     sqlite3_finalize(m_get_relation_tags_stmt);
-    sqlite3_close(m_db);     
+    sqlite3_close_v2(m_db);     
   }
 
   //----------------------------------------------------------------------------
@@ -566,14 +566,12 @@ namespace osm_diff_watcher
 
     // Reset bindings because they are now useless
     //--------------------------------------------
-#if SQLITE_VERSION_NUMBER > 3006000
     l_status = sqlite3_clear_bindings(m_get_relation_members_stmt);
     if(l_status != SQLITE_OK)
       {
 	std::cout << "ERROR during reset of bindings of get_relation_members statement : " << sqlite3_errmsg(m_db) << std::endl ;     
 	exit(-1);
       }
-#endif  
   }
 
   const std::string osm_cache::m_schema_version = "0.2";

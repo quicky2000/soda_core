@@ -20,7 +20,7 @@
 */
 #include "internal_database.h"
 #include "osm_diff_state.h"
-#include <sqlite3.h>
+#include "my_sqlite3.h"
 #include <iostream>
 #include <sstream>
 #include <cassert>
@@ -35,7 +35,7 @@ namespace osm_diff_watcher
     m_table("internal_information")
   {
     // Opening the database
-    int l_status = sqlite3_open(p_name.c_str(), &m_db);
+    int l_status = sqlite3_open_v2(p_name.c_str(), &m_db,SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,NULL);
     if(l_status == SQLITE_OK)
       {
 	m_table.set_db(m_db);
@@ -51,7 +51,7 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   internal_database::~internal_database(void)
     {
-      sqlite3_close(m_db);     
+      sqlite3_close_v2(m_db);     
     }
 
   //----------------------------------------------------------------------------

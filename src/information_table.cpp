@@ -25,11 +25,6 @@
 
 using namespace std;
 
-#if SQLITE_VERSION_NUMBER < 3006000
-#define sqlite3_prepare_v2 sqlite3_prepare
-#endif
-
-
 namespace osm_diff_watcher
 {
   //------------------------------------------------------------------------------
@@ -97,7 +92,7 @@ namespace osm_diff_watcher
 
     // Preparing named_item update statement
     //-------------------------------------------
-    l_status = sqlite3_prepare_v2(m_db,("UPDATE " + m_table_name + " SET Value = $value WHERE Key LIKE $key ;").c_str(),-1,&m_update_stmt,NULL);
+    l_status = sqlite3_prepare_v2(m_db,("UPDATE " + m_table_name + " SET Value = $value WHERE Key = $key ;").c_str(),-1,&m_update_stmt,NULL);
     if(l_status != SQLITE_OK)
       {
 	std::cout << "ERROR during preparation of statement to update " << m_table_name << " item : " << sqlite3_errmsg(m_db) << std::endl ;     
@@ -183,14 +178,12 @@ namespace osm_diff_watcher
 
     // Reset bindings because they are now useless
     //--------------------------------------------
-#if SQLITE_VERSION_NUMBER > 3006000
     l_status = sqlite3_clear_bindings(m_create_stmt);
     if(l_status != SQLITE_OK)
       {
 	std::cout << "ERROR during reset of bindings of " << m_table_name << " create statement : " << sqlite3_errmsg(m_db) << std::endl ;     
 	exit(-1);
       }
-#endif
 
   }
 
@@ -239,14 +232,12 @@ namespace osm_diff_watcher
 
     // Reset bindings because they are now useless
     //--------------------------------------------
-#if SQLITE_VERSION_NUMBER > 3006000
     l_status = sqlite3_clear_bindings(m_update_stmt);
     if(l_status != SQLITE_OK)
       {
 	std::cout << "ERROR during reset of bindings of " << m_table_name << " update statement : " << sqlite3_errmsg(m_db) << std::endl ;     
 	exit(-1);
       }
-#endif
 
 
   }
@@ -289,14 +280,12 @@ namespace osm_diff_watcher
 
     // Reset bindings because they are now useless
     //--------------------------------------------
-#if SQLITE_VERSION_NUMBER > 3006000
     l_status = sqlite3_clear_bindings(m_delete_stmt);
     if(l_status != SQLITE_OK)
       {
 	std::cout << "ERROR during reset of bindings of " << m_table_name << " delete statement : " << sqlite3_errmsg(m_db) << std::endl ;     
 	exit(-1);
       }
-#endif
   }
 
   //------------------------------------------------------------------------------
@@ -359,14 +348,12 @@ namespace osm_diff_watcher
 
     // Reset bindings because they are now useless
     //--------------------------------------------
-#if SQLITE_VERSION_NUMBER > 3006000
     l_status = sqlite3_clear_bindings(m_get_stmt);
     if(l_status != SQLITE_OK)
       {
 	std::cout << "ERROR during reset of bindings of " << m_table_name << " get statement : " << sqlite3_errmsg(m_db) << std::endl ;     
 	exit(-1);
       }
-#endif
     return l_result;
   }
 
