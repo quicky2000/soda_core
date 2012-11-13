@@ -21,10 +21,10 @@
 #ifndef _INFORMATION_TABLE_H_
 #define _INFORMATION_TABLE_H_
 
-#include "sqlite3.h"
+#include "my_sqlite3.h"
 #include <vector>
 #include <string>
-#include <stdint.h>
+#include <inttypes.h>
 
 namespace osm_diff_watcher
 {

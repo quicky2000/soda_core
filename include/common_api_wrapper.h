@@ -33,7 +33,7 @@ namespace osm_diff_watcher
   public:
     static common_api_wrapper & instance(osm_ressources & p_ressources);
     static void remove_instance(void);
-    static void register_function(void **,uint32_t);
+    static void register_function(uintptr_t *,uint32_t);
 
   private:
     static const char * get_api_version(void);

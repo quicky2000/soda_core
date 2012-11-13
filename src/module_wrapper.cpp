@@ -33,10 +33,10 @@ namespace osm_diff_watcher
     m_clean_up(NULL)
   {
 
-    void * l_api_ptr[MODULE_LIBRARY_IF_API_SIZE];
+    uintptr_t l_api_ptr[MODULE_LIBRARY_IF_API_SIZE];
     for(uint32_t l_index = 0 ;l_index < MODULE_LIBRARY_IF_API_SIZE ; ++l_index)
       {
-        l_api_ptr[l_index] = NULL;
+        l_api_ptr[l_index] = 0;
       }
     p_func(l_api_ptr,MODULE_LIBRARY_IF_API_SIZE);
 

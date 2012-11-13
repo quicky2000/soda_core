@@ -24,7 +24,7 @@
 #include "osm_cache_item.h"
 #include <iostream>
 #include <string>
-#include <stdint.h>
+#include <inttypes.h>
 #include <cassert>
 
 namespace osm_diff_watcher
@@ -36,7 +36,7 @@ namespace osm_diff_watcher
 
   public:
     inline osm_cache_versionned_item(void);
-    inline osm_cache_versionned_item(const osm_cache_versionned_item & p_item);;
+    inline osm_cache_versionned_item(const osm_cache_versionned_item & p_item);
     inline osm_cache_versionned_item(const osm_api_data_types::osm_object::t_osm_id & p_id,
                                      const osm_api_data_types::osm_core_element::t_osm_version & p_version);
     inline const osm_api_data_types::osm_core_element::t_osm_version & get_version(void)const;

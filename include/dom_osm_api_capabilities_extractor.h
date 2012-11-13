@@ -116,6 +116,6 @@ namespace osm_diff_watcher
                                           l_timeout_max);
     }
   
-};
+}
 #endif
 //EOF

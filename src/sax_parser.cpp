@@ -20,7 +20,7 @@
 */
 #include "sax_parser.h"
 #include "sax_analyzer_operations.h"
-#include <stdint.h>
+#include <inttypes.h>
 #include <iostream>
 #include <fstream>
 #include <assert.h>

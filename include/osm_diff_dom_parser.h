@@ -36,6 +36,6 @@ namespace osm_diff_watcher
     void perform_dedicated_analyze(const XMLNode & p_node);
   };
 
-};
+}
 #endif // _OSM_DIFF_DOM_PARSER_H_
 //EOF

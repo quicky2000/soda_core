@@ -24,7 +24,7 @@
 #include "osm_api_data_types.h"
 #include <iostream>
 #include <string>
-#include <stdint.h>
+#include <inttypes.h>
 #include <cassert>
 
 namespace osm_diff_watcher
