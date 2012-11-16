@@ -58,7 +58,11 @@ namespace osm_diff_watcher
             std::cout << "ERROR : Unknown module type \"" << p_conf->get_type() << "\"" << std::endl ;
             exit(-1);
           }
+#ifndef FORCE_USE_OF_REINTERPRET_CAST
         T * l_result = dynamic_cast<T*>(l_iter->second->create_analyzer(p_conf));
+#else
+        T * l_result = reinterpret_cast<T*>(l_iter->second->create_analyzer(p_conf));
+#endif // FORCE_USE_OF_REINTERPRET_CAST
         if(l_result==NULL)
           {
             std::cout << "ERROR : Creation of module \"" << p_conf->get_name() << "\" with type \"" << p_conf->get_type() << "\" has failed" << std::endl ;

@@ -74,7 +74,11 @@ namespace osm_diff_watcher
 	  }
 	else if(l_input_type=="dom")
 	  {
+#ifndef FORCE_USE_OF_REINTERPRET_CAST
 	    osm_diff_analyzer_dom_if::dom_analyzer_if * l_dom_analyzer = dynamic_cast<osm_diff_analyzer_dom_if::dom_analyzer_if *>(l_analyzer);
+#else
+	    osm_diff_analyzer_dom_if::dom_analyzer_if * l_dom_analyzer = reinterpret_cast<osm_diff_analyzer_dom_if::dom_analyzer_if *>(l_analyzer);
+#endif // FORCE_USE_OF_REINTERPRET_CAST
 	    if(l_dom_analyzer==NULL)
               {
                 std::cout << "Invalid dom_analyzer \"" << l_type << "\"" << std::endl ;
@@ -84,7 +88,11 @@ namespace osm_diff_watcher
 	  }
 	else if(l_input_type=="sax")
 	  {
+#ifndef FORCE_USE_OF_REINTERPRET_CAST
 	    osm_diff_analyzer_sax_if::sax_analyzer_if * l_sax_analyzer = dynamic_cast<osm_diff_analyzer_sax_if::sax_analyzer_if *>(l_analyzer);
+#else
+	    osm_diff_analyzer_sax_if::sax_analyzer_if * l_sax_analyzer = reinterpret_cast<osm_diff_analyzer_sax_if::sax_analyzer_if *>(l_analyzer);
+#endif // FORCE_USE_OF_REINTERPRET_CAST
             if(l_sax_analyzer==NULL)
               {
                 std::cout << "Invalid sax_analyzer \"" << l_type << "\"" << std::endl ;
@@ -94,7 +102,11 @@ namespace osm_diff_watcher
 	  }
 	else if(l_input_type=="cpp")
 	  {
+#ifndef FORCE_USE_OF_REINTERPRET_CAST
 	    osm_diff_analyzer_cpp_if::cpp_analyzer_if * l_cpp_analyzer = dynamic_cast<osm_diff_analyzer_cpp_if::cpp_analyzer_if *>(l_analyzer);
+#else
+	    osm_diff_analyzer_cpp_if::cpp_analyzer_if * l_cpp_analyzer = reinterpret_cast<osm_diff_analyzer_cpp_if::cpp_analyzer_if *>(l_analyzer);
+#endif // FORCE_USE_OF_REINTERPRET_CAST
 	    if(l_cpp_analyzer==NULL)
               {
                 std::cout << "Invalid cpp_analyzer \"" << l_type << "\"" << std::endl ;
