@@ -99,6 +99,7 @@ namespace osm_diff_watcher
       std::string l_user = p_user_name;
       char * l_escaped_user = quicky_url_reader::url_reader::escape_string(l_user.c_str());
       p_result = m_user_url +"/"+l_escaped_user;
+      curl_free(l_escaped_user);
    }
 
   //----------------------------------------------------------------------------

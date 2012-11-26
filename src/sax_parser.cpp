@@ -66,7 +66,6 @@ namespace osm_diff_watcher
 	    exit(-1);
 	  }
       }
-    std::cout << "SAX PARSE SUCCESSFULL" << std::endl ;
   }
 
   //------------------------------------------------------------------------------
