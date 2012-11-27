@@ -331,7 +331,22 @@ namespace osm_diff_watcher
 	std::string l_url_diff = m_ressources.get_url_minute_diff(l_current_seq_number);
 	std::cout << "Url of diff file \"" << l_url_diff << "\"" << std::endl ;
         time_t l_begin_time = time(NULL);
-	m_url_reader.dump_url_binary(l_url_diff,m_diff_file_name);
+	bool l_404_error = false;
+	
+	// Check if download has succeeded
+	uint32_t l_404_trial = 3;
+	do
+	  {
+	    m_url_reader.dump_url_binary(l_url_diff,m_diff_file_name);
+	    l_404_error = check_404_error(m_diff_file_name);
+	    --l_404_trial;
+	  } while(l_404_error && l_404_trial);
+
+	if(l_404_error)
+	  {
+	    std::cout << "ERROR : download of " << l_url_diff << " failed to many times" << std::endl ;
+	    exit(-1);
+	  }
 
 	parse_diff(l_diff_state);
 	m_informations.store(*l_diff_state);
@@ -392,6 +407,25 @@ namespace osm_diff_watcher
     // DOM analyze
     m_dom_parser.set_diff_state(p_diff_state);
     m_dom_parser.parse(m_diff_file_name);  
+  }
+  
+  //------------------------------------------------------------------------------
+  bool osm_diff_watcher::check_404_error(const std::string & p_file_name)
+  {
+    std::ifstream l_tmp_input_file(p_file_name.c_str());
+    if(l_tmp_input_file==NULL)
+      {
+	std::cout << "ERROR : Unable to open file \"" << p_file_name << "\"" << std::endl ;
+	exit(-1);
+      }
+    l_tmp_input_file.close();
+
+    igzstream l_input_file(p_file_name.c_str());    
+    std::string l_line;
+    bool l_eof = getline(l_input_file,l_line).eof();
+    bool l_error = l_line.substr(0,std::string("<?xml").size()) != "<?xml" && l_line.substr(0,std::string("<osmChange").size()) != "<osmChange";
+    l_input_file.close();
+    return l_error || l_eof;
   }
 
   bool osm_diff_watcher::m_stop = false;

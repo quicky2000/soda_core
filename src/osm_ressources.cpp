@@ -1,22 +1,22 @@
 /*
-    This file is part of osm_diff_watcher, Openstreetmap diff analyze framework
-    The aim of this software is to provided generic facilities for diff analyzis
-    to allow developers to concentrate on analyze rather than diff management 
-    infrastructure
-    Copyright (C) 2012  Julien Thevenon ( julien_thevenon at yahoo.fr )
+  This file is part of osm_diff_watcher, Openstreetmap diff analyze framework
+  The aim of this software is to provided generic facilities for diff analyzis
+  to allow developers to concentrate on analyze rather than diff management 
+  infrastructure
+  Copyright (C) 2012  Julien Thevenon ( julien_thevenon at yahoo.fr )
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 #include "osm_ressources.h"
 #include "url_reader.h"
@@ -118,36 +118,44 @@ namespace osm_diff_watcher
   {
     std::string l_sequence_number_str;
     std::string l_timestamp;
-    url_reader l_url_reader;
-    download_buffer l_buffer;
+    uint32_t l_nb_trial = 3;
     std::string l_url = (p_url != "" ? p_url : (m_replication_domain+"/state.txt")); 
-    l_url_reader.read_url(l_url.c_str(),l_buffer);
-    //  l_url_reader.read_url("http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt",l_buffer);
-    std::stringstream l_stream;
-    l_stream << l_buffer.get_data();
-    std::string l_line;
-    while(!getline(l_stream,l_line).eof())
+    do
       {
-	if(l_line.find("sequenceNumber") != std::string::npos)
+	url_reader l_url_reader;
+	download_buffer l_buffer;
+	l_url_reader.read_url(l_url.c_str(),l_buffer);
+	//  l_url_reader.read_url("http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt",l_buffer);
+	std::stringstream l_stream;
+	l_stream << l_buffer.get_data();
+	std::string l_line;
+	while(!getline(l_stream,l_line).eof())
 	  {
-	    size_t l_begin = l_line.find("=");
-	    l_sequence_number_str = l_line.substr(l_begin+1);
+	    if(l_line.find("sequenceNumber") != std::string::npos)
+	      {
+		size_t l_begin = l_line.find("=");
+		l_sequence_number_str = l_line.substr(l_begin+1);
+	      }
+	    if(l_line.find("timestamp=") != std::string::npos)
+	      {
+		size_t l_begin = l_line.find("=");
+		l_timestamp = l_line.substr(l_begin+1);
+		while((l_begin = l_timestamp.find("\\")) != std::string::npos)
+		  {
+		    std::string l_suffix = l_timestamp.substr(l_begin+1);
+		    std::string l_prefix = l_timestamp.substr(0,l_begin);
+		    l_timestamp = l_prefix+l_suffix;
+		  }
+		std::cout << "timestamp=\"" << l_timestamp << "\"" << std::endl ;
+	      }
 	  }
-	if(l_line.find("timestamp=") != std::string::npos)
-	  {
-	    size_t l_begin = l_line.find("=");
-	    l_timestamp = l_line.substr(l_begin+1);
-            while((l_begin = l_timestamp.find("\\")) != std::string::npos)
-              {
-                std::string l_suffix = l_timestamp.substr(l_begin+1);
-                std::string l_prefix = l_timestamp.substr(0,l_begin);
-                l_timestamp = l_prefix+l_suffix;
-              }
-            std::cout << "timestamp=\"" << l_timestamp << "\"" << std::endl ;
-	  }
+	--l_nb_trial;
+      }while((l_sequence_number_str == "" || l_timestamp == "") && l_nb_trial);
+    if(l_sequence_number_str == "" || l_timestamp == "")
+      {
+	std::cout << "ERROR : too many unsuccessfull attempt to obtain diff information from " << l_url << std::endl ;
+	exit(-1);
       }
-    assert(l_sequence_number_str != "");
-    assert(l_timestamp != "");
     uint64_t l_sequence_number = atoll(l_sequence_number_str.c_str());
     return new osm_diff_analyzer_if::osm_diff_state(l_sequence_number,l_timestamp,m_replication_domain);
   }
