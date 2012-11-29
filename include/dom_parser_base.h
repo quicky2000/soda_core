@@ -81,10 +81,6 @@ namespace osm_diff_watcher
             this->perform_init();
             this->perform_dedicated_analyze(l_node);
           }
-        else
-          {
-            std::cout << "WARNING : empty XML" << std::endl ;
-          }
       }
 
     //------------------------------------------------------------------------------
