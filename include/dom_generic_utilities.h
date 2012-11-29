@@ -140,11 +140,10 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   template <>
     inline float generic_dom_utilities<XMLNode>::extract_attribute(const XMLNode & p_node,
-								 const char * p_attribute_name)
+								   const char * p_attribute_name)
     {
       XMLCSTR l_str = p_node.getAttribute(p_attribute_name);
-      assert(l_str);
-    return atof(l_str); 
+      return (l_str ? atof(l_str):0.0); 
     }
 
   //----------------------------------------------------------------------------
