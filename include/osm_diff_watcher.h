@@ -33,6 +33,8 @@
 #include "configuration.h"
 #include <string>
 #include <map>
+#include <ctime>
+#include <memory.h>
 
 namespace quicky_url_reader
 {
@@ -51,6 +53,7 @@ namespace osm_diff_watcher
     void run(void);
 
   private:
+    inline static time_t extract_time(const std::string & p_date);
     static void sig_handler(int p_sig);
     void parse_diff(const osm_diff_analyzer_if::osm_diff_state * p_diff_state);
     const uint64_t get_start_sequence_number(const osm_diff_analyzer_if::osm_diff_state &p_diff_state);
@@ -76,9 +79,24 @@ namespace osm_diff_watcher
   };
 
   //----------------------------------------------------------------------------
+  time_t osm_diff_watcher::extract_time(const std::string & p_date)
+  {
+    assert(p_date.size()==20);
+    struct tm l_date;
+    memset(&l_date,0,sizeof(l_date));
+    l_date.tm_year = atoi(p_date.substr(0,4).c_str());
+    l_date.tm_mon  = atoi(p_date.substr(5,2).c_str()) ;
+    l_date.tm_mday = atoi(p_date.substr(8,2).c_str()) ;
+    l_date.tm_hour = atoi(p_date.substr(11,2).c_str());
+    l_date.tm_min  = atoi(p_date.substr(14,2).c_str());
+    l_date.tm_sec = atoi(p_date.substr(17,2).c_str());
+    return mktime(&l_date);
+  }
+
+  //----------------------------------------------------------------------------
   const uint64_t osm_diff_watcher::get_next_sequence_number(const uint64_t & p_seq_number)
   {
-    uint64_t l_result = p_seq_number +1 ;
+    uint64_t l_result = p_seq_number + 1 ;
     // Check if we are at replication domain boundary
     std::map<uint64_t,replication_domain_jump>::const_iterator l_domain_jump_iter = m_configuration->get_domain_jumps().find(p_seq_number); 
     if(l_domain_jump_iter != m_configuration->get_domain_jumps().end() && l_domain_jump_iter->second.get_old_domain() == m_ressources.get_replication_domain())

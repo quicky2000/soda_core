@@ -301,15 +301,21 @@ namespace osm_diff_watcher
 
     // Managing iteration number
     uint64_t l_nb_iteration = std::numeric_limits<uint64_t>::max();
+    bool l_display_iteration = false;
     if(m_configuration->get_variable("iteration_number") != "")
       {
 	l_nb_iteration = strtoull(m_configuration->get_variable("iteration_number").c_str(),NULL,10);
+        l_display_iteration = true;
       }
-
+    time_t l_previous_diff_time;
+    bool l_first_diff = true;
     while(l_nb_iteration && !m_stop)
       {
 	std::cout << "--------------------------------------------------------" << std::endl ;
-	std::cout << l_nb_iteration << " remaining iterations" << std::endl ;
+        if(l_display_iteration)
+          {
+            std::cout << l_nb_iteration << " remaining iterations" << std::endl ;
+          }
 	std::cout << "Latest seq number available = " << l_end_seq_number << std::endl ;
 	std::cout << "--> Sequence number = \"" << l_current_seq_number << "\"" << std::endl;
 
@@ -328,6 +334,20 @@ namespace osm_diff_watcher
             l_diff_state = m_ressources.get_minute_diff_state(l_state_url);
 	  }
         std::cout << "Timestamp of diff file : " << l_diff_state->get_timestamp() << std::endl ;
+        time_t l_diff_time = extract_time(l_diff_state->get_timestamp());
+
+        //Compute time elapsed between two diffs generations to adjust wait delay
+        double l_time_between_diff = 60;
+        if(!l_first_diff)
+          {
+            l_time_between_diff = difftime(l_diff_time,l_previous_diff_time); 
+          }
+        else
+          {
+            l_first_diff = false;
+          }
+        l_previous_diff_time = l_diff_time ;
+
 	std::string l_url_diff = m_ressources.get_url_minute_diff(l_current_seq_number);
 	std::cout << "Url of diff file \"" << l_url_diff << "\"" << std::endl ;
         time_t l_begin_time = time(NULL);
@@ -348,39 +368,53 @@ namespace osm_diff_watcher
 	    exit(-1);
 	  }
 
+        // Parse diff file
 	parse_diff(l_diff_state);
+        
+        // Remember reference of parsed diff
 	m_informations.store(*l_diff_state);
         delete l_diff_state;
         l_diff_state = NULL;
 	--l_nb_iteration;
+
+        // Prepare wait of next diff if necessary : latest available number is current sequence number
 	if(l_current_seq_number == l_end_seq_number && !m_stop && l_nb_iteration)
 	  {
             uint64_t l_next_seq_number = get_next_sequence_number(l_current_seq_number);
+
+            // Check if we are just before a domain jump. Not necessary to wai tin case of domain jump
             if(l_next_seq_number == l_current_seq_number +1)
               {
+                // Determine time needed to run analyzer on diff file
                 time_t l_end_time = time(NULL);
-                double l_diff_time = difftime(l_end_time,l_begin_time);
-                if(l_diff_time < 60)
+                double l_computation_time = difftime(l_end_time,l_begin_time);
+                std::cout << "Number of seconds between diffs : " << l_time_between_diff << " s" << std::endl ;
+                std::cout << "Time spent in analyze = " << l_computation_time << "s" << std::endl ;
+
+                // Compute remaining time before next diff generation
+                double l_remaining_time = 0;
+                if(l_computation_time < l_time_between_diff)
                   {
-                    double l_remaining_time = 60 - l_diff_time;
-                    std::cout << "Elapsed time = " << l_diff_time << "s" << std::endl ;
-                    // Waiting for new end sequence number
-                    uint32_t l_delay = (uint32_t) l_remaining_time;
-                    do
-                      {
-                        std::cout << "Wait for " << l_delay << " seconds" << std::endl ;
-#ifndef _WIN32
-                        sleep(l_delay);
-#else
-                        Sleep(1000*l_delay);
-#endif
-                        delete l_diff_state;
-                        l_diff_state = m_ressources.get_minute_diff_state();
-                        l_end_seq_number = l_diff_state->get_sequence_number();
-                        if(l_delay == (uint32_t) l_remaining_time) l_delay = 1;
-                        if(l_delay < 30 ) l_delay *= 2;
-                      }while(l_current_seq_number == l_end_seq_number && !m_stop);
+                    l_remaining_time = l_time_between_diff - l_computation_time;
                   }
+                // Waiting for new end sequence number
+                uint32_t l_delay = (uint32_t) l_remaining_time;
+                do
+                  {
+                    std::cout << "Wait for " << l_delay << " seconds" << std::endl ;
+#ifndef _WIN32
+                    sleep(l_delay);
+#else
+                    Sleep(1000*l_delay);
+#endif
+                    delete l_diff_state;
+                    l_diff_state = m_ressources.get_minute_diff_state();
+                    l_end_seq_number = l_diff_state->get_sequence_number();
+                    // Increase delay in case of unchanged end seqence number
+                    if(l_delay == (uint32_t) l_remaining_time) l_delay = 1;
+                    if(l_delay < l_time_between_diff / 2) l_delay *= 2;
+                  }while(l_current_seq_number == l_end_seq_number && !m_stop);
+              
               }
             l_current_seq_number = l_next_seq_number;
  
