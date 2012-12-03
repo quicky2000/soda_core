@@ -39,7 +39,6 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   void dom2cpp_analyzer::analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree)
   {
-    std::cout << m_diff_state << std::endl ;
     this->perform_analyze(apply_init(m_diff_state));
     assert(!strcmp(p_tree.getName(),"osmChange"));
     int l_nb_child_node = p_tree.nChildNode();
