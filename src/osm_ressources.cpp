@@ -146,7 +146,6 @@ namespace osm_diff_watcher
 		    std::string l_prefix = l_timestamp.substr(0,l_begin);
 		    l_timestamp = l_prefix+l_suffix;
 		  }
-		std::cout << "timestamp=\"" << l_timestamp << "\"" << std::endl ;
 	      }
 	  }
 	--l_nb_trial;
