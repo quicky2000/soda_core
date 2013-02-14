@@ -21,6 +21,9 @@
 #ifndef _REPLICATION_DOMAIN_JUMP_H_
 #define _REPLICATION_DOMAIN_JUMP_H_
 
+#include <inttypes.h>
+#include <string>
+
 namespace osm_diff_watcher
 {
   class replication_domain_jump
