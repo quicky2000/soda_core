@@ -38,10 +38,10 @@ namespace osm_diff_watcher
     inline const std::string & get_old_domain(void)const;
     inline const std::string & get_new_domain(void)const;
   private:
-    const uint64_t m_id;
-    const std::string m_domain;
-    const uint64_t m_id2;
-    const std::string m_domain2;
+    uint64_t m_id;
+    std::string m_domain;
+    uint64_t m_id2;
+    std::string m_domain2;
   };
 
   //----------------------------------------------------------------------------
