@@ -25,6 +25,7 @@
 #include "configuration.h"
 #include "xmlParser.h"
 #include <cstring>
+#include <iostream>
 
 namespace osm_diff_watcher
 {
