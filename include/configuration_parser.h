@@ -30,7 +30,7 @@ namespace osm_diff_watcher
   class configuration_parser
   {
   public:
-    static const configuration * parse(const std::string & p_file_name);
+    inline static const configuration * parse(const std::string & p_file_name);
   private:
   };
 
