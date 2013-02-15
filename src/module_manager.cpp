@@ -45,9 +45,9 @@ namespace osm_diff_watcher
 #ifndef UNICODE
 	t_lib_handler l_library_handle = (void*)LoadLibrary(p_name.c_str());
 #else // UNICODE
-	unsigned int l_size = MultiByteToWideChar(CP_ACP, 0, p_library_name.c_str(), -1, NULL, 0);
+        unsigned int l_size = MultiByteToWideChar(CP_ACP, 0, p_name.c_str(), -1, NULL, 0);
 	WCHAR *l_buf = new WCHAR[l_size];
-	MultiByteToWideChar(CP_ACP, 0,p_library_name.c_str(), -1, l_buf, l_size);
+        MultiByteToWideChar(CP_ACP, 0,p_name.c_str(), -1, l_buf, l_size);
 	t_lib_handler l_library_handle = (void*)LoadLibrary(l_buf);
 #endif // UNICODE
 #endif // _WIN32
