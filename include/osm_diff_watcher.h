@@ -51,16 +51,15 @@ namespace osm_diff_watcher
     osm_diff_watcher(const std::string & p_file_name);
     ~osm_diff_watcher(void);
     void run(void);
-
+    inline void stop(void);
   private:
     inline static time_t extract_time(const std::string & p_date);
-    static void sig_handler(int p_sig);
     void parse_diff(const osm_diff_analyzer_if::osm_diff_state * p_diff_state);
     const uint64_t get_start_sequence_number(const osm_diff_analyzer_if::osm_diff_state &p_diff_state);
     inline const uint64_t get_next_sequence_number(const uint64_t & p_seq_number);
     bool check_404_error(const std::string & p_file_name);
 
-    static bool m_stop;
+    bool m_stop;
     osm_ressources & m_ressources;
     common_api_wrapper & m_api_wrapper;
     std::string m_diff_file_name;
@@ -77,6 +76,12 @@ namespace osm_diff_watcher
     internal_database m_informations;
 
   };
+
+  //----------------------------------------------------------------------------
+  void osm_diff_watcher::stop(void)
+  {
+      m_stop = true;
+  }
 
   //----------------------------------------------------------------------------
   time_t osm_diff_watcher::extract_time(const std::string & p_date)

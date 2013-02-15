@@ -31,7 +31,6 @@
 #include <fstream>
 #include <cassert>
 #include <cstdlib>
-#include <signal.h>
 #include <limits>
 #ifdef _WIN32
 #include <windows.h>
@@ -42,13 +41,13 @@ namespace osm_diff_watcher
 {
   //------------------------------------------------------------------------------
   osm_diff_watcher::osm_diff_watcher(const std::string & p_file_name):
+    m_stop(false),
     m_ressources(osm_ressources::instance()),
     m_api_wrapper(common_api_wrapper::instance(m_ressources)),
     m_diff_file_name("tmp_diff.gz"),
     m_configuration(NULL),
     m_dom2cpp_analyzer("dom2cpp_analyzer_instance"),
     m_url_reader(quicky_url_reader::url_reader::instance())
-
   {
     std::string l_file_name = (p_file_name == "" ?  "osm.conf" : p_file_name);
     m_configuration = configuration_parser::parse(l_file_name);
@@ -172,27 +171,6 @@ namespace osm_diff_watcher
       }
     // Add built-in DOM parsers
     m_dom_parser.add_analyzer(m_dom2cpp_analyzer);
-
-
-
-#ifndef _WIN32
-    //Preparing signal handling to manage stop
-    /* Déclaration d'une structure pour la mise en place des gestionnaires */
-    struct sigaction l_signal_action;
-  
-    /* Remplissage de la structure pour la mise en place des gestionnaires */
-    /* adresse du gestionnaire */
-    l_signal_action.sa_handler=sig_handler;
-    // Mise a zero du champ sa_flags theoriquement ignoré
-    l_signal_action.sa_flags=0;
-    /* On ne bloque pas de signaux spécifiques */
-    sigemptyset(&l_signal_action.sa_mask);
-    
-    /* Mise en place du gestionnaire bidon pour trois signaux */
-    sigaction(SIGINT,&l_signal_action,0);
-#else
-    signal(SIGINT,sig_handler);
-#endif
   }
 
   //------------------------------------------------------------------------------
@@ -228,13 +206,6 @@ namespace osm_diff_watcher
     delete m_configuration;
     common_api_wrapper::remove_instance();
     osm_ressources::remove_instance();
-  }
-
-  //------------------------------------------------------------------------------
-  void osm_diff_watcher::sig_handler(int p_sig)
-  {
-    std::cout << "===================> Receive Control-C : execution will stop after this minute diff analyze will be finished" << std::endl ;
-    m_stop = true;
   }
 
   //------------------------------------------------------------------------------
@@ -464,7 +435,6 @@ namespace osm_diff_watcher
     return l_error || l_eof;
   }
 
-  bool osm_diff_watcher::m_stop = false;
 }
 
 //EOF
