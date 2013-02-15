@@ -241,7 +241,7 @@ namespace osm_diff_watcher
   const uint64_t osm_diff_watcher::get_start_sequence_number(const osm_diff_analyzer_if::osm_diff_state &p_diff_state)
   {
     std::string l_start_policy = m_configuration->get_variable("start_policy");
-    uint64_t l_result;
+    uint64_t l_result=0;
     if(l_start_policy=="current" || l_start_policy == "")
       {
 	std::cout << "Start Policy : Using current sequence number" << std::endl ;
@@ -307,7 +307,7 @@ namespace osm_diff_watcher
 	l_nb_iteration = strtoull(m_configuration->get_variable("iteration_number").c_str(),NULL,10);
         l_display_iteration = true;
       }
-    time_t l_previous_diff_time;
+    time_t l_previous_diff_time=0;
     bool l_first_diff = true;
  
     double l_remaining_time = 0;
