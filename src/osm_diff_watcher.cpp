@@ -26,6 +26,7 @@
 #include "configuration_parser.h"
 #include "common_api_wrapper.h"
 #include "osm_diff_state.h"
+#include "soda_Ui_if.h"
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -40,15 +41,17 @@ using namespace quicky_url_reader;
 namespace osm_diff_watcher
 {
   //------------------------------------------------------------------------------
-  osm_diff_watcher::osm_diff_watcher(const std::string & p_file_name):
+  osm_diff_watcher::osm_diff_watcher(const std::string & p_file_name, soda_Ui_if & p_Ui):
+    m_Ui(p_Ui),
     m_stop(false),
     m_ressources(osm_ressources::instance()),
-    m_api_wrapper(common_api_wrapper::instance(m_ressources)),
+    m_api_wrapper(common_api_wrapper::instance(m_ressources,m_Ui)),
     m_diff_file_name("tmp_diff.gz"),
     m_configuration(NULL),
     m_dom2cpp_analyzer("dom2cpp_analyzer_instance"),
     m_url_reader(quicky_url_reader::url_reader::instance())
   {
+    m_Ui.clear_common_text();
     std::string l_file_name = (p_file_name == "" ?  "osm.conf" : p_file_name);
     m_configuration = configuration_parser::parse(l_file_name);
     for(std::vector<std::string>::const_iterator l_iter = m_configuration->get_libraries().begin();
@@ -68,7 +71,9 @@ namespace osm_diff_watcher
 	std::string l_input_type = l_analyzer->get_input_type();
 	if(!l_module_enabled)
 	  {
-	    std::cout << "Module \"" << l_analyzer->get_name() << "\" of type \"" << l_type << "\" has been disable" << std::endl ;
+            std::stringstream l_stream;
+            l_stream << "Module \"" << l_analyzer->get_name() << "\" of type \"" << l_type << "\" has been disable" << std::endl ;
+            m_Ui.append_common_text(l_stream.str());
 	    m_disabled_analyzers.insert(make_pair(l_analyzer->get_name(),l_analyzer));
 	  }
 	else if(l_input_type=="dom")
@@ -97,7 +102,7 @@ namespace osm_diff_watcher
                 std::cout << "Invalid sax_analyzer \"" << l_type << "\"" << std::endl ;
                 exit(-1);
               }
-	    m_sax_analyzers.insert(make_pair(l_sax_analyzer->get_name(),l_sax_analyzer));	    
+            m_sax_analyzers.insert(make_pair(l_sax_analyzer->get_name(),l_sax_analyzer));
 	  }
 	else if(l_input_type=="cpp")
 	  {
@@ -130,7 +135,7 @@ namespace osm_diff_watcher
        l_proxy_login != "" &&
        l_proxy_password != "")
       {
-	std::cout << "Configuring proxy authentication" << std::endl ;
+        m_Ui.append_common_text("Configuring proxy authentication");
 	url_reader l_url_reader;
 	l_url_reader.set_authentication(l_proxy_name,l_proxy_port,l_proxy_login,l_proxy_password);
       }
@@ -215,7 +220,7 @@ namespace osm_diff_watcher
     uint64_t l_result=0;
     if(l_start_policy=="current" || l_start_policy == "")
       {
-	std::cout << "Start Policy : Using current sequence number" << std::endl ;
+        m_Ui.append_common_text("Start Policy : Using current sequence number");
 	l_result = p_diff_state.get_sequence_number();
       }
     else if(l_start_policy == "stored")
@@ -225,20 +230,24 @@ namespace osm_diff_watcher
         m_informations.get_latest_replication_domain(l_stored_replication_domain);
         if(l_stored_replication_domain != "")
           {
-            std::cout << "Start Policy : Using stored replication domain : " << l_stored_replication_domain << std::endl ;
+            std::stringstream l_stream;
+            l_stream << "Start Policy : Using stored replication domain : " << l_stored_replication_domain << std::endl ;
+            m_Ui.append_common_text(l_stream.str());
             m_ressources.set_replication_domain(l_stored_replication_domain);
           }
 	l_result = m_informations.get_latest_sequence_number();
 	if(!l_result)
 	  {
-	    std::cout << "WARNING : Using Start policy \"stored\" whereas no sequence number has been stored, start with current sequence" << std::endl;
+            m_Ui.append_common_text("WARNING : Using Start policy \"stored\" whereas no sequence number has been stored, start with current sequence");
 	    l_result = p_diff_state.get_sequence_number();
 	  }
 	else
 	  {
-            std::cout << "Start Policy : Using stored sequence number : " << l_result << std::endl ;
+            std::stringstream l_stream;
+            l_stream << "Start Policy : Using stored sequence number : " << l_result << std::endl ;
+            m_Ui.append_common_text(l_stream.str());
 	    l_result = get_next_sequence_number(l_result);
-	  }
+          }
       }
     else if(l_start_policy == "user_defined")
       {
@@ -272,10 +281,13 @@ namespace osm_diff_watcher
 
     // Managing iteration number
     uint64_t l_nb_iteration = std::numeric_limits<uint64_t>::max();
+    uint64_t l_configured_iteration = 0;
     bool l_display_iteration = false;
     if(m_configuration->get_variable("iteration_number") != "")
       {
 	l_nb_iteration = strtoull(m_configuration->get_variable("iteration_number").c_str(),NULL,10);
+        l_configured_iteration = l_nb_iteration;
+        m_Ui.configure_progress_display(0,l_nb_iteration);
         l_display_iteration = true;
       }
     time_t l_previous_diff_time=0;
@@ -285,14 +297,24 @@ namespace osm_diff_watcher
     double l_time_between_diff = 0;
     while(l_nb_iteration && !m_stop)
       {
-	std::cout << "--------------------------------------------------------" << std::endl ;
+        m_Ui.append_common_text("--------------------------------------------------------");
         if(l_display_iteration)
           {
-            std::cout << l_nb_iteration << " remaining iterations" << std::endl ;
+            m_Ui.update_progress(l_configured_iteration - l_nb_iteration +1);
+            std::stringstream l_stream;
+            l_stream << l_nb_iteration << " remaining iterations" << std::endl ;
+            m_Ui.append_common_text(l_stream.str());
           }
-	std::cout << "Latest seq number that was available = " << l_end_seq_number << std::endl ;
-	std::cout << "--> Sequence number = \"" << l_current_seq_number << "\"" << std::endl;
-
+        {
+            std::stringstream l_stream;
+            l_stream << "Latest seq number that was available = " << l_end_seq_number << std::endl ;
+            m_Ui.append_common_text(l_stream.str());
+        }
+        {
+            std::stringstream l_stream;
+            l_stream << "--> Sequence number = \"" << l_current_seq_number << "\"" << std::endl;
+            m_Ui.append_common_text(l_stream.str());
+        }
         // Waiting for end sequence number
         uint32_t l_delay = (uint32_t) l_remaining_time;
         // In case of replication domain jump it is important to recompute end_seq_time so 
@@ -302,7 +324,11 @@ namespace osm_diff_watcher
           {
             if(!l_first_loop && l_delay)
               {
-                std::cout << "Wait for " << l_delay << " seconds" << std::endl ;
+                {
+                    std::stringstream l_stream;
+                    l_stream << "Wait for " << l_delay << " seconds" << std::endl ;
+                    m_Ui.append_common_text(l_stream.str());
+                }
 #ifndef _WIN32
                 sleep(l_delay);
 #else
@@ -331,7 +357,12 @@ namespace osm_diff_watcher
                 m_ressources.get_state_url_diff(l_state_url,l_current_seq_number);
                 l_diff_state = m_ressources.get_minute_diff_state(l_state_url);
               }
-            std::cout << "Timestamp of diff file : " << l_diff_state->get_timestamp() << std::endl ;
+
+            {
+                std::stringstream l_stream;
+                l_stream << "Timestamp of diff file : " << l_diff_state->get_timestamp() << std::endl ;
+                m_Ui.append_common_text(l_stream.str());
+            }
             time_t l_diff_time = extract_time(l_diff_state->get_timestamp());
 
             //Compute time elapsed between two diffs generations to adjust wait delay
@@ -346,7 +377,12 @@ namespace osm_diff_watcher
             l_previous_diff_time = l_diff_time ;
 
             std::string l_url_diff = m_ressources.get_url_minute_diff(l_current_seq_number);
-            std::cout << "Url of diff file \"" << l_url_diff << "\"" << std::endl ;
+
+            {
+                std::stringstream l_stream;
+                l_stream << "Url of diff file <A HREF=\"" << l_url_diff << "\">" << l_url_diff << "</A>" << std::endl ;
+                m_Ui.append_common_text(l_stream.str());
+            }
             time_t l_begin_time = time(NULL);
             bool l_404_error = false;
 	
@@ -364,6 +400,9 @@ namespace osm_diff_watcher
                 std::cout << "ERROR : download of " << l_url_diff << " failed to many times" << std::endl ;
                 exit(-1);
               }
+
+	    // Send diff state to Ui
+	    m_Ui.update_diff_state(*l_diff_state);
 
             // Parse diff file
             parse_diff(l_diff_state);
@@ -384,8 +423,17 @@ namespace osm_diff_watcher
                     // Determine time needed to run analyzer on diff file
                     time_t l_end_time = time(NULL);
                     double l_computation_time = difftime(l_end_time,l_begin_time);
-                    std::cout << "Number of seconds between diffs : " << l_time_between_diff << " s" << std::endl ;
-                    std::cout << "Time spent in analyze = " << l_computation_time << "s" << std::endl ;
+
+                    {
+                        std::stringstream l_stream;
+                        l_stream << "Number of seconds between diffs : " << l_time_between_diff << " s" << std::endl ;
+                        m_Ui.append_common_text(l_stream.str());
+                    }
+                    {
+                        std::stringstream l_stream;
+                        l_stream << "Time spent in analyze = " << l_computation_time << "s" << std::endl ;
+                        m_Ui.append_common_text(l_stream.str());
+                    }
 
                     // Compute remaining time before next diff generation
                     if(l_computation_time < l_time_between_diff)
@@ -400,7 +448,7 @@ namespace osm_diff_watcher
     delete l_diff_state;
     if(m_stop)
       {
-        std::cout << "End of run requested by user" << std::endl ;
+        m_Ui.append_common_text("End of run requested by user");
       }
   }
 

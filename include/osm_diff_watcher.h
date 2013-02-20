@@ -44,11 +44,12 @@ namespace quicky_url_reader
 namespace osm_diff_watcher
 {
   class common_api_wrapper;
+  class soda_Ui_if;
 
   class osm_diff_watcher
   {
   public:
-    osm_diff_watcher(const std::string & p_file_name);
+    osm_diff_watcher(const std::string & p_file_name,soda_Ui_if & p_Ui);
     ~osm_diff_watcher(void);
     void run(void);
     inline void stop(void);
@@ -59,6 +60,7 @@ namespace osm_diff_watcher
     inline const uint64_t get_next_sequence_number(const uint64_t & p_seq_number);
     bool check_404_error(const std::string & p_file_name);
 
+    soda_Ui_if & m_Ui;
     bool m_stop;
     osm_ressources & m_ressources;
     common_api_wrapper & m_api_wrapper;

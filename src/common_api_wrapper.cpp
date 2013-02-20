@@ -61,6 +61,9 @@ namespace osm_diff_watcher
     p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_USER_BROWSE_URL] = (uintptr_t) common_api_wrapper::get_user_browse_url;
     p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_OBJECT_BROWSE_URL] = (uintptr_t) common_api_wrapper::get_object_browse_url;
     p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_API_OBJECT_URL] = (uintptr_t) common_api_wrapper::get_api_object_url;
+    p_api_ptr[osm_diff_analyzer_if::common_api_if::UI_REGISTER_MODULE] = (uintptr_t) common_api_wrapper::ui_register_module;
+    p_api_ptr[osm_diff_analyzer_if::common_api_if::UI_APPEND_LOG_TEXT] = (uintptr_t) common_api_wrapper::ui_append_log_text;
+    p_api_ptr[osm_diff_analyzer_if::common_api_if::UI_DECLARE_HTML_REPORT] = (uintptr_t) common_api_wrapper::ui_declare_html_report;
   }
 
   //----------------------------------------------------------------------------
@@ -70,18 +73,19 @@ namespace osm_diff_watcher
   }
 
   //----------------------------------------------------------------------------
-  common_api_wrapper::common_api_wrapper(osm_ressources & p_ressources):
+  common_api_wrapper::common_api_wrapper(osm_ressources & p_ressources,soda_Ui_if & p_Ui):
+    m_Ui(p_Ui),
     m_ressources(p_ressources),
     m_api(p_ressources)
   {
   }
 
   //----------------------------------------------------------------------------
-  common_api_wrapper & common_api_wrapper::instance(osm_ressources & p_ressources)
+  common_api_wrapper & common_api_wrapper::instance(osm_ressources & p_ressources,soda_Ui_if & p_Ui)
   {
     if(m_instance == NULL)
       {
-        m_instance = new common_api_wrapper(p_ressources);
+        m_instance = new common_api_wrapper(p_ressources,p_Ui);
       }
     return *m_instance;
   }
@@ -89,6 +93,7 @@ namespace osm_diff_watcher
   void common_api_wrapper::remove_instance(void)
   {
     delete m_instance;
+    m_instance = NULL;
   }
 
   common_api_wrapper * common_api_wrapper::m_instance = NULL;

@@ -25,13 +25,14 @@
 #include "osm_ressources.h"
 #include "osm_api.h"
 #include "osm_cache.h"
+#include "soda_Ui_if.h"
 
 namespace osm_diff_watcher
 {
   class common_api_wrapper
   {
   public:
-    static common_api_wrapper & instance(osm_ressources & p_ressources);
+    static common_api_wrapper & instance(osm_ressources & p_ressources,soda_Ui_if & p_Ui);
     static void remove_instance(void);
     static void register_function(uintptr_t *,uint32_t);
 
@@ -145,9 +146,19 @@ namespace osm_diff_watcher
                                           const osm_api_data_types::osm_object::t_osm_id & p_id,
                                           const osm_api_data_types::osm_core_element::t_osm_version & p_version);
 
-    common_api_wrapper(osm_ressources & p_ressources);
+    inline static void ui_register_module(const osm_diff_analyzer_if::analyzer_base & p_module,
+					  const std::string & p_name);
+
+    inline static void ui_append_log_text(const osm_diff_analyzer_if::analyzer_base & p_module,
+		                      const std::string & p_text);
+
+    inline static void ui_declare_html_report(const osm_diff_analyzer_if::analyzer_base & p_module,
+					      const std::string & p_name);
+
+    common_api_wrapper(osm_ressources & p_ressources,soda_Ui_if & p_Ui);
     static common_api_wrapper * m_instance;
 
+    soda_Ui_if & m_Ui;
     osm_cache m_cache;
     osm_ressources & m_ressources;
     osm_api m_api;
@@ -388,6 +399,27 @@ namespace osm_diff_watcher
                                               const osm_api_data_types::osm_core_element::t_osm_version & p_version)
   {
     m_instance->m_ressources.get_api_object_url(p_result,p_type,p_id,p_version);
+  }
+
+  //----------------------------------------------------------------------------
+  void common_api_wrapper::ui_register_module(const osm_diff_analyzer_if::analyzer_base & p_module,
+					      const std::string & p_name)
+  {
+    m_instance->m_Ui.instantiate_module(p_name,p_module);
+  }
+
+  //----------------------------------------------------------------------------
+  void common_api_wrapper::ui_append_log_text(const osm_diff_analyzer_if::analyzer_base & p_module,
+                                          const std::string & p_text)
+  {
+    m_instance->m_Ui.append_log_text(p_module,p_text);
+  }
+  
+  //----------------------------------------------------------------------------
+  void common_api_wrapper::ui_declare_html_report(const osm_diff_analyzer_if::analyzer_base & p_module,
+						  const std::string & p_name)
+  {
+    m_instance->m_Ui.declare_html_report(p_module,p_name);
   }
   
 }
