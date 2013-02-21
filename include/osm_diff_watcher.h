@@ -70,6 +70,8 @@ namespace osm_diff_watcher
     sax_parser m_sax_parser;
     osm_diff_dom_parser m_dom_parser;
     dom2cpp_analyzer m_dom2cpp_analyzer;
+    bool m_sax_parser_activated;
+    bool m_dom_parser_activated;
     std::map<std::string,osm_diff_analyzer_dom_if::dom_analyzer_if *> m_dom_analyzers;
     std::map<std::string,osm_diff_analyzer_sax_if::sax_analyzer_if *> m_sax_analyzers;
     std::map<std::string,osm_diff_analyzer_cpp_if::cpp_analyzer_if *> m_cpp_analyzers;

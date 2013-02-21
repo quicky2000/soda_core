@@ -32,6 +32,7 @@ namespace osm_diff_watcher
     {
     public:
       void add_analyzer(T & p_analyzer);
+      size_t get_nb_analyzers(void)const;
     protected:
       void perform_analyze(const analyze_operation<T> & f);
     private:
@@ -53,6 +54,12 @@ namespace osm_diff_watcher
 	{
 	  func(*l_iter);
 	}
+    }
+  //------------------------------------------------------------------------------
+  template <class T>
+    size_t output_producer_if<T>::get_nb_analyzers(void)const
+    {
+      return  m_analyzers.size();
     }
 
 }

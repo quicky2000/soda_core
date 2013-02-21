@@ -49,6 +49,8 @@ namespace osm_diff_watcher
     m_diff_file_name("tmp_diff.gz"),
     m_configuration(NULL),
     m_dom2cpp_analyzer("dom2cpp_analyzer_instance"),
+    m_sax_parser_activated(false),
+    m_dom_parser_activated(false),
     m_url_reader(quicky_url_reader::url_reader::instance())
   {
     m_Ui.clear_common_text();
@@ -153,6 +155,7 @@ namespace osm_diff_watcher
         ++l_iter)
       {
         m_sax_parser.add_analyzer(*(l_iter->second));
+	m_sax_parser_activated = true;
       }
 
     // Add built-in SAX parsers
@@ -173,9 +176,23 @@ namespace osm_diff_watcher
         ++l_iter)
       {
         m_dom_parser.add_analyzer(*(l_iter->second));
+	m_dom_parser_activated = true;
       }
     // Add built-in DOM parsers
-    m_dom_parser.add_analyzer(m_dom2cpp_analyzer);
+    if(m_dom2cpp_analyzer.get_nb_analyzers())
+      {
+	m_Ui.append_common_text("Activating dom2cpp analzyer");
+	m_dom_parser.add_analyzer(m_dom2cpp_analyzer);
+	m_dom_parser_activated = true;
+      }
+    if(m_sax_parser_activated)
+      {
+	m_Ui.append_common_text("Activating sax analyzer");
+      }
+    if(m_dom_parser_activated)
+      {
+	m_Ui.append_common_text("Activating dom analyzer");
+      }
   }
 
   //------------------------------------------------------------------------------
@@ -302,17 +319,12 @@ namespace osm_diff_watcher
           {
             m_Ui.update_progress(l_configured_iteration - l_nb_iteration +1);
             std::stringstream l_stream;
-            l_stream << l_nb_iteration << " remaining iterations" << std::endl ;
+            l_stream << l_nb_iteration << " remaining iterations";
             m_Ui.append_common_text(l_stream.str());
           }
         {
             std::stringstream l_stream;
-            l_stream << "Latest seq number that was available = " << l_end_seq_number << std::endl ;
-            m_Ui.append_common_text(l_stream.str());
-        }
-        {
-            std::stringstream l_stream;
-            l_stream << "--> Sequence number = \"" << l_current_seq_number << "\"" << std::endl;
+            l_stream << "Latest seq number that was available = " << l_end_seq_number;
             m_Ui.append_common_text(l_stream.str());
         }
         // Waiting for end sequence number
@@ -326,7 +338,7 @@ namespace osm_diff_watcher
               {
                 {
                     std::stringstream l_stream;
-                    l_stream << "Wait for " << l_delay << " seconds" << std::endl ;
+                    l_stream << "Wait for " << l_delay << " seconds";
                     m_Ui.append_common_text(l_stream.str());
                 }
 #ifndef _WIN32
@@ -358,11 +370,6 @@ namespace osm_diff_watcher
                 l_diff_state = m_ressources.get_minute_diff_state(l_state_url);
               }
 
-            {
-                std::stringstream l_stream;
-                l_stream << "Timestamp of diff file : " << l_diff_state->get_timestamp() << std::endl ;
-                m_Ui.append_common_text(l_stream.str());
-            }
             time_t l_diff_time = extract_time(l_diff_state->get_timestamp());
 
             //Compute time elapsed between two diffs generations to adjust wait delay
@@ -380,7 +387,7 @@ namespace osm_diff_watcher
 
             {
                 std::stringstream l_stream;
-                l_stream << "Url of diff file <A HREF=\"" << l_url_diff << "\">" << l_url_diff << "</A>" << std::endl ;
+                l_stream << "Url of diff file <A HREF=\"" << l_url_diff << "\">" << l_url_diff << "</A>" ;
                 m_Ui.append_common_text(l_stream.str());
             }
             time_t l_begin_time = time(NULL);
@@ -426,12 +433,12 @@ namespace osm_diff_watcher
 
                     {
                         std::stringstream l_stream;
-                        l_stream << "Number of seconds between diffs : " << l_time_between_diff << " s" << std::endl ;
+                        l_stream << "Number of seconds between diffs : " << l_time_between_diff << " s" ;
                         m_Ui.append_common_text(l_stream.str());
                     }
                     {
                         std::stringstream l_stream;
-                        l_stream << "Time spent in analyze = " << l_computation_time << "s" << std::endl ;
+                        l_stream << "Time spent in analyze = " << l_computation_time << "s" ;
                         m_Ui.append_common_text(l_stream.str());
                     }
 
@@ -456,12 +463,18 @@ namespace osm_diff_watcher
   void osm_diff_watcher::parse_diff(const osm_diff_analyzer_if::osm_diff_state * p_diff_state)
   {
     // Sax analyze
-    m_sax_parser.set_diff_state(p_diff_state);
-    m_sax_parser.parse(m_diff_file_name);
+    if(m_sax_parser_activated)
+      {
+	m_sax_parser.set_diff_state(p_diff_state);
+	m_sax_parser.parse(m_diff_file_name);
+      }
 
     // DOM analyze
-    m_dom_parser.set_diff_state(p_diff_state);
-    m_dom_parser.parse(m_diff_file_name);  
+    if(m_dom_parser_activated)
+      {
+	m_dom_parser.set_diff_state(p_diff_state);
+	m_dom_parser.parse(m_diff_file_name);  
+      }
   }
   
   //------------------------------------------------------------------------------
