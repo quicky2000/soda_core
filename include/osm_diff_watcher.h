@@ -31,6 +31,7 @@
 #include "internal_database.h"
 #include "osm_ressources.h"
 #include "configuration.h"
+#include "soda_Ui_if.h"
 #include <string>
 #include <map>
 #include <ctime>
@@ -44,7 +45,6 @@ namespace quicky_url_reader
 namespace osm_diff_watcher
 {
   class common_api_wrapper;
-  class soda_Ui_if;
 
   class osm_diff_watcher
   {
@@ -84,7 +84,8 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   void osm_diff_watcher::stop(void)
   {
-      m_stop = true;
+    m_Ui.append_common_text("Stop request received from UI");
+    m_stop = true;
   }
 
   //----------------------------------------------------------------------------
