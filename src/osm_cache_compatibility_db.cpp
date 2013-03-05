@@ -19,6 +19,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 #include "osm_cache_compatibility_db.h"
+#include "quicky_exception.h"
+#include "soda_Ui_if.h"
 #include <cassert>
 #include <iostream>
 #include <fstream>
@@ -26,9 +28,10 @@
 namespace osm_diff_watcher
 {
   //----------------------------------------------------------------------------
-  osm_cache_compatibility_db::osm_cache_compatibility_db(const std::string & p_name,const std::string & p_current_version):
+  osm_cache_compatibility_db::osm_cache_compatibility_db(const std::string & p_name,const std::string & p_current_version,soda_Ui_if & p_ui):
     m_db(NULL),
-    m_informations("information_table")
+    m_informations("information_table"),
+    m_ui(p_ui)
   {
 
     std::ifstream l_check_file(p_name.c_str());
@@ -43,7 +46,9 @@ namespace osm_diff_watcher
           }
         else
           {
-            std::cerr << "Can't open database \"" << p_name << "\" : " << sqlite3_errmsg(m_db) << std::endl ;
+	    std::stringstream l_stream;
+            l_stream << "Can't open database \"" << p_name << "\" : " << sqlite3_errmsg(m_db) ;
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
           }
         bool l_updated = false;
         do
@@ -73,7 +78,11 @@ namespace osm_diff_watcher
   //------------------------------------------------------------------------------
   void osm_cache_compatibility_db::upgrade(const std::string & p_from_version)
   {
-    std::cout << "Upgrading from version \"" << p_from_version << "\"" << std::endl ;
+    {
+      std::stringstream l_stream ;
+      l_stream << "Upgrading from version \"" << p_from_version << "\"" ;
+      m_ui.append_common_text(l_stream.str());
+    }
     if(p_from_version == "0.1" || p_from_version == "")
       {
 	upgrade_from_0_1();
@@ -95,15 +104,15 @@ namespace osm_diff_watcher
 				      NULL);
     if(l_status != SQLITE_OK)
       {
-	std::cout << "ERROR during preparation of upgrade from 0.1 statement for " << m_user_table.get_name() << " : " << sqlite3_errmsg(m_db) << std::endl ;     
-	exit(EXIT_FAILURE);
+	std::stringstream l_stream;
+	l_stream << "ERROR during preparation of upgrade from 0.1 statement for " << m_user_table.get_name() << " : " << sqlite3_errmsg(m_db);
+	throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       }
 
     l_status = sqlite3_step(l_upgrade_stmt);
     if(!l_status == SQLITE_DONE)
       {
-	std::cout << "ERROR during upgrade from 0.1" << std::endl ;
-	exit(-1);
+	throw quicky_exception::quicky_runtime_exception("ERROR during upgrade from 0.1",__LINE__,__FILE__);
       }
     sqlite3_finalize(l_upgrade_stmt);  
 

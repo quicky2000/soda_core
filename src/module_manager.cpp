@@ -20,7 +20,9 @@
 */
 #include "module_manager.h"
 #include "module_wrapper.h"
-
+#include "quicky_exception.h"
+#include "soda_Ui_if.h"
+#include <sstream>
 #ifndef _WIN32
 #include <dlfcn.h>
 #else
@@ -31,6 +33,12 @@
 
 namespace osm_diff_watcher
 {
+  //----------------------------------------------------------------------------
+  module_manager::module_manager(soda_Ui_if & p_Ui):
+    m_ui(p_Ui)
+  {
+  }
+  
   //----------------------------------------------------------------------------
   void module_manager::load_library(const std::string & p_name)
   {
@@ -65,14 +73,15 @@ namespace osm_diff_watcher
 #endif
 	    if (l_register_function == NULL)
 	      {
-		std::cout << "ERROR : Cannot find symbol \"" << m_register_function_name << "\" in library \"" << p_name << "\"" << std::endl;
 
 #ifndef _WIN32
 		dlclose(l_library_handle);
 #else // _WIN32
                 FreeLibrary((HMODULE)l_library_handle);
 #endif
-		exit(-1);
+		std::stringstream l_stream;
+		l_stream << "ERROR : Cannot find symbol \"" << m_register_function_name << "\" in library \"" << p_name << "\"" ;
+		throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	      }
 	    
 	    register_module(l_register_function);
@@ -81,18 +90,20 @@ namespace osm_diff_watcher
 	  }
 	else
 	  {
-	    std::cout << "ERROR : unable to open library \"" << p_name << "\"";
+	    std::stringstream l_stream;
+	    l_stream << "ERROR : unable to open library \"" << p_name << "\"";
 #ifndef _WIN32
-            std::cout << " : " << dlerror() ;
+            l_stream << " : " << dlerror() ;
 #endif
-            std::cout << std::endl ;
-	    exit(-1);
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
       }
     else
       {
-	std::cout << "WARNING : Skipping already opened library \"" << p_name << "\"" << std::endl ;
+	std::stringstream l_stream;
+	l_stream << "WARNING : Skipping already opened library \"" << p_name << "\"";
+	m_ui.append_common_text(l_stream.str());
       }
   }
 
@@ -105,7 +116,11 @@ namespace osm_diff_watcher
         l_iter != m_module_wrappers.end();
         ++l_iter)
       {
-        std::cout << "Delete module wrapper of analyzer type \"" << l_iter->second->get_description()->get_type() << "\"" << std::endl;
+	{
+	  std::stringstream l_stream;
+	  l_stream << "Delete module wrapper of analyzer type \"" << l_iter->second->get_description()->get_type() << "\"" ;
+	  m_ui.append_common_text(l_stream.str());
+	}
         delete l_iter->second;
       }
 
@@ -114,12 +129,16 @@ namespace osm_diff_watcher
     std::map<std::string,t_lib_handler>::iterator l_iter_end = m_library_handlers.end();
     while(l_iter != l_iter_end)
       {
-	std::cout << "Closing library \"" << l_iter->first << "\"" << std::endl ;
-          #ifndef _WIN32
-          dlclose(l_iter->second);
-          #else // _WIN32
-          FreeLibrary((HMODULE)l_iter->second);
-          #endif
+	{
+	  std::stringstream l_stream;
+	  l_stream << "Closing library \"" << l_iter->first << "\"" ;
+	  m_ui.append_common_text(l_stream.str());
+	}
+#ifndef _WIN32
+	dlclose(l_iter->second);
+#else // _WIN32
+	FreeLibrary((HMODULE)l_iter->second);
+#endif
 	++l_iter;
       }
   }
@@ -129,7 +148,11 @@ namespace osm_diff_watcher
   {
     module_wrapper * l_module_wrapper = new module_wrapper(p_func);
     const std::string & l_type = l_module_wrapper->get_description()->get_type();
-    std::cout << "Successfull registration of analyzer type \"" << l_type << "\"" << std::endl ;
+    {
+      std::stringstream l_stream;
+      l_stream << "Successfull registration of analyzer type \"" << l_type << "\"";
+      m_ui.append_common_text(l_stream.str());
+    }
     m_module_wrappers.insert(make_pair(l_type,l_module_wrapper));
   }
 

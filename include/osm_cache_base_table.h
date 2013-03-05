@@ -24,6 +24,7 @@
 #include "osm_cache_base_table_description.h"
 #include "osm_api_data_types.h"
 #include "my_sqlite3.h"
+#include "quicky_exception.h"
 #include <inttypes.h>
 #include <vector>
 #include <string>
@@ -92,7 +93,9 @@ namespace osm_diff_watcher
 	sqlite3_finalize(m_delete_stmt);  
 	sqlite3_finalize(m_update_stmt);  
 	sqlite3_finalize(m_create_stmt);  
+#ifdef DEBUG
 	std::cout << "Table " << m_name << " end of destruction" << std::endl ;
+#endif
       }
 
     //------------------------------------------------------------------------------
@@ -113,7 +116,7 @@ namespace osm_diff_watcher
     template <class T>
       void osm_cache_base_table<T>::set_db(sqlite3 *p_db,bool p_primary_key_id)
       {
-	assert(p_db);
+        if(NULL == p_db) throw quicky_exception::quicky_logic_exception("p_db should not be NULL",__LINE__,__FILE__);
 	m_db = p_db;
 
 	sqlite3_stmt *l_stmt = NULL;
@@ -123,15 +126,17 @@ namespace osm_diff_watcher
 	int l_status = sqlite3_prepare_v2(m_db,("CREATE TABLE IF NOT EXISTS " + m_name + " ( Id INTEGER" + (p_primary_key_id ? " PRIMARY KEY AUTOINCREMENT": "")+", "+ osm_cache_base_table_description<T>::get_table_fields_declaration()+");").c_str(),-1,&l_stmt,NULL);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during preparation of statement to create " << m_name << " table : " << sqlite3_errmsg(m_db) << std::endl ;
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during preparation of statement to create " << m_name << " table : " << sqlite3_errmsg(m_db) ;
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
   
 	l_status = sqlite3_step(l_stmt);
 	if(!l_status == SQLITE_DONE)
 	  {
-	    std::cout << "ERROR during creation of " << m_name << " table : " << sqlite3_errmsg(m_db) << std::endl ;
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during creation of " << m_name << " table : " << sqlite3_errmsg(m_db) ;
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 	sqlite3_finalize(l_stmt);  
 
@@ -140,8 +145,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_prepare_v2(m_db,("INSERT INTO " + m_name + " (Id,"+osm_cache_base_table_description<T>::get_table_fields()+") VALUES ($id, "+osm_cache_base_table_description<T>::get_field_values()+")").c_str(),-1,&m_create_stmt,NULL);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during preparation of statement to create " << m_name << " item : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during preparation of statement to create " << m_name << " item : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Preparing named_item update statement
@@ -149,8 +155,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_prepare_v2(m_db,("UPDATE " + m_name + " SET " + osm_cache_base_table_description<T>::get_update_fields() + " WHERE Id == $id ;").c_str(),-1,&m_update_stmt,NULL);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during preparation of statement to update " << m_name << " item : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during preparation of statement to update " << m_name << " item : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Preparing named_item delete statements
@@ -158,8 +165,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_prepare_v2(m_db,("DELETE FROM " + m_name + " WHERE Id == $id").c_str(),-1,&m_delete_stmt,NULL);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during preparation of statement to delete " << m_name << " item : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during preparation of statement to delete " << m_name << " item : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Preparing named_item get_by_id statements
@@ -167,8 +175,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_prepare_v2(m_db,("SELECT Id,"+osm_cache_base_table_description<T>::get_table_fields()+" FROM " + m_name + " WHERE Id == $id").c_str(),-1,&m_get_by_id_stmt,NULL);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during preparation of statement to get " << m_name << " item by id: " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during preparation of statement to get " << m_name << " item by id: " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Preparing get_all statements
@@ -176,8 +185,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_prepare_v2(m_db,("SELECT Id,"+osm_cache_base_table_description<T>::get_table_fields()+" FROM " + m_name).c_str(),-1,&m_get_all_stmt,NULL);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during preparation of statement to get all " << m_name << " items : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during preparation of statement to get all " << m_name << " items : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Preparing get_max_id statements
@@ -185,8 +195,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_prepare_v2(m_db,("SELECT MAX(Id) FROM " + m_name).c_str(),-1,&m_get_max_id_stmt,NULL);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during preparation of statement to get max Id of " << m_name << " table : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during preparation of statement to get max Id of " << m_name << " table : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 #ifdef ENABLE_SUCCESS_STATUS_DISPLAY
@@ -213,15 +224,16 @@ namespace osm_diff_watcher
     template <class T>
       void osm_cache_base_table<T>::force_create(const T & p_named_item)
       {
-	assert(p_named_item.get_id());
+        if(!p_named_item.get_id()) throw quicky_exception::quicky_logic_exception("Trying to create an object with id 0",__LINE__,__FILE__);
 
 	// Binding values to statement
 	//----------------------------
 	int l_status = sqlite3_bind_int64(m_create_stmt,sqlite3_bind_parameter_index(m_create_stmt,"$id"),p_named_item.get_id());
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of Id parameter for create statement of " << m_name << " : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during binding of Id parameter for create statement of " << m_name << " : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
   
 	osm_cache_base_table_description<T>::bind_item_values(p_named_item,m_create_stmt,m_db);
@@ -237,8 +249,9 @@ namespace osm_diff_watcher
 	  }
 	else
 	  {
-	    std::cout << "ERROR during creation of " << m_name << " item : " << sqlite3_errmsg(m_db) << std::endl ;
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during creation of " << m_name << " item : " << sqlite3_errmsg(m_db) ;
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Reset the statement for the next use
@@ -246,8 +259,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_reset(m_create_stmt);  
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of " << m_name << " create statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of " << m_name << " create statement : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Reset bindings because they are now useless
@@ -255,8 +269,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_clear_bindings(m_create_stmt);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of bindings of " << m_name << " create statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of bindings of " << m_name << " create statement : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
       }
@@ -269,8 +284,9 @@ namespace osm_diff_watcher
 	int l_status = sqlite3_bind_int64(m_update_stmt,sqlite3_bind_parameter_index(m_update_stmt,"$id"),p_named_item.get_id());
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of Id parameter for update statement of " << m_name << " : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during binding of Id parameter for update statement of " << m_name << " : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
   
 	osm_cache_base_table_description<T>::bind_item_values(p_named_item,m_update_stmt,m_db);
@@ -286,8 +302,9 @@ namespace osm_diff_watcher
 	  }
 	else
 	  {
-	    std::cout << "ERROR during update of " << m_name << " : " << sqlite3_errmsg(m_db) << std::endl ;
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during update of " << m_name << " : " << sqlite3_errmsg(m_db) ;
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Reset the statement for the next use
@@ -295,8 +312,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_reset(m_update_stmt);  
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of " << m_name << " update statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of " << m_name << " update statement : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Reset bindings because they are now useless
@@ -304,8 +322,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_clear_bindings(m_update_stmt);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of bindings of " << m_name << " update statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of bindings of " << m_name << " update statement : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 
@@ -319,8 +338,9 @@ namespace osm_diff_watcher
 	int l_status = sqlite3_bind_int64(m_delete_stmt,sqlite3_bind_parameter_index(m_delete_stmt,"$id"),p_named_item.get_id());
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of Id parameter for delete statement of " << m_name << " : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during binding of Id parameter for delete statement of " << m_name << " : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
     
 	// Executing statement
@@ -334,8 +354,9 @@ namespace osm_diff_watcher
 	  }
 	else
 	  {
-	    std::cout << "ERROR during delete of " << m_name << " : " << sqlite3_errmsg(m_db) << std::endl ;
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during delete of " << m_name << " : " << sqlite3_errmsg(m_db) ;
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Reset the statement for the next use
@@ -343,8 +364,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_reset(m_delete_stmt);  
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of " << m_name << " delete statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of " << m_name << " delete statement : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Reset bindings because they are now useless
@@ -352,8 +374,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_clear_bindings(m_delete_stmt);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of bindings of " << m_name << " delete statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of bindings of " << m_name << " delete statement : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
       }
@@ -369,8 +392,9 @@ namespace osm_diff_watcher
 	int l_status = sqlite3_bind_int64(m_get_by_id_stmt,sqlite3_bind_parameter_index(m_get_by_id_stmt,"$id"),p_id);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of Id parameter for get_by_id statement of " << m_name << " : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during binding of Id parameter for get_by_id statement of " << m_name << " : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
     
 	// Executing statement
@@ -394,14 +418,16 @@ namespace osm_diff_watcher
 	      }
 	    else
 	      {
-		std::cout << "ERROR during selection of " << m_name << " : Id " << p_id << " is not unique " << sqlite3_errmsg(m_db) << std::endl ;
-		exit(-1);
+                std::stringstream l_stream;
+                l_stream << "ERROR during selection of " << m_name << " : Id " << p_id << " is not unique " << sqlite3_errmsg(m_db) ;
+		throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	      }
 	  }
 	else if(l_status != SQLITE_DONE)
 	  {
-	    std::cout << "ERROR during selection of " << m_name << " : " << sqlite3_errmsg(m_db) << std::endl ;
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during selection of " << m_name << " : " << sqlite3_errmsg(m_db) ;
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 
@@ -411,8 +437,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_reset(m_get_by_id_stmt);  
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of " << m_name << " get_by_id statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of " << m_name << " get_by_id statement : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Reset bindings because they are now useless
@@ -420,8 +447,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_clear_bindings(m_get_by_id_stmt);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of bindings of " << m_name << " get_by_id statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of bindings of " << m_name << " get_by_id statement : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 	return l_result;
       }
@@ -439,8 +467,9 @@ namespace osm_diff_watcher
 	  }
 	if(l_status != SQLITE_DONE)
 	  {
-	    std::cout << "ERROR during selection of " << m_name << " : " << sqlite3_errmsg(m_db) << std::endl ;
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during selection of " << m_name << " : " << sqlite3_errmsg(m_db) ;
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 #ifdef ENABLE_SUCCESS_STATUS_DISPLAY
@@ -452,8 +481,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_reset(m_get_all_stmt);  
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of " << m_name << " get_all statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of " << m_name << " get_all statement : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
       }
@@ -485,14 +515,16 @@ namespace osm_diff_watcher
 	      }
 	    else
 	      {
-		std::cout << "ERROR during determination of max Id of " << m_name << " table : " << sqlite3_errmsg(m_db) << std::endl ;
-		exit(-1);
+                std::stringstream l_stream;
+                l_stream << "ERROR during determination of max Id of " << m_name << " table : " << sqlite3_errmsg(m_db) ;
+		throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	      }
 	  }
 	else
 	  {
-	    std::cout << "ERROR during determination of max Id of " << m_name << " : " << sqlite3_errmsg(m_db) << std::endl ;
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during determination of max Id of " << m_name << " : " << sqlite3_errmsg(m_db) ;
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 
@@ -502,8 +534,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_reset(m_get_max_id_stmt);  
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of " << m_name << " get_max_id statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of " << m_name << " get_max_id statement : " << sqlite3_errmsg(m_db) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	return l_result;

@@ -23,6 +23,7 @@
 
 #include "dom_simple_analyzer_if.h"
 #include "dom_generic_utilities.h"
+#include "quicky_exception.h"
 #include <cstring>
 
 namespace osm_diff_watcher
@@ -60,10 +61,26 @@ namespace osm_diff_watcher
     template <class T>
     void dom_osm_extractor<T>::analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree)
     {
-      assert(!strcmp("osm",p_tree.getName()));
-      assert(p_tree.nChildNode()==1);
+      if(strcmp("osm",p_tree.getName()))
+        {
+          std::stringstream l_stream;
+          l_stream << "Root of XML tree should be \"osm\" instead of \"" << p_tree.getName() << "\"" ;
+          throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+        }
+      if(1 != p_tree.nChildNode())
+        {
+          throw quicky_exception::quicky_logic_exception("Child number should be 1 for node \"osm\"",__LINE__,__FILE__);
+        }
+
       osm_diff_analyzer_dom_if::t_dom_tree l_node = p_tree.getChildNode(0);
-      assert(!strcmp(l_node.getName(),T::get_type_str().c_str()));
+
+      if(strcmp(l_node.getName(),T::get_type_str().c_str()))
+        {
+          std::stringstream l_stream;
+          l_stream << "Node name \"" << l_node.getName() << "\" should be different of type name \"" << T::get_type_str() << "\"" ;
+          throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+        }
+      
       m_result = generic_dom_utilities<osm_diff_analyzer_dom_if::t_dom_tree>::extract_info<T>(l_node,true);
     }
   

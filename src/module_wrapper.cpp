@@ -21,8 +21,10 @@
 #include "module_wrapper.h"
 #include "module_library_if.h"
 #include "common_api_wrapper.h"
+#include "quicky_exception.h"
 #include <cassert>
 #include <iostream>
+#include <sstream>
 
 namespace osm_diff_watcher
 {
@@ -44,11 +46,15 @@ namespace osm_diff_watcher
     m_api_version = l_get_api_version();
     if(m_api_version != MODULE_LIBRARY_IF_VERSION)
       {
-	std::cout << "ERROR : osm_diff_watcher was compiled with module API " << MODULE_LIBRARY_IF_VERSION << " whereas module was compiled with version " << m_api_version << std::endl ;
-	exit(-1);
+	std::stringstream l_stream;
+	l_stream << "osm_diff_watcher was compiled with module API " << MODULE_LIBRARY_IF_VERSION << " whereas module was compiled with version " << m_api_version;
+	throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       }
     osm_diff_analyzer_if::module_library_if::t_get_api_size l_get_api_size = (osm_diff_analyzer_if::module_library_if::t_get_api_size)l_api_ptr[osm_diff_analyzer_if::module_library_if::GET_API_SIZE];
-    assert(MODULE_LIBRARY_IF_API_SIZE == l_get_api_size());
+    if(MODULE_LIBRARY_IF_API_SIZE != l_get_api_size())
+      {
+	throw quicky_exception::quicky_logic_exception("API size of module doesn't correspond to the one of executable. Please ensure they have been compiled with the same API version",__LINE__,__FILE__);
+      }
     osm_diff_analyzer_if::module_library_if::t_get_description l_get_description = (osm_diff_analyzer_if::module_library_if::t_get_description)l_api_ptr[osm_diff_analyzer_if::module_library_if::GET_DESCRIPTION];
     m_description = l_get_description();
     m_create = (osm_diff_analyzer_if::module_library_if::t_create_analyzer)l_api_ptr[osm_diff_analyzer_if::module_library_if::CREATE_ANALYZER];

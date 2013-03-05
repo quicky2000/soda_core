@@ -20,6 +20,8 @@
 */
 #include "sax_parser.h"
 #include "sax_analyzer_operations.h"
+#include "quicky_exception.h"
+#include <sstream>
 #include <inttypes.h>
 #include <iostream>
 #include <fstream>
@@ -33,8 +35,7 @@ namespace osm_diff_watcher
   {
     if (!m_parser)
       {
-	std::cout << "Couldn't allocate memory for parser" << std::endl ;
-	exit(-1);
+	throw quicky_exception::quicky_runtime_exception("Couldn't allocate memory for parser",__LINE__,__FILE__);
       }
 
   }
@@ -62,8 +63,9 @@ namespace osm_diff_watcher
 	p_stream.read(l_buf,l_size);
 	if (! XML_Parse(m_parser, l_buf,p_stream.gcount(),l_end))
 	  {
-	    std::cout << "ERROR : Parse error at line " << XML_GetCurrentLineNumber(m_parser) << " :" << XML_ErrorString(XML_GetErrorCode(m_parser)) << std::endl;
-	    exit(-1);
+	    std::stringstream l_stream;
+	    l_stream << "ERROR : Parse error at line " << XML_GetCurrentLineNumber(m_parser) << " :" << XML_ErrorString(XML_GetErrorCode(m_parser)) ;
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
       }
   }
@@ -72,7 +74,10 @@ namespace osm_diff_watcher
   void sax_parser::start(void *p_data, const char *p_element, const char **p_attribute)
   {
     sax_parser *l_parser = static_cast<sax_parser*>(p_data);
-    assert(l_parser);
+    if(NULL == l_parser)
+      {
+	throw quicky_exception::quicky_logic_exception("l_parser pointer should not be NULL",__LINE__,__FILE__);
+      }
     l_parser->analyze_start_element(p_element,p_attribute);
 
   }
@@ -81,7 +86,10 @@ namespace osm_diff_watcher
   void sax_parser::end(void *p_data, const char *p_element)
   {
     sax_parser *l_parser = static_cast<sax_parser*>(p_data);
-    assert(l_parser);
+    if(NULL == l_parser)
+      {
+	throw quicky_exception::quicky_logic_exception("l_parser pointer should not be NULL",__LINE__,__FILE__);
+      }
     l_parser->analyze_end_element(p_element);
   }
 

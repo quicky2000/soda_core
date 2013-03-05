@@ -25,6 +25,8 @@
 #include "dom_parser.h"
 #include "dom_osm_change_extractor.h"
 #include "dom_osm_full_extractor.h"
+#include "quicky_exception.h"
+#include "soda_Ui_if.h"
 #include <sstream>
 #include <cassert>
 #include <iostream>
@@ -35,7 +37,8 @@ using namespace quicky_url_reader;
 namespace osm_diff_watcher
 {
 
-  osm_ressources::osm_ressources(void):
+  osm_ressources::osm_ressources(soda_Ui_if & p_ui):
+    m_ui(p_ui),
     m_domain("openstreetmap.org"),
     m_data_domain("http://planet."+m_domain),
     m_redaction_domain(m_data_domain+"/redaction_period"), //Latest sequence number 229907
@@ -82,7 +85,9 @@ namespace osm_diff_watcher
       }
     if(!l_found)
       {
-        std::cout << "WARNING : Unable to find subscription date of user \"" << p_user_name << "\"" << std::endl ;
+	std::stringstream l_stream;
+        l_stream << "WARNING : Unable to find subscription date of user \"" << p_user_name << "\"" ;
+	m_ui.append_common_text(l_stream.str());
       }
     p_date = l_user_date;
   }
@@ -152,19 +157,20 @@ namespace osm_diff_watcher
       }while((l_sequence_number_str == "" || l_timestamp == "") && l_nb_trial);
     if(l_sequence_number_str == "" || l_timestamp == "")
       {
-	std::cout << "ERROR : too many unsuccessfull attempt to obtain diff information from " << l_url << std::endl ;
-	exit(-1);
+	std::stringstream l_stream;
+	l_stream << "ERROR : too many unsuccessfull attempt to obtain diff information from " << l_url  ;
+	throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       }
     uint64_t l_sequence_number = atoll(l_sequence_number_str.c_str());
     return new osm_diff_analyzer_if::osm_diff_state(l_sequence_number,l_timestamp,m_replication_domain);
   }
 
   //------------------------------------------------------------------------------
-  osm_ressources & osm_ressources::instance(void)
+  osm_ressources & osm_ressources::instance(soda_Ui_if & p_ui)
   {
     if(m_instance == NULL)
       {
-        m_instance = new osm_ressources();
+        m_instance = new osm_ressources(p_ui);
       }
     return *m_instance;
   }

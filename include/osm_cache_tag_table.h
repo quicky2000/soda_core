@@ -22,6 +22,8 @@
 #define _OSM_CACHE_TAG_TABLE_H_
 #include "osm_cache_versionned_table.h"
 #include "osm_cache_object_tag.h"
+#include "quicky_exception.h"
+#include <sstream>
 
 namespace osm_diff_watcher
 {
@@ -51,7 +53,9 @@ namespace osm_diff_watcher
       osm_cache_tag_table<T>::~osm_cache_tag_table(void)
       {
         sqlite3_finalize(m_exists_stmt);
+#ifdef DEBUG
 	std::cout << "Table " << this->get_name() << " end of destruction" << std::endl ;
+#endif
       }
 
     //------------------------------------------------------------------------------
@@ -65,8 +69,9 @@ namespace osm_diff_watcher
 	int l_status = sqlite3_prepare_v2(osm_cache_base_table<T>::get_db(),("SELECT Id,"+osm_cache_base_table_description<T>::get_table_fields()+" FROM " + this->get_name() + " WHERE Id = $id AND Version = $version AND Tag_Name_id = $tag_name_id AND Tag_Value_Id = $tag_value_id").c_str(),-1,&m_exists_stmt,NULL);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during preparation of statement to check "+osm_cache_base_table_description<T>::get_table_fields()+" existence : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during preparation of statement to check "+osm_cache_base_table_description<T>::get_table_fields()+" existence : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 #ifdef ENABLE_SUCCESS_STATUS_DISPLAY
@@ -87,28 +92,32 @@ namespace osm_diff_watcher
 	int l_status = sqlite3_bind_int64(m_exists_stmt,sqlite3_bind_parameter_index(m_exists_stmt,"$id"),p_tag.get_id());
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of id parameter for exists statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during binding of id parameter for exists statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
     
         l_status = sqlite3_bind_int(m_exists_stmt,sqlite3_bind_parameter_index(m_exists_stmt,"$version"),p_tag.get_version());
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of version parameter for exists statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during binding of version parameter for exists statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
     
 	l_status = sqlite3_bind_int64(m_exists_stmt,sqlite3_bind_parameter_index(m_exists_stmt,"$tag_name_id"),p_tag.get_tag_name_id());
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of tag_name_id parameter for exists statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during binding of tag_name_id parameter for exists statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 	l_status = sqlite3_bind_int64(m_exists_stmt,sqlite3_bind_parameter_index(m_exists_stmt,"$tag_value_id"),p_tag.get_tag_value_id());
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of tag_value_id parameter for exists statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during binding of tag_value_id parameter for exists statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
     
 	// Executing statement
@@ -130,14 +139,16 @@ namespace osm_diff_watcher
               }
 	    else
 	      {
-		std::cout << "ERROR during selection of " << this->get_name() << " : tag is not unique " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;
-		exit(-1);
+                std::stringstream l_stream;
+                l_stream << "ERROR during selection of " << this->get_name() << " : tag is not unique " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;
+		throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	      }
 	  }
 	else if(l_status != SQLITE_DONE)
 	  {
-	    std::cout << "ERROR during selection of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during selection of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 
@@ -146,8 +157,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_reset(m_exists_stmt);  
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of " << this->get_name() << " exists statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of " << this->get_name() << " exists statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Reset bindings because they are now useless
@@ -155,8 +167,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_clear_bindings(m_exists_stmt);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of bindings of " << this->get_name() << " exists statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of bindings of " << this->get_name() << " exists statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
         return l_result;
       }

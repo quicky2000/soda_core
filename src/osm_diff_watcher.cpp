@@ -26,7 +26,6 @@
 #include "configuration_parser.h"
 #include "common_api_wrapper.h"
 #include "osm_diff_state.h"
-#include "soda_Ui_if.h"
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -44,10 +43,11 @@ namespace osm_diff_watcher
   osm_diff_watcher::osm_diff_watcher(const std::string & p_file_name, soda_Ui_if & p_Ui):
     m_Ui(p_Ui),
     m_stop(false),
-    m_ressources(osm_ressources::instance()),
+    m_ressources(osm_ressources::instance(m_Ui)),
     m_api_wrapper(common_api_wrapper::instance(m_ressources,m_Ui)),
     m_diff_file_name("tmp_diff.gz"),
     m_configuration(NULL),
+    m_module_manager(p_Ui),
     m_dom2cpp_analyzer("dom2cpp_analyzer_instance"),
     m_sax_parser_activated(false),
     m_dom_parser_activated(false),
@@ -74,7 +74,7 @@ namespace osm_diff_watcher
 	if(!l_module_enabled)
 	  {
             std::stringstream l_stream;
-            l_stream << "Module \"" << l_analyzer->get_name() << "\" of type \"" << l_type << "\" has been disable" << std::endl ;
+            l_stream << "Module \"" << l_analyzer->get_name() << "\" of type \"" << l_type << "\" has been disable";
             m_Ui.append_common_text(l_stream.str());
 	    m_disabled_analyzers.insert(make_pair(l_analyzer->get_name(),l_analyzer));
 	  }
@@ -87,8 +87,9 @@ namespace osm_diff_watcher
 #endif // FORCE_USE_OF_REINTERPRET_CAST
 	    if(l_dom_analyzer==NULL)
               {
-                std::cout << "Invalid dom_analyzer \"" << l_type << "\"" << std::endl ;
-                exit(-1);
+		std::stringstream l_stream;
+                l_stream << "Invalid dom_analyzer \"" << l_type << "\""  ;
+                throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
               }
 	    m_dom_analyzers.insert(make_pair(l_dom_analyzer->get_name(),l_dom_analyzer));
 	  }
@@ -101,8 +102,9 @@ namespace osm_diff_watcher
 #endif // FORCE_USE_OF_REINTERPRET_CAST
             if(l_sax_analyzer==NULL)
               {
-                std::cout << "Invalid sax_analyzer \"" << l_type << "\"" << std::endl ;
-                exit(-1);
+		std::stringstream l_stream;
+                l_stream << "Invalid sax_analyzer \"" << l_type << "\""  ;
+                throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
               }
             m_sax_analyzers.insert(make_pair(l_sax_analyzer->get_name(),l_sax_analyzer));
 	  }
@@ -115,15 +117,17 @@ namespace osm_diff_watcher
 #endif // FORCE_USE_OF_REINTERPRET_CAST
 	    if(l_cpp_analyzer==NULL)
               {
-                std::cout << "Invalid cpp_analyzer \"" << l_type << "\"" << std::endl ;
-                exit(-1);
+		std::stringstream l_stream;
+                l_stream << "Invalid cpp_analyzer \"" << l_type << "\""  ;
+                throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
               }
 	    m_cpp_analyzers.insert(make_pair(l_cpp_analyzer->get_name(),l_cpp_analyzer));	    
 	  }
 	else
 	  {
-	    std::cout << "Unknown input type \"" << l_input_type << "\"" << std::endl ;
-	    exit(-1);
+	    std::stringstream l_stream;
+	    l_stream << "Unknown input type \"" << l_input_type << "\""  ;
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
       }
 
@@ -248,7 +252,7 @@ namespace osm_diff_watcher
         if(l_stored_replication_domain != "")
           {
             std::stringstream l_stream;
-            l_stream << "Start Policy : Using stored replication domain : " << l_stored_replication_domain << std::endl ;
+            l_stream << "Start Policy : Using stored replication domain : " << l_stored_replication_domain ;
             m_Ui.append_common_text(l_stream.str());
             m_ressources.set_replication_domain(l_stored_replication_domain);
           }
@@ -261,7 +265,7 @@ namespace osm_diff_watcher
 	else
 	  {
             std::stringstream l_stream;
-            l_stream << "Start Policy : Using stored sequence number : " << l_result << std::endl ;
+            l_stream << "Start Policy : Using stored sequence number : " << l_result ;
             m_Ui.append_common_text(l_stream.str());
 	    l_result = get_next_sequence_number(l_result);
           }
@@ -271,17 +275,18 @@ namespace osm_diff_watcher
 	std::string l_start_value = m_configuration->get_variable("start_sequence_number");
 	if(l_start_value=="")
 	  {
-	    std::cout << "Start Policy : Using user defined sequence number" << std::endl ;
-	    std::cout << "ERROR : \"start_sequence_number\" should be defined when using start_policy \"user_defined\"" << std::endl ;
-	    exit(EXIT_FAILURE);
+	    std::stringstream l_stream;
+	    l_stream << "ERROR : \"start_sequence_number\" should be defined when using start_policy \"user_defined\""  ;
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 	l_result = strtoull(l_start_value.c_str(),NULL,10);
       }
     else if(l_start_policy != "")
       {
-	std::cout << "ERROR : unexpected value for start_policy : \"" << l_start_policy << "\"" << std::endl ;
-	std::cout << "\t Value should be \"current\",\"stored\" or \"user_defined\"" << std::endl ;
-	exit(EXIT_FAILURE);
+	std::stringstream l_stream;
+	l_stream << "ERROR : unexpected value for start_policy : \"" << l_start_policy << "\".";
+	l_stream << "Value should be \"current\",\"stored\" or \"user_defined\""  ;
+	throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       }
 
     return l_result;
@@ -404,15 +409,16 @@ namespace osm_diff_watcher
 
             if(l_404_error)
               {
-                std::cout << "ERROR : download of " << l_url_diff << " failed to many times" << std::endl ;
-                exit(-1);
+		std::stringstream l_stream;
+                l_stream << "ERROR : download of " << l_url_diff << " failed to many times";
+                throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
               }
 
 	    // Send diff state to Ui
 	    m_Ui.update_diff_state(*l_diff_state);
 
             // Parse diff file
-            parse_diff(l_diff_state);
+            parse_diff(*l_diff_state);
         
             // Remember reference of parsed diff
             m_informations.store(*l_diff_state);
@@ -460,7 +466,7 @@ namespace osm_diff_watcher
   }
 
   //------------------------------------------------------------------------------
-  void osm_diff_watcher::parse_diff(const osm_diff_analyzer_if::osm_diff_state * p_diff_state)
+  void osm_diff_watcher::parse_diff(const osm_diff_analyzer_if::osm_diff_state & p_diff_state)
   {
     // Sax analyze
     if(m_sax_parser_activated)
@@ -483,8 +489,9 @@ namespace osm_diff_watcher
     std::ifstream l_tmp_input_file(p_file_name.c_str());
     if(l_tmp_input_file==NULL)
       {
-	std::cout << "ERROR : Unable to open file \"" << p_file_name << "\"" << std::endl ;
-	exit(-1);
+	std::stringstream l_stream;
+	l_stream << "ERROR : Unable to open file \"" << p_file_name << "\""  ;
+	throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       }
     l_tmp_input_file.close();
 

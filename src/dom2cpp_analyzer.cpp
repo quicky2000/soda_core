@@ -23,8 +23,10 @@
 #include "osm_node.h"
 #include "dom_generic_utilities.h"
 #include "cpp_analyzer_operations.h"
+#include "quicky_exception.h"
 #include <cassert>
 #include <iostream>
+#include <sstream>
 #include <string.h>
 
 namespace osm_diff_watcher
@@ -40,9 +42,13 @@ namespace osm_diff_watcher
   void dom2cpp_analyzer::analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree)
   {
     this->perform_analyze(apply_init(m_diff_state));
-    assert(!strcmp(p_tree.getName(),"osmChange"));
+    if(strcmp(p_tree.getName(),"osmChange"))
+      {
+	std::stringstream l_stream;
+	l_stream << "XML root name of should be \"osmChange\" instead of \"" << p_tree.getName() << "\"";
+	throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
+      }
     int l_nb_child_node = p_tree.nChildNode();
-    std::cout << "Nb child " << l_nb_child_node << std::endl ;
     std::vector<osm_api_data_types::osm_change*> l_changes;
 
     for(int l_index = 0 ; l_index < l_nb_child_node ; ++l_index)
@@ -66,7 +72,11 @@ namespace osm_diff_watcher
                 l_changes.push_back(new osm_api_data_types::osm_change_generic<osm_api_data_types::osm_relation>(l_change_type,generic_dom_utilities<XMLNode>::extract_info<osm_api_data_types::osm_relation>(l_object_node)));
 		break;
 	      default:
-		exit(-1);
+		{
+		  std::stringstream l_stream;
+		  l_stream << "Unexpected core type value \"" << osm_api_data_types::osm_core_element::get_osm_type_str(l_osm_type) << "\"" ;
+		  throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+		}
 		break;
 	      }
 	  }

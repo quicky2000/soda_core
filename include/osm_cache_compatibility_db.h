@@ -35,10 +35,11 @@ class sqlite3;
 
 namespace osm_diff_watcher
 {
+  class soda_Ui_if;
   class osm_cache_compatibility_db
   {
   public:
-    osm_cache_compatibility_db(const std::string & p_name,const std::string & p_current_version);
+    osm_cache_compatibility_db(const std::string & p_name,const std::string & p_current_version,soda_Ui_if & p_ui);
     ~osm_cache_compatibility_db(void);
   private:
     void upgrade(const std::string & p_from_version);
@@ -49,6 +50,7 @@ namespace osm_diff_watcher
     // Element tables
     osm_cache_named_table<osm_cache_user> m_user_table;
     information_table m_informations;
+    soda_Ui_if & m_ui;
   };
 
 }

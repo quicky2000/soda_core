@@ -20,12 +20,13 @@
 */
 #include "osm_cache.h"
 #include "osm_cache_compatibility_db.h"
+#include "quicky_exception.h"
 #include <cassert>
 
 namespace osm_diff_watcher
 {
   //----------------------------------------------------------------------------
-  osm_cache::osm_cache(const std::string & p_name):
+  osm_cache::osm_cache(soda_Ui_if & p_ui,const std::string & p_name):
     m_db(NULL),
     m_get_node_tags_stmt(NULL),
     m_get_way_tags_stmt(NULL),
@@ -45,7 +46,7 @@ namespace osm_diff_watcher
     m_informations("information_table")
   {
     // Opening the database in compatibility mode
-    osm_cache_compatibility_db * l_compatibility_db = new osm_cache_compatibility_db(p_name,m_schema_version);
+    osm_cache_compatibility_db * l_compatibility_db = new osm_cache_compatibility_db(p_name,m_schema_version,p_ui);
     delete l_compatibility_db;
 
     // Opening the database
@@ -74,7 +75,12 @@ namespace osm_diff_watcher
 	  }
 	else
 	  {
-	    assert(l_version_info.second == m_schema_version);
+	    if(l_version_info.second != m_schema_version)
+	      {
+		std::stringstream l_stream;
+		l_stream << "l_version_info.second != m_schema_version : " << l_version_info.second << " != " << m_schema_version;
+		throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+	      }
 	  }
 
         prepare_get_tags_statement(m_node_tag_table.get_name(),m_get_node_tags_stmt);
@@ -102,8 +108,9 @@ namespace osm_diff_watcher
                                       NULL);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during preparation of statement to get_relation_members : " << sqlite3_errmsg(m_db) << std::endl ;     
-	    exit(-1);
+	    std::stringstream l_stream;
+	    l_stream << "ERROR during preparation of statement to get_relation_members : " << sqlite3_errmsg(m_db);
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
  
@@ -112,7 +119,9 @@ namespace osm_diff_watcher
       {
         std::cerr << "Can't open database \"" << p_name << "\" : " << sqlite3_errmsg(m_db) << std::endl ;
       }
+#ifdef DEBUG
     std::cout << "Database \"" << p_name << "\" successfully opened" << std::endl ; 
+#endif
   }
 
   //----------------------------------------------------------------------------
@@ -139,8 +148,9 @@ namespace osm_diff_watcher
                                       NULL);
     if(l_status != SQLITE_OK)
       {
-        std::cout << "ERROR during preparation of statement to get_tags of object : " << sqlite3_errmsg(m_db) << std::endl ;     
-        exit(-1);
+	std::stringstream l_stream;
+        l_stream << "ERROR during preparation of statement to get_tags of object : " << sqlite3_errmsg(m_db);     
+        throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       }
   }
 
@@ -527,15 +537,18 @@ namespace osm_diff_watcher
     int l_status = sqlite3_bind_int64(m_get_relation_members_stmt,sqlite3_bind_parameter_index(m_get_relation_members_stmt,"$id"),p_id);
     if(l_status != SQLITE_OK)
       {
-	std::cout << "ERROR during binding of id parameter for get_relation_members statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	exit(-1);
+	std::stringstream l_stream;
+	l_stream << "ERROR during binding of id parameter for get_relation_members statement : " << sqlite3_errmsg(m_db);
+	throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       }
     
     l_status = sqlite3_bind_int(m_get_relation_members_stmt,sqlite3_bind_parameter_index(m_get_relation_members_stmt,"$version"),p_version);
     if(l_status != SQLITE_OK)
       {
-	std::cout << "ERROR during binding of version parameter for get_relation_members statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	exit(-1);
+	
+	std::stringstream l_stream;
+	l_stream << "ERROR during binding of version parameter for get_relation_members statement : " << sqlite3_errmsg(m_db);     
+	throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       }
     // Executing statement
     //---------------------
@@ -549,19 +562,23 @@ namespace osm_diff_watcher
       }
     if(l_status != SQLITE_DONE)
       {
-	std::cout << "ERROR during selection of relation_members : " << sqlite3_errmsg(m_db) << std::endl ;
-	exit(-1);
+	std::stringstream l_stream;
+	l_stream << "ERROR during selection of relation_members : " << sqlite3_errmsg(m_db);
+	throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
       }
 
+#ifdef DEBUG
     std::cout << "get_relation_members successfully listed" << std::endl ;
+#endif
 
     // Reset the statement for the next use
     //--------------------------------------
     l_status = sqlite3_reset(m_get_relation_members_stmt);  
     if(l_status != SQLITE_OK)
       {
-	std::cout << "ERROR during reset of get_relation_members statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	exit(-1);
+	std::stringstream l_stream;
+	l_stream << "ERROR during reset of get_relation_members statement : " << sqlite3_errmsg(m_db) ;     
+	throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
       }
 
     // Reset bindings because they are now useless
@@ -569,8 +586,9 @@ namespace osm_diff_watcher
     l_status = sqlite3_clear_bindings(m_get_relation_members_stmt);
     if(l_status != SQLITE_OK)
       {
-	std::cout << "ERROR during reset of bindings of get_relation_members statement : " << sqlite3_errmsg(m_db) << std::endl ;     
-	exit(-1);
+	std::stringstream l_stream;
+	l_stream << "ERROR during reset of bindings of get_relation_members statement : " << sqlite3_errmsg(m_db) ;     
+	throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
       }
   }
 

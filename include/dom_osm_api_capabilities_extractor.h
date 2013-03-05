@@ -25,6 +25,8 @@
 #include "dom_simple_analyzer_if.h"
 #include "dom_generic_utilities.h"
 #include "osm_api_capabilities.h"
+#include "quicky_exception.h"
+#include <sstream>
 #include <cstring>
 
 namespace osm_diff_watcher
@@ -57,13 +59,32 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
     void dom_osm_api_capabilities_extractor::analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree)
     {
-      assert(!strcmp("osm",p_tree.getName()));
+      if(strcmp("osm",p_tree.getName()))
+        {
+          std::stringstream l_stream;
+          l_stream << "Root of XML tree should be \"osm\" instead of \"" << p_tree.getName() << "\"" ;
+          throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+        }
+
       int l_nb_child_object = p_tree.nChildNode();
-      assert(l_nb_child_object==1);
+      if(1 != p_tree.nChildNode())
+        {
+          throw quicky_exception::quicky_logic_exception("Child number should be 1 for node \"osm\"",__LINE__,__FILE__);
+        }
+
       const osm_diff_analyzer_dom_if::t_dom_tree & l_api_node = p_tree.getChildNode(0);
-      assert(!strcmp(l_api_node.getName(),"api"));
+      if(strcmp(l_api_node.getName(),"api"))
+        {
+          std::stringstream l_stream;
+          l_stream << "Name of node should be \"api\" instead of \"" << l_api_node.getName() << "\"" ;
+          throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+        }
+
       l_nb_child_object = l_api_node.nChildNode();
-      assert(l_nb_child_object>=6);
+      if(6 > p_tree.nChildNode())
+        {
+          throw quicky_exception::quicky_logic_exception("Child number should be 6 at least for node \"api\"",__LINE__,__FILE__);
+        }
 
       std::string l_version_min;
       std::string l_version_max;

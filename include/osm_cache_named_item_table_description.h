@@ -24,6 +24,8 @@
 #include "osm_cache_base_table_description.h"
 #include "osm_cache_named_item.h"
 #include "my_sqlite3.h"
+#include "quicky_exception.h"
+#include <sstream>
 #include <iostream>
 #include <cstdlib>
 
@@ -86,8 +88,9 @@ namespace osm_diff_watcher
     int l_status = sqlite3_bind_text(p_stmt,sqlite3_bind_parameter_index(p_stmt,"$name"),p_named_item.get_name().c_str(),-1,SQLITE_STATIC);
     if(l_status != SQLITE_OK)
       {
-	std::cout << "ERROR during binding of name parameter for update statement of " << get_class_type() << " : " << sqlite3_errmsg(p_db) << std::endl ;     
-	exit(-1);
+        std::stringstream l_stream;
+        l_stream << "ERROR during binding of name parameter for update statement of " << get_class_type() << " : " << sqlite3_errmsg(p_db) ;     
+	throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       }  
   }
 

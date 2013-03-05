@@ -25,6 +25,8 @@
 #include "osm_cache_core_element_table_description.h"
 #include "osm_cache_node.h"
 #include "my_sqlite3.h"
+#include "quicky_exception.h"
+#include<sstream>
 #include <iostream>
 #include <cstdlib>
 
@@ -82,25 +84,28 @@ namespace osm_diff_watcher
     }
 
   //------------------------------------------------------------------------------
-  void osm_cache_base_table_description<osm_cache_node>::bind_item_values(const osm_cache_node & p_node,sqlite3_stmt* p_stmt,sqlite3 *p_db)
+  void osm_cache_base_table_description<osm_cache_node>::bind_item_values(const osm_cache_node & p_node,
+                                                                          sqlite3_stmt* p_stmt,sqlite3 *p_db)
   {
     osm_cache_base_table_description<osm_cache_core_element>::bind_item_values(p_node,p_stmt,p_db);
     int l_status = sqlite3_bind_double(p_stmt,sqlite3_bind_parameter_index(p_stmt,"$lat"),p_node.get_lat());
     if(l_status != SQLITE_OK)
       {
-	std::cout << "ERROR during binding of lat parameter for update statement of " << get_class_type() << " : " << sqlite3_errmsg(p_db) << std::endl ;     
-	exit(-1);
+        std::stringstream l_stream;
+        l_stream << "ERROR during binding of lat parameter for update statement of " << get_class_type() << " : " << sqlite3_errmsg(p_db) ;     
+	throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       }  
     l_status = sqlite3_bind_double(p_stmt,sqlite3_bind_parameter_index(p_stmt,"$lon"),p_node.get_lon());
     if(l_status != SQLITE_OK)
       {
-	std::cout << "ERROR during binding of lon parameter for update statement of " << get_class_type() << " : " << sqlite3_errmsg(p_db) << std::endl ;     
-	exit(-1);
+        std::stringstream l_stream;
+        l_stream << "ERROR during binding of lon parameter for update statement of " << get_class_type() << " : " << sqlite3_errmsg(p_db) ;     
+	throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       }  
   }
 
   //------------------------------------------------------------------------------
-  osm_cache_node osm_cache_base_table_description<osm_cache_node>::get_item_from_row(sqlite3_stmt* p_stmt)
+  osm_cache_node osm_cache_base_table_description<osm_cache_node>::get_item_from_row(sqlite3_stmt * p_stmt)
     {
       return osm_cache_node(osm_cache_base_table_description<osm_cache_core_element>::get_item_from_row(p_stmt),
                             sqlite3_column_double(p_stmt,5),// Lat

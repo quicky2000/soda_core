@@ -23,6 +23,7 @@
 
 #include "parser_base.h"
 #include "xmlParser.h"
+#include "quicky_exception.h"
 #include <sstream>
 
 namespace osm_diff_watcher
@@ -75,8 +76,7 @@ namespace osm_diff_watcher
             dom_parser_base<T>::error_message(l_err,l_error_msg);
             if(l_error_msg != "")
               {
-                std::cout << l_error_msg << std::endl ;
-                exit(-1);
+                throw quicky_exception::quicky_logic_exception(l_error_msg,__LINE__,__FILE__);
               }
             this->perform_init();
             this->perform_dedicated_analyze(l_node);

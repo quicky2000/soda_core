@@ -21,13 +21,15 @@
 #ifndef _PARSER_BASE_H_
 #define _PARSER_BASE_H_
 
-#include <set>
-#include <algorithm>
-#include <iostream>
+#include "quicky_exception.h"
 #include "gzstream.h"
 #include "analyze_operation.h"
 #include "parser_if.h"
 #include "output_producer_if.h"
+#include <set>
+#include <algorithm>
+#include <iostream>
+#include <sstream>
 
 namespace osm_diff_watcher
 {

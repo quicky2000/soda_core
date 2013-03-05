@@ -34,7 +34,7 @@ namespace osm_diff_analyzer_if
 
 namespace osm_diff_watcher
 {
-
+  class soda_Ui_if;
   class osm_ressources
   {
   public:
@@ -44,7 +44,7 @@ namespace osm_diff_watcher
     void get_root_url_diff(std::string & p_result,const uint64_t & p_seq_number)const;
     void get_state_url_diff(std::string & p_result,const uint64_t & p_seq_number)const;
     const osm_diff_analyzer_if::osm_diff_state * get_minute_diff_state(const std::string & p_url="")const;
-    static osm_ressources & instance(void);
+    static osm_ressources & instance(soda_Ui_if & p_Ui);
     static void remove_instance(void);
     inline void set_replication_domain(const std::string & p_replication_domain);
     inline const std::string & get_replication_domain(void)const;
@@ -60,8 +60,8 @@ namespace osm_diff_watcher
                                      std::vector<osm_api_data_types::osm_way*> & p_ways,
                                      std::vector<osm_api_data_types::osm_relation*> & p_relations);
   private:
-    osm_ressources(void);
-
+    osm_ressources(soda_Ui_if & p_Ui);
+    soda_Ui_if & m_ui;
     const std::string m_domain;
     const std::string m_data_domain;
     const std::string m_redaction_domain;

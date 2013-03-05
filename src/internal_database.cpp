@@ -21,6 +21,7 @@
 #include "internal_database.h"
 #include "osm_diff_state.h"
 #include "my_sqlite3.h"
+#include "quicky_exception.h"
 #include <iostream>
 #include <sstream>
 #include <cassert>
@@ -42,9 +43,13 @@ namespace osm_diff_watcher
       }
     else
       {
-        std::cerr << "Can't open database \"" << p_name << "\" : " << sqlite3_errmsg(m_db) << std::endl ;
+	std::stringstream l_stream;
+        l_stream << "Can't open database \"" << p_name << "\" : " << sqlite3_errmsg(m_db) ;
+	throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
       }
+#ifdef DEBUG
     std::cout << "Database \"" << p_name << "\" successfully opened" << std::endl ; 
+#endif
 
   }
 

@@ -34,7 +34,7 @@ namespace osm_diff_watcher
   {
   public:
     inline osm_diff_parser_if(void);
-    inline void set_diff_state(const osm_diff_analyzer_if::osm_diff_state * p_diff_state);
+    inline void set_diff_state(const osm_diff_analyzer_if::osm_diff_state & p_diff_state);
     inline const osm_diff_analyzer_if::osm_diff_state * get_diff_state(void)const;
   private:
     const osm_diff_analyzer_if::osm_diff_state * m_diff_state;
@@ -46,10 +46,9 @@ namespace osm_diff_watcher
     {
     }
     //----------------------------------------------------------------------------
-    void osm_diff_parser_if::set_diff_state(const osm_diff_analyzer_if::osm_diff_state * p_diff_state)
+    void osm_diff_parser_if::set_diff_state(const osm_diff_analyzer_if::osm_diff_state & p_diff_state)
     {
-      assert(p_diff_state);
-      m_diff_state = p_diff_state;
+      m_diff_state = &p_diff_state;
     }
     //----------------------------------------------------------------------------
     const osm_diff_analyzer_if::osm_diff_state * osm_diff_parser_if::get_diff_state(void)const

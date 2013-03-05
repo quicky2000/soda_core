@@ -29,6 +29,7 @@
 #include "osm_diff_dom_parser.h"
 #include "osm_change.h"
 #include "dom_osm_change_extractor.h"
+#include "quicky_exception.h"
 #include <string>
 #include <sstream>
 
@@ -235,13 +236,15 @@ namespace osm_diff_watcher
       // Check arguments
       if(p_id != 0 && p_user_name != "")
         {
-          std::cout << "ERROR : it is forbidden to provide both user id (" << p_id << " and user name (\"" << p_user_name << "\"" << std::endl ;
-          exit(-1);
+          std::stringstream l_stream;
+          l_stream << "ERROR : it is forbidden to provide both user id (" << p_id << " and user name (\"" << p_user_name << "\"" ;
+          throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
         }
       if(p_time1 == "" && p_time2 != "")
         {
-          std::cout << "ERROR : time1 empty whereas time2 is not empty" << std::endl ;
-          exit(-1);
+          std::stringstream l_stream;
+          l_stream << "ERROR : time1 empty whereas time2 is not empty" ;
+          throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
         }
        
       // End of argument check

@@ -24,6 +24,7 @@
 #include "dom_simple_analyzer_if.h"
 #include "configuration.h"
 #include "xmlParser.h"
+#include "quicky_exception.h"
 #include <cstring>
 #include <iostream>
 
@@ -54,7 +55,13 @@ namespace osm_diff_watcher
     //--------------------------------------------------------------------------
     void dom_configuration_extractor::analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree)
     {
-      assert(!strcmp("osm_diff_watcher_configuration",p_tree.getName()));
+      if(strcmp("osm_diff_watcher_configuration",p_tree.getName()))
+        {
+          std::stringstream l_stream;
+          l_stream << "Root of XML tree should be \"osm_diff_watcher_configuration\" instead of \"" << p_tree.getName() << "\"" ;
+          throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+        }
+
       m_result = new configuration();
       int l_nb_nodes = p_tree.nChildNode();
       for(int l_index = 0; l_index < l_nb_nodes ; ++l_index)
@@ -63,15 +70,15 @@ namespace osm_diff_watcher
 	  if(!strcmp(l_node.getName(),"library"))
 	    {
 	      XMLCSTR l_library_name = l_node.getAttribute("name");
-              assert(l_library_name);
+              if(l_library_name == NULL) throw quicky_exception::quicky_logic_exception("\"name\" attribute is manadatory for \"library\" element",__LINE__,__FILE__);
 	      m_result->add_library(l_library_name);
 	    }
 	  else if(!strcmp(l_node.getName(),"analyzer"))
             {
 	      XMLCSTR l_module_type = l_node.getAttribute("type");
-              assert(l_module_type);
+              if(l_module_type == NULL) throw quicky_exception::quicky_logic_exception("\"type\" attribute is manadatory for \"analyzer\" element",__LINE__,__FILE__);
 	      XMLCSTR l_module_name = l_node.getAttribute("name");
-              assert(l_module_name);
+              if(l_module_name == NULL ) throw quicky_exception::quicky_logic_exception("\"name\" attribute is manadatory for \"analyzer\" element",__LINE__,__FILE__);
 	      XMLCSTR l_module_enabled = l_node.getAttribute("enabled");
 	      bool l_enabled = true;
 	      if(l_module_enabled)
@@ -82,8 +89,9 @@ namespace osm_diff_watcher
 		    }
 		  else if(strcmp(l_module_enabled,"yes"))
 		    {
-		      std::cout << "ERROR : \"enabled\" analyzer attribute should have vaue yes or no instead of \"" << l_module_enabled << "\"" << std::endl ;
-		      exit(-1);
+                      std::stringstream l_stream;
+                      l_stream << "ERROR : \"enabled\" analyzer attribute should have value yes or no instead of \"" << l_module_enabled << "\"";
+                      throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 		    }
 		}
 	      osm_diff_analyzer_if::module_configuration * l_configuration = new osm_diff_analyzer_if::module_configuration(l_module_name,l_module_type,l_enabled);
@@ -93,16 +101,16 @@ namespace osm_diff_watcher
 		  ++l_param_index)
 		{
 		  osm_diff_analyzer_dom_if::t_dom_tree l_param_node = l_node.getChildNode(l_param_index);
-		  std::cout << "node name \"" << l_param_node.getName() << "\"" << std::endl ;
 		  if(strcmp(l_param_node.getName(),"parameter"))
 		    {
-		      std::cout << "ERROR : waiting for \"parameter\" node in configuration of module \"" << l_module_name << "\" instead of \"" <<  l_param_node.getName() << "\"" << std::endl ;
-		      exit(-1);
+                      std::stringstream l_stream;
+                      l_stream << "ERROR : waiting for \"parameter\" node in configuration of module \"" << l_module_name << "\" instead of \"" <<  l_param_node.getName() << "\"";
+		      throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 		    }
 		     XMLCSTR l_parameter_name = l_param_node.getAttribute("name");
-		     assert(l_parameter_name);
+		     if(NULL == l_parameter_name) throw quicky_exception::quicky_logic_exception("\"name\" attribute is manadatory for \"parameter\" element",__LINE__,__FILE__);
 		     XMLCSTR l_parameter_value = l_param_node.getAttribute("value");
-		     assert(l_parameter_value);
+		     if(NULL == l_parameter_value) throw quicky_exception::quicky_logic_exception("\"value\" attribute is manadatory for \"parameter\" element",__LINE__,__FILE__);
 		     l_configuration->add_parameter(l_parameter_name,l_parameter_value);
 		}
 	      m_result->add_module_configuration(l_configuration);
@@ -110,27 +118,28 @@ namespace osm_diff_watcher
 	  else if(!strcmp(l_node.getName(),"variable"))
             {
 	      XMLCSTR l_variable_name = l_node.getAttribute("name");
-              assert(l_variable_name);
+              if(NULL == l_variable_name) throw quicky_exception::quicky_logic_exception("\"name\" attribute is manadatory for \"variable\" element",__LINE__,__FILE__);
 	      XMLCSTR l_variable_value = l_node.getAttribute("value");
-              assert(l_variable_value);
+              if(NULL == l_variable_value) throw quicky_exception::quicky_logic_exception("\"value\" attribute is manadatory for \"variable\" element",__LINE__,__FILE__);
 	      m_result->add_variable(l_variable_name,l_variable_value);
             }
 	  else if(!strcmp(l_node.getName(),"replication_domain_jump"))
             {
 	      XMLCSTR l_last_sequence_number = l_node.getAttribute("last_sequence_number");
-              assert(l_last_sequence_number);
+              if(NULL == l_last_sequence_number) throw quicky_exception::quicky_logic_exception("\"last_sequence_number\" attribute is manadatory for \"replication_domain_jump\" element",__LINE__,__FILE__);
 	      XMLCSTR l_old_domain = l_node.getAttribute("old_domain");
-              assert(l_old_domain);
+              if(NULL == l_old_domain) throw quicky_exception::quicky_logic_exception("\"old_domain\" attribute is manadatory for \"replication_domain_jump\" element",__LINE__,__FILE__);
 	      XMLCSTR l_first_sequence_number = l_node.getAttribute("first_sequence_number");
-              assert(l_first_sequence_number);
+              if(NULL == l_first_sequence_number) throw quicky_exception::quicky_logic_exception("\"first_sequence_number\" attribute is manadatory for \"replication_domain_jump\" element",__LINE__,__FILE__);
 	      XMLCSTR l_new_domain = l_node.getAttribute("new_domain");
-              assert(l_new_domain);
+              if(NULL == l_new_domain) throw quicky_exception::quicky_logic_exception("\"new_domain\" attribute is manadatory for \"replication_domain_jump\" element",__LINE__,__FILE__);
 	      m_result->add_replication_domain_jump(l_last_sequence_number,l_old_domain,l_first_sequence_number,l_new_domain);
             }
           else
 	    {
-	      std::cout << "ERROR : unknown configuration item \"" << l_node.getName() << "\"" << std::endl ;
-	      exit(-1);
+              std::stringstream l_stream;
+              l_stream << "ERROR : unknown configuration item \"" << l_node.getName() << "\"" ;
+              throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	    }
 	}
    }

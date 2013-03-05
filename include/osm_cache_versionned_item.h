@@ -22,6 +22,8 @@
 #define _OSM_CACHE_VERSIONNED_ITEM_H_
 
 #include "osm_cache_item.h"
+#include "quicky_exception.h"
+#include <sstream>
 #include <iostream>
 #include <string>
 #include <inttypes.h>
@@ -69,14 +71,18 @@ namespace osm_diff_watcher
       osm_cache_item(p_id),
       m_version(p_version)
       {
-	assert(m_version);
+        if(!m_version)
+          {
+            std::stringstream l_stream;
+            l_stream << "Cache item for object id " << p_id << " is not allowed to be created with version 0";
+            throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+          }
       }
 
       //------------------------------------------------------------------------------
       void osm_cache_versionned_item::set_version(const osm_api_data_types::osm_core_element::t_osm_version & p_version)
       {
-	assert(!m_version);
-	assert(p_version);
+	if(!p_version) throw quicky_exception::quicky_logic_exception("Setting version to 0 is not allowed",__LINE__,__FILE__);
 	m_version = p_version;
       }
 

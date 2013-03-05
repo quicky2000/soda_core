@@ -19,6 +19,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 #include "common_api_wrapper.h"
+#include "quicky_exception.h"
 
 #include <cassert>
 
@@ -27,7 +28,10 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   void common_api_wrapper::register_function(uintptr_t * p_api_ptr,uint32_t p_size)
   {
-    assert(p_size == COMMON_API_IF_SIZE);
+    if(p_size != COMMON_API_IF_SIZE)
+      {
+	throw quicky_exception::quicky_logic_exception("API size of module doesn't correspond to the one of executable. Please ensure they have been compiled with the same API version",__LINE__,__FILE__);
+      }
     p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_API_VERSION] = (uintptr_t) common_api_wrapper::get_api_version;
     p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_USER_SUBSCRIPTION_DATE] = (uintptr_t) common_api_wrapper::get_user_subscription_date;
     p_api_ptr[osm_diff_analyzer_if::common_api_if::GET_NODE] = (uintptr_t) common_api_wrapper::get_node;
@@ -75,6 +79,7 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   common_api_wrapper::common_api_wrapper(osm_ressources & p_ressources,soda_Ui_if & p_Ui):
     m_Ui(p_Ui),
+    m_cache(p_Ui),
     m_ressources(p_ressources),
     m_api(p_ressources)
   {

@@ -32,6 +32,7 @@
 #include "osm_ressources.h"
 #include "configuration.h"
 #include "soda_Ui_if.h"
+#include "quicky_exception.h"
 #include <string>
 #include <map>
 #include <ctime>
@@ -55,7 +56,7 @@ namespace osm_diff_watcher
     inline void stop(void);
   private:
     inline static time_t extract_time(const std::string & p_date);
-    void parse_diff(const osm_diff_analyzer_if::osm_diff_state * p_diff_state);
+    void parse_diff(const osm_diff_analyzer_if::osm_diff_state & p_diff_state);
     const uint64_t get_start_sequence_number(const osm_diff_analyzer_if::osm_diff_state &p_diff_state);
     inline const uint64_t get_next_sequence_number(const uint64_t & p_seq_number);
     bool check_404_error(const std::string & p_file_name);
@@ -91,7 +92,12 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   time_t osm_diff_watcher::extract_time(const std::string & p_date)
   {
-    assert(p_date.size()==20);
+    if(20 != p_date.size())
+      {
+        std::stringstream l_stream;
+        l_stream << "Unexpected length for date : " << p_date.size() << " instead of 20";
+        throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+      }
     struct tm l_date;
     memset(&l_date,0,sizeof(l_date));
     l_date.tm_year = atoi(p_date.substr(0,4).c_str());

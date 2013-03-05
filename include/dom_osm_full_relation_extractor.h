@@ -62,7 +62,12 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   void dom_osm_full_relation_extractor::analyze(const osm_diff_analyzer_dom_if::t_dom_tree & p_tree)
   {
-      assert(!strcmp("osm",p_tree.getName()));
+      if(strcmp("osm",p_tree.getName()))
+        {
+          std::stringstream l_stream;
+          l_stream << "Root of XML tree should be \"osm\" instead of \"" << p_tree.getName() << "\"" ;
+          throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+        }
       int l_nb_version = p_tree.nChildNode();
       for(int l_index = 0; l_index < l_nb_version ; ++l_index)
 	{
@@ -81,8 +86,9 @@ namespace osm_diff_watcher
 	    }
 	  else
 	    {
-	      std::cout << "Unexpected node type \"" << l_node.getName() << "\"" << std::endl ;
-	      exit(-1);
+	      std::stringstream l_stream;
+	      l_stream << "Unexpected node type \"" << l_node.getName() << "\"" ;
+	      throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	    }
 	}
   }

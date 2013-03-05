@@ -25,6 +25,8 @@
 #include "osm_cache_way_member_table_description.h"
 #include "osm_cache_relation_member.h"
 #include "my_sqlite3.h"
+#include "quicky_exception.h"
+#include <sstream>
 #include <iostream>
 #include <cstdlib>
 
@@ -90,14 +92,16 @@ namespace osm_diff_watcher
     int l_status = sqlite3_bind_int(p_stmt,sqlite3_bind_parameter_index(p_stmt,"$osm_type"),p_relation_member.get_osm_type());
     if(l_status != SQLITE_OK)
       {
-	std::cout << "ERROR during binding of osm_type parameter for update statement of " << get_class_type() << " : " << sqlite3_errmsg(p_db) << std::endl ;     
-	exit(-1);
+        std::stringstream l_stream;
+        l_stream << "ERROR during binding of osm_type parameter for update statement of " << get_class_type() << " : " << sqlite3_errmsg(p_db) ;     
+	throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       }  
    l_status = sqlite3_bind_int64(p_stmt,sqlite3_bind_parameter_index(p_stmt,"$role_id"),p_relation_member.get_role_id());
     if(l_status != SQLITE_OK)
       {
-	std::cout << "ERROR during binding of role_id parameter for update statement of " << get_class_type() << " : " << sqlite3_errmsg(p_db) << std::endl ;     
-	exit(-1);
+        std::stringstream l_stream;
+        l_stream << "ERROR during binding of role_id parameter for update statement of " << get_class_type() << " : " << sqlite3_errmsg(p_db) ;     
+	throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       }  
   }
 

@@ -22,6 +22,9 @@
 #define _OSM_CACHE_ORDERED_TABLE_H
 
 #include "osm_cache_base_table.h"
+#include "quicky_exception.h"
+#include <sstream>
+
 namespace osm_diff_watcher
 {
   class named_item;
@@ -62,7 +65,9 @@ namespace osm_diff_watcher
       {
         sqlite3_finalize(m_get_by_id_version_ordered_stmt);
         sqlite3_finalize(m_get_by_id_version_rank_stmt);
+#ifdef DEBUG
 	std::cout << "Table " << this->get_name() << " end of destruction" << std::endl ;
+#endif
       }
 
     //------------------------------------------------------------------------------
@@ -76,8 +81,9 @@ namespace osm_diff_watcher
 	int l_status = sqlite3_prepare_v2(osm_cache_base_table<T>::get_db(),("SELECT Id,"+osm_cache_base_table_description<T>::get_table_fields()+" FROM " + this->get_name() + " WHERE Id = $id AND Version = $version AND Position = $position").c_str(),-1,&m_get_by_id_version_rank_stmt,NULL);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during preparation of statement to get "+osm_cache_base_table_description<T>::get_table_fields()+" item by id and version : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during preparation of statement to get "+osm_cache_base_table_description<T>::get_table_fields()+" item by id and version : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Preparing get_by_id_version_ordered statements
@@ -85,8 +91,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_prepare_v2(osm_cache_base_table<T>::get_db(),("SELECT Id,"+osm_cache_base_table_description<T>::get_table_fields()+" FROM " + this->get_name() + " WHERE Id = $id AND Version = $version ORDER BY Position ASC").c_str(),-1,&m_get_by_id_version_ordered_stmt,NULL);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during preparation of statement to get "+osm_cache_base_table_description<T>::get_table_fields()+" item by id and version : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during preparation of statement to get "+osm_cache_base_table_description<T>::get_table_fields()+" item by id and version : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 #ifdef ENABLE_SUCCESS_STATUS_DISPLAY
@@ -111,22 +118,25 @@ namespace osm_diff_watcher
 	int l_status = sqlite3_bind_int64(m_get_by_id_version_rank_stmt,sqlite3_bind_parameter_index(m_get_by_id_version_rank_stmt,"$id"),p_id);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of id parameter for get_by_id_version_rank statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during binding of id parameter for get_by_id_version_rank statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
     
         l_status = sqlite3_bind_int(m_get_by_id_version_rank_stmt,sqlite3_bind_parameter_index(m_get_by_id_version_rank_stmt,"$version"),p_version);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of version parameter for get_by_id_version_rank statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during binding of version parameter for get_by_id_version_rank statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
     
         l_status = sqlite3_bind_int(m_get_by_id_version_rank_stmt,sqlite3_bind_parameter_index(m_get_by_id_version_rank_stmt,"$position"),p_rank);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of position parameter for get_by_id_version_rank statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during binding of position parameter for get_by_id_version_rank statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
     
 	// Executing statement
@@ -149,14 +159,16 @@ namespace osm_diff_watcher
               }
 	    else
 	      {
-		std::cout << "ERROR during selection of " << this->get_name() << " : Id " << p_id << " is not unique " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;
-		exit(-1);
+                std::stringstream l_stream;
+                l_stream << "ERROR during selection of " << this->get_name() << " : Id " << p_id << " is not unique " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;
+		throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	      }
 	  }
 	else if(l_status != SQLITE_DONE)
 	  {
-	    std::cout << "ERROR during selection of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during selection of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 
@@ -165,8 +177,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_reset(m_get_by_id_version_rank_stmt);  
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of " << this->get_name() << " get_by_id_version_rank statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of " << this->get_name() << " get_by_id_version_rank statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Reset bindings because they are now useless
@@ -174,8 +187,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_clear_bindings(m_get_by_id_version_rank_stmt);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of bindings of " << this->get_name() << " get_by_id_version_rank statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of bindings of " << this->get_name() << " get_by_id_version_rank statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
         return l_result;
       }
@@ -193,15 +207,17 @@ namespace osm_diff_watcher
 	int l_status = sqlite3_bind_int64(m_get_by_id_version_ordered_stmt,sqlite3_bind_parameter_index(m_get_by_id_version_ordered_stmt,"$id"),p_id);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of id parameter for get_by_id_version_ordered statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during binding of id parameter for get_by_id_version_ordered statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
     
         l_status = sqlite3_bind_int(m_get_by_id_version_ordered_stmt,sqlite3_bind_parameter_index(m_get_by_id_version_ordered_stmt,"$version"),p_version);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during binding of version parameter for get_by_id_version_ordered statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during binding of version parameter for get_by_id_version_ordered statement of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
         
 	// Executing statement
@@ -212,8 +228,9 @@ namespace osm_diff_watcher
           }
         if( l_status != SQLITE_DONE)
           {
-	    std::cout << "ERROR during selection of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during selection of " << this->get_name() << " : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Reset the statement for the next use
@@ -221,8 +238,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_reset(m_get_by_id_version_ordered_stmt);  
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of " << this->get_name() << " get_by_id_version_ordered statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of " << this->get_name() << " get_by_id_version_ordered statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
 
 	// Reset bindings because they are now useless
@@ -230,8 +248,9 @@ namespace osm_diff_watcher
 	l_status = sqlite3_clear_bindings(m_get_by_id_version_ordered_stmt);
 	if(l_status != SQLITE_OK)
 	  {
-	    std::cout << "ERROR during reset of bindings of " << this->get_name() << " get_by_id_version_ordered statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) << std::endl ;     
-	    exit(-1);
+            std::stringstream l_stream;
+            l_stream << "ERROR during reset of bindings of " << this->get_name() << " get_by_id_version_ordered statement : " << sqlite3_errmsg(osm_cache_base_table<T>::get_db()) ;     
+	    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 	  }
       }
 

@@ -22,6 +22,7 @@
 #define _OSM_CACHE_ITEM_H_
 
 #include "osm_api_data_types.h"
+#include "quicky_exception.h"
 #include <iostream>
 #include <string>
 #include <inttypes.h>
@@ -58,14 +59,13 @@ namespace osm_diff_watcher
     osm_cache_item::osm_cache_item(const osm_api_data_types::osm_object::t_osm_id & p_id):
       m_id(p_id)
       {
-	assert(m_id);
+	if(!p_id)throw quicky_exception::quicky_logic_exception("Creation of osm_cache_item with id 0 is not allowed",__LINE__,__FILE__);
       }
 
       //------------------------------------------------------------------------------
       void osm_cache_item::set_id(const osm_api_data_types::osm_object::t_osm_id & p_id)
       {
-	assert(!m_id);
-	assert(p_id);
+        if(!p_id) throw quicky_exception::quicky_logic_exception("Setting id of osm_cache_item to 0 is not allowed",__LINE__,__FILE__);
 	m_id = p_id;
       }
 

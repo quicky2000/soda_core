@@ -1,22 +1,22 @@
 /*
-    This file is part of osm_diff_watcher, Openstreetmap diff analyze framework
-    The aim of this software is to provided generic facilities for diff analyzis
-    to allow developers to concentrate on analyze rather than diff management 
-    infrastructure
-    Copyright (C) 2012  Julien Thevenon ( julien_thevenon at yahoo.fr )
+  This file is part of osm_diff_watcher, Openstreetmap diff analyze framework
+  The aim of this software is to provided generic facilities for diff analyzis
+  to allow developers to concentrate on analyze rather than diff management 
+  infrastructure
+  Copyright (C) 2012  Julien Thevenon ( julien_thevenon at yahoo.fr )
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 #ifndef _DOM_UTILITIES_H_
 #define _DOM_UTILITIES_H_
@@ -26,6 +26,8 @@
 #include "osm_relation.h"
 #include "osm_changeset.h"
 #include "xmlParser.h"
+#include "quicky_exception.h"
+#include <sstream>
 #include <cstdlib>
 #include <cstring>
 
@@ -36,11 +38,16 @@ namespace osm_diff_watcher
     {
     public:
       template <class OSM_OBJ>
-        static OSM_OBJ * extract_info(const T & p_node,bool p_search_visible=false,bool p_delete_change=false);  
+        static OSM_OBJ * extract_info(const T & p_node,
+                                      bool p_search_visible=false,
+                                      bool p_delete_change=false);  
 
-      static void extract_tag_info(const T & p_node, osm_api_data_types::osm_object & p_object);
-      static void extract_node_ref_info(const T & p_node, osm_api_data_types::osm_way & p_way);
-      static void extract_member_info(const T & p_node, osm_api_data_types::osm_relation & p_relation);
+      static void extract_tag_info(const T & p_node,
+                                   osm_api_data_types::osm_object & p_object);
+      static void extract_node_ref_info(const T & p_node,
+                                        osm_api_data_types::osm_way & p_way);
+      static void extract_member_info(const T & p_node,
+                                      osm_api_data_types::osm_relation & p_relation);
       static void extract_core_element_attributes(const T & p_node,
                                                   osm_api_data_types::osm_object::t_osm_id & p_id,
                                                   osm_api_data_types::osm_core_element::t_osm_version & p_version,
@@ -55,8 +62,9 @@ namespace osm_diff_watcher
 				     std::string & p_user,
 				     osm_api_data_types::osm_object::t_osm_id & p_uid);
       template <class ATTR_TYPE>
-	static ATTR_TYPE extract_attribute(const T & p_node,const char * p_attribute_name);
-     private:
+	static ATTR_TYPE extract_attribute(const T & p_node,
+                                           const char * p_attribute_name);
+    private:
     };
 
   template <>
@@ -82,9 +90,9 @@ namespace osm_diff_watcher
 					    osm_api_data_types::osm_object::t_osm_id & p_id,
 					    std::string & p_user,
 					    osm_api_data_types::osm_object::t_osm_id & p_uid);
-       template <class ATTR_TYPE>
+      template <class ATTR_TYPE>
 	inline static ATTR_TYPE extract_attribute(const XMLNode & p_node,const char * p_attribute_name);
-   private:
+    private:
     };
 
   //----------------------------------------------------------------------------
@@ -92,8 +100,9 @@ namespace osm_diff_watcher
     OSM_OBJ * generic_dom_utilities<XMLNode>::extract_info(const XMLNode & p_node,bool p_search_visible,bool p_delete_change)
     {
       // Dummy implementation should not be called
-      std::cout << "No implementation provided for type \"" << OSM_OBJ::get_type_str() << "\"" << std::endl ;
-      exit(-1);
+      std::stringstream l_stream;
+      l_stream << "No implementation provided for type \"" << OSM_OBJ::get_type_str() << "\"" ;
+      throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       return NULL;
     }
 
@@ -102,39 +111,55 @@ namespace osm_diff_watcher
     ATTR_TYPE extract_attribute(const XMLNode & p_node,const char * p_attribute_name)
     {
       // Dummy implementation should not be called
-      std::cout << "No implementation provided for " << __FUNCTION__ << " of attribute \"" << p_attribute_name << "\" of node \"" << p_node.getName() << "\"" << std::endl ;
-      exit(-1);
+      std::stringstream l_stream;
+      l_stream << "No implementation provided for " << __FUNCTION__ << " of attribute \"" << p_attribute_name << "\" of node \"" << p_node.getName() << "\"" ;
+      throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
       return NULL;
     }
 
   //----------------------------------------------------------------------------
   template <>
-  inline const char * generic_dom_utilities<XMLNode>::extract_attribute(const XMLNode & p_node,
-								 const char * p_attribute_name)
+    inline const char * generic_dom_utilities<XMLNode>::extract_attribute(const XMLNode & p_node,
+                                                                          const char * p_attribute_name)
     {
       XMLCSTR l_str = p_node.getAttribute(p_attribute_name);
-      assert(l_str);
+      if(NULL == l_str)
+        {
+          std::stringstream l_stream;
+          l_stream << "Mandatory attribute \"" << p_attribute_name << "\" is missing in node \"" << p_node.getName() << "\"";
+          throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+        }
       return l_str;
     }
 
   //----------------------------------------------------------------------------
   template <>
     inline osm_api_data_types::osm_object::t_osm_id generic_dom_utilities<XMLNode>::extract_attribute(const XMLNode & p_node,
-								 const char * p_attribute_name)
+                                                                                                      const char * p_attribute_name)
     {
       XMLCSTR l_str = p_node.getAttribute(p_attribute_name);
-      assert(l_str);
-    return strtoull(l_str,NULL,10); 
+      if(NULL == l_str)
+        {
+          std::stringstream l_stream;
+          l_stream << "Mandatory attribute \"" << p_attribute_name << "\" is missing in node \"" << p_node.getName() << "\"";
+          throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+        }
+      return strtoull(l_str,NULL,10); 
     }
 
   //----------------------------------------------------------------------------
   template <>
     inline osm_api_data_types::osm_core_element::t_osm_version generic_dom_utilities<XMLNode>::extract_attribute(const XMLNode & p_node,
-                                                                                             const char * p_attribute_name)
+                                                                                                                 const char * p_attribute_name)
     {
       XMLCSTR l_str = p_node.getAttribute(p_attribute_name);
-      assert(l_str);
-    return strtoul(l_str,NULL,10); 
+      if(NULL == l_str)
+        {
+          std::stringstream l_stream;
+          l_stream << "Mandatory attribute \"" << p_attribute_name << "\" is missing in node \"" << p_node.getName() << "\"";
+          throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+        }
+      return strtoul(l_str,NULL,10); 
     }
 
   //----------------------------------------------------------------------------
@@ -149,20 +174,30 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   template <>
     inline bool generic_dom_utilities<XMLNode>::extract_attribute(const XMLNode & p_node,
-                                                           const char * p_attribute_name)
+                                                                  const char * p_attribute_name)
     {
       XMLCSTR l_str = p_node.getAttribute(p_attribute_name);
-      assert(l_str);
+      if(NULL == l_str)
+        {
+          std::stringstream l_stream;
+          l_stream << "Mandatory attribute \"" << p_attribute_name << "\" is missing in node \"" << p_node.getName() << "\"";
+          throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+        }
       return !strcmp(l_str,"true"); 
     }
 
   //----------------------------------------------------------------------------
   template <>
     inline osm_api_data_types::osm_core_element::t_osm_type generic_dom_utilities<XMLNode>::extract_attribute(const XMLNode & p_node,
-                                                                                          const char * p_attribute_name)
+                                                                                                              const char * p_attribute_name)
     {
       XMLCSTR l_type_str = p_node.getAttribute(p_attribute_name);
-      assert(l_type_str);
+      if(NULL == l_type_str)
+        {
+          std::stringstream l_stream;
+          l_stream << "Mandatory attribute \"" << p_attribute_name << "\" is missing in node \"" << p_node.getName() << "\"";
+          throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+        }
       return osm_api_data_types::osm_core_element::get_osm_type(l_type_str);
     }
 
@@ -307,13 +342,34 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   void generic_dom_utilities<XMLNode>::extract_tag_info(const XMLNode & p_node, osm_api_data_types::osm_object & p_object)
   {
-    assert(!strcmp(p_node.getName(),"tag"));
+    if(strcmp(p_node.getName(),"tag"))
+      {
+        std::stringstream l_stream;
+        l_stream << "Name of node should be \"tag\" instead of \"" << p_node.getName() << "\"" ;
+        throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+      }
+
     int l_nb_attribute = p_node.nAttribute();
-    assert(l_nb_attribute >= 2);
+
+    if(2 > l_nb_attribute)
+      {
+        throw quicky_exception::quicky_logic_exception("Child number should be 2 for node \"tag\"",__LINE__,__FILE__);
+      }
+
     XMLCSTR l_key_str = p_node.getAttribute("k");
-    assert(l_key_str);
+    if(NULL == l_key_str)
+      {
+        std::stringstream l_stream;
+        l_stream << "Mandatory attribute \"k\" is missing in node \"" << p_node.getName() << "\"";
+        throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+      }
     XMLCSTR l_value_str = p_node.getAttribute("v",0);
-    assert(l_value_str);
+    if(NULL == l_value_str)
+      {
+        std::stringstream l_stream;
+        l_stream << "Mandatory attribute \"v\" is missing in node \"" << p_node.getName() << "\"";
+        throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+      }
     p_object.add_tag(l_key_str,l_value_str);
   }
 
@@ -329,7 +385,13 @@ namespace osm_diff_watcher
                                                                        bool p_search_visible)
   {
     int l_nb_attribute = p_node.nAttribute();
-    assert(l_nb_attribute >= 6);
+    if(6 > l_nb_attribute)
+      {
+        std::stringstream l_stream;
+        l_stream << "Child number should be 6 at least for node \"" << p_node.getName() << "\"" ;
+        throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+      }
+
 
     extract_attributes(p_node,p_id,p_user,p_uid);
 
@@ -359,7 +421,12 @@ namespace osm_diff_watcher
 							  osm_api_data_types::osm_object::t_osm_id & p_uid)
   {
     int l_nb_attribute = p_node.nAttribute();
-    assert(l_nb_attribute >= 3);
+    if(3 > l_nb_attribute)
+      {
+        std::stringstream l_stream;
+        l_stream << "Child number should be 3 at least for node \"" << p_node.getName() << "\"" ;
+        throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+      }
 
     p_id = extract_attribute<osm_api_data_types::osm_object::t_osm_id>(p_node,"id");
     p_user = extract_attribute<const char *>(p_node,"user");
@@ -369,9 +436,19 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   void generic_dom_utilities<XMLNode>::extract_node_ref_info(const XMLNode & p_node, osm_api_data_types::osm_way & p_way)
   {
-    assert(!strcmp(p_node.getName(),"nd"));
+    if(strcmp("nd",p_node.getName()))
+      {
+        std::stringstream l_stream;
+        l_stream << "Root of XML tree should be \"nd\" instead of \"" << p_node.getName() << "\"" ;
+        throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+      }
     int l_nb_attribute = p_node.nAttribute();
-    assert(l_nb_attribute >= 1);
+    if(1 > l_nb_attribute)
+      {
+        std::stringstream l_stream;
+        l_stream << "Child number should be 1 at least for node \"" << p_node.getName() << "\"" ;
+        throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+      }
 
     osm_api_data_types::osm_object::t_osm_id l_node_ref = extract_attribute<osm_api_data_types::osm_object::t_osm_id>(p_node,"ref");
     p_way.add_node(l_node_ref);
@@ -380,9 +457,19 @@ namespace osm_diff_watcher
   //----------------------------------------------------------------------------
   void generic_dom_utilities<XMLNode>::extract_member_info(const XMLNode & p_node, osm_api_data_types::osm_relation & p_relation)
   {
-    assert(!strcmp(p_node.getName(),"member"));
+    if(strcmp("member",p_node.getName()))
+      {
+        std::stringstream l_stream;
+        l_stream << "Root of XML tree should be \"member\" instead of \"" << p_node.getName() << "\"" ;
+        throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+      }
     int l_nb_attribute = p_node.nAttribute();
-    assert(l_nb_attribute >= 3);
+    if(3 > l_nb_attribute)
+      {
+        std::stringstream l_stream;
+        l_stream << "Child number should be 3 at least for node \"" << p_node.getName() << "\"" ;
+        throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+      }
 
     osm_api_data_types::osm_core_element::t_osm_type l_type = extract_attribute<osm_api_data_types::osm_core_element::t_osm_type>(p_node,"type");
     osm_api_data_types::osm_object::t_osm_id l_node_ref = extract_attribute<osm_api_data_types::osm_object::t_osm_id>(p_node,"ref");
