@@ -21,7 +21,11 @@
 #ifndef _SAX_PARSER_H_
 #define _SAX_PARSER_H_
 
+#ifdef _WIN32
+#include "expat.h"
+#else
 #include <expat.h>
+#endif // _WIN32
 #include "sax_analyzer_if.h"
 #include "parser_base.h"
 #include "osm_diff_parser_if.h"
