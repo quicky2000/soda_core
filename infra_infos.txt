@@ -1,4 +1,4 @@
-depend:osm_api_data_types url_reader EXT_gzstream EXT_expat osm_diff_analyzer_sax_if osm_diff_analyzer_dom_if osm_diff_analyzer_cpp_if EXT_sqlite3
+depend:osm_api_data_types url_reader EXT_gzstream EXT_expat soda_analyzer_sax_if soda_analyzer_dom_if soda_analyzer_cpp_if EXT_sqlite3
 CFLAGS:-Wall -g -ansi -pedantic
 LDFLAGS:-ldl
 
