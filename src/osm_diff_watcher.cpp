@@ -578,12 +578,6 @@ namespace osm_diff_watcher
       }
     close(l_fp_cpy);
     return l_error;
- //    igzstream l_input_file(l_fp_cpy);    
-//     std::string l_line;
-//     bool l_eof = getline(l_input_file,l_line).eof();
-//     bool l_error = l_line.substr(0,std::string("<?xml").size()) != "<?xml" && l_line.substr(0,std::string("<osmChange").size()) != "<osmChange";
-//     l_input_file.close();
-//     return l_error || l_eof;
   }
 
 }
