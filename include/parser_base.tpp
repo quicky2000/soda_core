@@ -1,5 +1,7 @@
 #ifndef _PARSER_BASE_TPP_
 #define _PARSER_BASE_TPP_
+#include <sys/types.h>
+#include <unistd.h>
 
 //------------------------------------------------------------------------------
 template <class T>
@@ -15,6 +17,16 @@ void parser_base<T>::parse(const std::string & p_name)
     }
   l_tmp_input_file.close();
   igzstream l_input_file(p_name.c_str());
+  this->parse_stream(l_input_file);
+  l_input_file.close();
+}
+
+//------------------------------------------------------------------------------
+template <class T>
+void parser_base<T>::parse(const int & p_fd)
+{
+  lseek(p_fd,0,SEEK_SET);
+  igzstream l_input_file(p_fd);
   this->parse_stream(l_input_file);
   l_input_file.close();
 }

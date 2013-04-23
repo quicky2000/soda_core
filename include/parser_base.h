@@ -38,6 +38,7 @@ namespace osm_diff_watcher
   {
   public:
     void parse(const std::string & p_name);
+    void parse(const int & p_fd);
   private:
     virtual void parse_stream(std::istream & p_stream)=0;
 

@@ -32,8 +32,15 @@
 #include <cassert>
 #include <cstdlib>
 #include <limits>
-#ifdef _WIN32
+#include <cerrno>
+
+#ifndef _WIN32
+#include <sys/mman.h>
+#include <sys/stat.h>        /* For mode constants */
+#include <fcntl.h>           /* For O_* constants */
+#else
 #include <windows.h>
+#include <Fcntl.h>
 #endif
 using namespace quicky_url_reader;
 
@@ -328,9 +335,9 @@ namespace osm_diff_watcher
             m_Ui.append_common_text(l_stream.str());
           }
         {
-            std::stringstream l_stream;
-            l_stream << "Latest seq number that was available = " << l_end_seq_number;
-            m_Ui.append_common_text(l_stream.str());
+	  std::stringstream l_stream;
+	  l_stream << "Latest seq number that was available = " << l_end_seq_number;
+	  m_Ui.append_common_text(l_stream.str());
         }
         // Waiting for end sequence number
         uint32_t l_delay = (uint32_t) l_remaining_time;
@@ -342,9 +349,9 @@ namespace osm_diff_watcher
             if(!l_first_loop && l_delay)
               {
                 {
-                    std::stringstream l_stream;
-                    l_stream << "Wait for " << l_delay << " seconds";
-                    m_Ui.append_common_text(l_stream.str());
+		  std::stringstream l_stream;
+		  l_stream << "Wait for " << l_delay << " seconds";
+		  m_Ui.append_common_text(l_stream.str());
                 }
 #ifndef _WIN32
                 sleep(l_delay);
@@ -391,35 +398,106 @@ namespace osm_diff_watcher
             std::string l_url_diff = m_ressources.get_url_minute_diff(l_current_seq_number);
 
             {
-                std::stringstream l_stream;
-                l_stream << "Url of diff file <A HREF=\"" << l_url_diff << "\">" << l_url_diff << "</A>" ;
-                m_Ui.append_common_text(l_stream.str());
+	      std::stringstream l_stream;
+	      l_stream << "Url of diff file <A HREF=\"" << l_url_diff << "\">" << l_url_diff << "</A>" ;
+	      m_Ui.append_common_text(l_stream.str());
             }
             time_t l_begin_time = time(NULL);
             bool l_404_error = false;
 	
-            // Check if download has succeeded
-            uint32_t l_404_trial = 3;
-            do
-              {
-                m_url_reader.dump_url_binary(l_url_diff,m_diff_file_name);
-                l_404_error = check_404_error(m_diff_file_name);
-                --l_404_trial;
-              } while(l_404_error && l_404_trial);
+	    // Obtain File descriptor
+#ifdef _WIN32
+	    HANDLE l_file_handle = CreateFile("toto",GENERIC_READ | GENERIC_WRITE,0,0,OPEN_ALWAYS,/*FILE_ATTRIBUTE_NORMAL*/FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE,NULL);
+	    if(INVALID_HANDLE_VALUE == l_file_handle)
+	      {
+		throw quicky_exception::quicky_logic_exception("Problem when opening temp file for diff download",__LINE__,__FILE__);
+	      }
+	    
+	    // Get the file descriptor from the handle
+	    int l_fd = _open_osfhandle((long)l_file_handle, O_RDONLY);
+#else
+	    int l_fd = shm_open("/soda_sharedmem",O_RDWR|O_CREAT,0);
+	    if(l_fd<0) 
+	      {
+                std::stringstream l_stream;
+                l_stream <<  "Unable to obtain shared mem for diff download : " << strerror(errno) << std::endl << "Please try to restart";
+		shm_unlink("/soda_sharedmem");
+		throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+	      }
+	    ;
+#endif
+	    try
+	      {
 
-            if(l_404_error)
-              {
-		std::stringstream l_stream;
-                l_stream << "ERROR : download of " << l_url_diff << " failed to many times";
-                throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
-              }
+		// Check if download has succeeded
+		uint32_t l_404_trial = 3;
+		
+		do
+		  {
+		    // Start at the beginning of the file
+		    lseek(l_fd,0,SEEK_SET);
+		    
+		    m_url_reader.dump_url(l_url_diff,l_fd);
+		    l_404_error = check_404_error(l_fd);
+		    --l_404_trial;
+		  } while(l_404_error && l_404_trial);
+		
+		if(l_404_error)
+		  {
+		    std::stringstream l_stream;
+		    l_stream << "ERROR : download of " << l_url_diff << " failed to many times";
+		    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
+		  }
+		
+		// Send diff state to Ui
+		m_Ui.update_diff_state(*l_diff_state);
+		
+		// Parse diff file
+		parse_diff(*l_diff_state,l_fd);
+	      }
+	    catch(quicky_exception::quicky_runtime_exception e)
+	      {
+		// Close file descriptor
+#ifdef _WIN32
+		CloseHandle(l_file_handle);
+#else
+		//  fclose(l_file);
+		shm_unlink("/soda_sharedmem");
+#endif
+		throw e;
+	      }
+	    catch(quicky_exception::quicky_logic_exception e)
+	      {
+		// Close file descriptor
+#ifdef _WIN32
+		CloseHandle(l_file_handle);
+#else
+		//  fclose(l_file);
+		shm_unlink("/soda_sharedmem");
+#endif
+		throw e;
+	      }
+	    catch(std::exception e)
+	      {
+		// Close file descriptor
+#ifdef _WIN32
+		CloseHandle(l_file_handle);
+#else
+		//  fclose(l_file);
+		shm_unlink("/soda_sharedmem");
+#endif
+		throw e;
+	      }
 
-	    // Send diff state to Ui
-	    m_Ui.update_diff_state(*l_diff_state);
-
-            // Parse diff file
-            parse_diff(*l_diff_state);
+	    // Close file descriptor
+#ifdef _WIN32
+	    CloseHandle(l_file_handle);
+#else
+	    //  fclose(l_file);
+	    shm_unlink("/soda_sharedmem");
+#endif
         
+	    
             // Remember reference of parsed diff
             m_informations.store(*l_diff_state);
             --l_nb_iteration;
@@ -438,14 +516,14 @@ namespace osm_diff_watcher
                     double l_computation_time = difftime(l_end_time,l_begin_time);
 
                     {
-                        std::stringstream l_stream;
-                        l_stream << "Number of seconds between diffs : " << l_time_between_diff << " s" ;
-                        m_Ui.append_common_text(l_stream.str());
+		      std::stringstream l_stream;
+		      l_stream << "Number of seconds between diffs : " << l_time_between_diff << " s" ;
+		      m_Ui.append_common_text(l_stream.str());
                     }
                     {
-                        std::stringstream l_stream;
-                        l_stream << "Time spent in analyze = " << l_computation_time << "s" ;
-                        m_Ui.append_common_text(l_stream.str());
+		      std::stringstream l_stream;
+		      l_stream << "Time spent in analyze = " << l_computation_time << "s" ;
+		      m_Ui.append_common_text(l_stream.str());
                     }
 
                     // Compute remaining time before next diff generation
@@ -466,41 +544,46 @@ namespace osm_diff_watcher
   }
 
   //------------------------------------------------------------------------------
-  void osm_diff_watcher::parse_diff(const osm_diff_analyzer_if::osm_diff_state & p_diff_state)
+  void osm_diff_watcher::parse_diff(const osm_diff_analyzer_if::osm_diff_state & p_diff_state,const int & p_fd)
   {
     // Sax analyze
     if(m_sax_parser_activated)
       {
 	m_sax_parser.set_diff_state(p_diff_state);
-	m_sax_parser.parse(m_diff_file_name);
+	int l_fd_cpy = dup(p_fd);
+	m_sax_parser.parse(l_fd_cpy);
       }
 
     // DOM analyze
     if(m_dom_parser_activated)
       {
 	m_dom_parser.set_diff_state(p_diff_state);
-	m_dom_parser.parse(m_diff_file_name);  
+	int l_fd_cpy = dup(p_fd);
+	m_dom_parser.parse(l_fd_cpy);  
       }
   }
   
   //------------------------------------------------------------------------------
-  bool osm_diff_watcher::check_404_error(const std::string & p_file_name)
+  bool osm_diff_watcher::check_404_error(const int & p_fd)
   {
-    std::ifstream l_tmp_input_file(p_file_name.c_str());
-    if(l_tmp_input_file==NULL)
+    int l_fp_cpy = dup(p_fd);
+    lseek(l_fp_cpy,0,SEEK_SET);
+    uint8_t l_buffer_ref[] = { 0x1f,0x8b};
+    uint8_t l_buffer_check[] = { 0x0,0x0};
+    int l_result = read(l_fp_cpy,&l_buffer_check,2);
+    bool l_error = l_result != 2;
+    if(!l_error)
       {
-	std::stringstream l_stream;
-	l_stream << "ERROR : Unable to open file \"" << p_file_name << "\""  ;
-	throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
+	l_error = memcmp(&l_buffer_ref,&l_buffer_check,2);
       }
-    l_tmp_input_file.close();
-
-    igzstream l_input_file(p_file_name.c_str());    
-    std::string l_line;
-    bool l_eof = getline(l_input_file,l_line).eof();
-    bool l_error = l_line.substr(0,std::string("<?xml").size()) != "<?xml" && l_line.substr(0,std::string("<osmChange").size()) != "<osmChange";
-    l_input_file.close();
-    return l_error || l_eof;
+    close(l_fp_cpy);
+    return l_error;
+ //    igzstream l_input_file(l_fp_cpy);    
+//     std::string l_line;
+//     bool l_eof = getline(l_input_file,l_line).eof();
+//     bool l_error = l_line.substr(0,std::string("<?xml").size()) != "<?xml" && l_line.substr(0,std::string("<osmChange").size()) != "<osmChange";
+//     l_input_file.close();
+//     return l_error || l_eof;
   }
 
 }

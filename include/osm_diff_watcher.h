@@ -56,10 +56,10 @@ namespace osm_diff_watcher
     inline void stop(void);
   private:
     inline static time_t extract_time(const std::string & p_date);
-    void parse_diff(const osm_diff_analyzer_if::osm_diff_state & p_diff_state);
+    void parse_diff(const osm_diff_analyzer_if::osm_diff_state & p_diff_state,const int & p_fd);
     const uint64_t get_start_sequence_number(const osm_diff_analyzer_if::osm_diff_state &p_diff_state);
     inline const uint64_t get_next_sequence_number(const uint64_t & p_seq_number);
-    bool check_404_error(const std::string & p_file_name);
+    bool check_404_error(const int & p_fd);
 
     soda_Ui_if & m_Ui;
     bool m_stop;
