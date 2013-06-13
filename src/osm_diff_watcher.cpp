@@ -416,7 +416,8 @@ namespace osm_diff_watcher
 	    // Get the file descriptor from the handle
 	    int l_fd = _open_osfhandle((long)l_file_handle, O_RDONLY);
 #else
-	    int l_fd = shm_open("/soda_sharedmem",O_RDWR|O_CREAT,0);
+	    //SHARED MEM	    int l_fd = shm_open("/soda_sharedmem",O_RDWR|O_CREAT,0);
+	    int l_fd = open("tmp_diff.osc.gz",O_RDWR|O_CREAT,0);
 	    if(l_fd<0) 
 	      {
                 std::stringstream l_stream;
@@ -445,7 +446,7 @@ namespace osm_diff_watcher
 		if(l_404_error)
 		  {
 		    std::stringstream l_stream;
-		    l_stream << "ERROR : download of " << l_url_diff << " failed to many times";
+		    l_stream << "ERROR : content downloaded from " << l_url_diff << " doesn't start as expected";
 		    throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
 		  }
 		
@@ -461,8 +462,8 @@ namespace osm_diff_watcher
 #ifdef _WIN32
 		CloseHandle(l_file_handle);
 #else
-		//  fclose(l_file);
-		shm_unlink("/soda_sharedmem");
+		close(l_fd);
+		//SHARED MEMshm_unlink("/soda_sharedmem");
 #endif
 		throw e;
 	      }
@@ -472,8 +473,8 @@ namespace osm_diff_watcher
 #ifdef _WIN32
 		CloseHandle(l_file_handle);
 #else
-		//  fclose(l_file);
-		shm_unlink("/soda_sharedmem");
+		close(l_fd);
+		//SHARED MEMshm_unlink("/soda_sharedmem");
 #endif
 		throw e;
 	      }
@@ -483,8 +484,8 @@ namespace osm_diff_watcher
 #ifdef _WIN32
 		CloseHandle(l_file_handle);
 #else
-		//  fclose(l_file);
-		shm_unlink("/soda_sharedmem");
+		close(l_fd);
+		//SHARED MEMshm_unlink("/soda_sharedmem");
 #endif
 		throw e;
 	      }
@@ -493,8 +494,8 @@ namespace osm_diff_watcher
 #ifdef _WIN32
 	    CloseHandle(l_file_handle);
 #else
-	    //  fclose(l_file);
-	    shm_unlink("/soda_sharedmem");
+	    close(l_fd);
+	    //SHARED MEMshm_unlink("/soda_sharedmem");
 #endif
         
 	    
@@ -569,12 +570,13 @@ namespace osm_diff_watcher
     int l_fp_cpy = dup(p_fd);
     lseek(l_fp_cpy,0,SEEK_SET);
     uint8_t l_buffer_ref[] = { 0x1f,0x8b};
-    uint8_t l_buffer_check[] = { 0x0,0x0};
-    int l_result = read(l_fp_cpy,&l_buffer_check,2);
-    bool l_error = l_result != 2;
+    uint8_t l_buffer_ref2[] = {  '<','o','s','m','C','h','a','n','g','e'};
+    uint8_t l_buffer_check[] = { 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
+    int l_result = read(l_fp_cpy,&l_buffer_check,10);
+    bool l_error = l_result != 10;
     if(!l_error)
       {
-	l_error = memcmp(&l_buffer_ref,&l_buffer_check,2);
+	l_error = memcmp(&l_buffer_ref,&l_buffer_check,2) &&  memcmp(&l_buffer_ref2,&l_buffer_check,10) ;
       }
     close(l_fp_cpy);
     return l_error;
