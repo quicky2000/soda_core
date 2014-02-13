@@ -26,7 +26,6 @@
 #include "osm_api.h"
 #include "osm_cache.h"
 #include "soda_Ui_if.h"
-#include "osm_diff_dumper.h"
 
 namespace osm_diff_watcher
 {
@@ -156,7 +155,6 @@ namespace osm_diff_watcher
     inline static void ui_declare_html_report(const osm_diff_analyzer_if::analyzer_base & p_module,
 					      const std::string & p_name);
 
-
     common_api_wrapper(osm_ressources & p_ressources,soda_Ui_if & p_Ui);
     static common_api_wrapper * m_instance;
 
@@ -164,7 +162,6 @@ namespace osm_diff_watcher
     osm_cache m_cache;
     osm_ressources & m_ressources;
     osm_api m_api;
-    osm_diff_dumper m_diff_dumper;
   };
   
   //----------------------------------------------------------------------------
@@ -423,24 +420,6 @@ namespace osm_diff_watcher
 						  const std::string & p_name)
   {
     m_instance->m_Ui.declare_html_report(p_module,p_name);
-  }
-
-  //----------------------------------------------------------------------------
-  void common_api_wrapper::diff_init_file(std::ofstream & p_diff_file)
-  {
-    m_instance->m_diff_dumper.init_file(p_diff_file);
-  }
-
-  //----------------------------------------------------------------------------
-  void common_api_wrapper::diff_dump_change(std::ofstream & p_diff_file,const osm_api_data_types::osm_change & p_change)
-  {
-    m_instance->m_diff_dumper.dump_change(p_diff_file,p_change);
-  }
-
-  //----------------------------------------------------------------------------
-  void common_api_wrapper::diff_terminate_file(std::ofstream & p_diff_file)
-  {
-    m_instance->m_diff_dumper.terminate_file(p_diff_file);
   }
   
 }
