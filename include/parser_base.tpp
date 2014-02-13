@@ -13,7 +13,7 @@ void parser_base<T>::parse(const std::string & p_name)
     {
       std::stringstream l_stream ;
       l_stream << "ERROR : Unable to open file \"" << p_name << "\"";
-      throw new quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
+      throw quicky_exception::quicky_runtime_exception(l_stream.str(),__LINE__,__FILE__);
     }
   l_tmp_input_file.close();
   igzstream l_input_file(p_name.c_str());
