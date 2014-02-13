@@ -156,11 +156,6 @@ namespace osm_diff_watcher
     inline static void ui_declare_html_report(const osm_diff_analyzer_if::analyzer_base & p_module,
 					      const std::string & p_name);
 
-    inline static void diff_init_file(std::ofstream & p_diff_file);
-    inline static void diff_dump_change(std::ofstream & p_diff_file,const osm_api_data_types::osm_change & p_change);
-    inline static void diff_terminate_file(std::ofstream & p_diff_file);
-
-
 
     common_api_wrapper(osm_ressources & p_ressources,soda_Ui_if & p_Ui);
     static common_api_wrapper * m_instance;

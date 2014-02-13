@@ -68,9 +68,6 @@ namespace osm_diff_watcher
     p_api_ptr[osm_diff_analyzer_if::common_api_if::UI_REGISTER_MODULE] = (uintptr_t) common_api_wrapper::ui_register_module;
     p_api_ptr[osm_diff_analyzer_if::common_api_if::UI_APPEND_LOG_TEXT] = (uintptr_t) common_api_wrapper::ui_append_log_text;
     p_api_ptr[osm_diff_analyzer_if::common_api_if::UI_DECLARE_HTML_REPORT] = (uintptr_t) common_api_wrapper::ui_declare_html_report;
-    p_api_ptr[osm_diff_analyzer_if::common_api_if::DIFF_INIT_FILE] = (uintptr_t) common_api_wrapper::diff_init_file;
-    p_api_ptr[osm_diff_analyzer_if::common_api_if::DIFF_DUMP_CHANGE] = (uintptr_t) common_api_wrapper::diff_dump_change;
-    p_api_ptr[osm_diff_analyzer_if::common_api_if::DIFF_TERMINATE_FILE] = (uintptr_t) common_api_wrapper::diff_terminate_file;
   }
 
   //----------------------------------------------------------------------------
