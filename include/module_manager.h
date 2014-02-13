@@ -66,7 +66,7 @@ namespace osm_diff_watcher
             throw quicky_exception::quicky_logic_exception(l_stream.str(),__LINE__,__FILE__);
           }
 #ifndef FORCE_USE_OF_REINTERPRET_CAST
-        T * l_result = dynamic_cast<T*>(l_iter->second->create_analyzer(p_conf));
+        T * l_result = dynamic_cast<T*>(l_iter->second->create_analyzer(p_conf)) != NULL ? dynamic_cast<T*>(l_iter->second->create_analyzer(p_conf)) : reinterpret_cast<T*>(l_iter->second->create_analyzer(p_conf));
 #else
         T * l_result = reinterpret_cast<T*>(l_iter->second->create_analyzer(p_conf));
 #endif // FORCE_USE_OF_REINTERPRET_CAST
