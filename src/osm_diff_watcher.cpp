@@ -417,7 +417,7 @@ namespace osm_diff_watcher
 	    int l_fd = _open_osfhandle((long)l_file_handle, O_RDONLY);
 #else
 	    //SHARED MEM	    int l_fd = shm_open("/soda_sharedmem",O_RDWR|O_CREAT,0);
-	    int l_fd = open("tmp_diff.osc.gz",O_RDWR|O_CREAT,0);
+	    int l_fd = open("tmp_diff.osc.gz",O_RDWR|O_CREAT,S_IRUSR|S_IWUSR);
 	    if(l_fd<0) 
 	      {
                 std::stringstream l_stream;
