@@ -34,7 +34,7 @@
 #include <sstream>
 
 //------------------------------------------------------------------------------
-// Taken from http://wiki.openstreetmap.org/wiki/API_v0.6_%28Archive%29#Changes_in_related_software
+// Taken from https://wiki.openstreetmap.org/wiki/API_v0.6_%28Archive%29#Changes_in_related_software
 //
 // GET 	capabilities                    Returns server capabilities.                                 Done
 // GET 	node/#id                        Returns the XML for that node.                               Done

@@ -40,21 +40,21 @@ namespace osm_diff_watcher
   osm_ressources::osm_ressources(soda_Ui_if & p_ui):
     m_ui(p_ui),
     m_domain("openstreetmap.org"),
-    m_data_domain("http://planet."+m_domain),
+    m_data_domain("https://planet."+m_domain),
     m_redaction_domain(m_data_domain+"/redaction_period"), //Latest sequence number 229907
     m_replication_domain(m_data_domain+"/replication/minute"),
     m_cc_by_sa_domain(m_data_domain+"cc-by-sa"), // Latest minute sequence number 1268792
-    m_browse_domain("http://www."+m_domain+"/browse"),
-    m_user_url("http://www."+m_domain+"/user"),
-    m_api("http://www."+m_domain+"/api"),
+    m_browse_domain("https://www."+m_domain+"/browse"),
+    m_user_url("https://www."+m_domain+"/user"),
+    m_api("https://www."+m_domain+"/api"),
     m_current_api_version("0.6"),
     m_current_api(m_api+"/"+m_current_api_version)
   {
   }
 
-  //"http://planet.openstreetmap.org/minute-replicate/"
-  //"http://planet.openstreetmap.org/redaction-period/minute-replicate/"
-  //"http://planet.openstreetmap.org/replication/minute/"
+  //"https://planet.openstreetmap.org/minute-replicate/"
+  //"https://planet.openstreetmap.org/redaction-period/minute-replicate/"
+  //"https://planet.openstreetmap.org/replication/minute/"
 
   //----------------------------------------------------------------------------
   void osm_ressources::get_user_subscription_date(const std::string & p_user_name,std::string & p_date)const
@@ -130,7 +130,7 @@ namespace osm_diff_watcher
 	url_reader l_url_reader;
 	download_buffer l_buffer;
 	l_url_reader.read_url(l_url.c_str(),l_buffer);
-	//  l_url_reader.read_url("http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt",l_buffer);
+	//  l_url_reader.read_url("https://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt",l_buffer);
 	std::stringstream l_stream;
 	l_stream << l_buffer.get_data();
 	std::string l_line;
